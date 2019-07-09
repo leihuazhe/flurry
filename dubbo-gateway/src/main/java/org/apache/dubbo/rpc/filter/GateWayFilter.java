@@ -9,6 +9,7 @@ import org.apache.dubbo.rpc.*;
 import com.yunji.gateway.util.GatewayUtils;
 
 import static com.yunji.gateway.util.Constants.*;
+import static org.apache.dubbo.rpc.Constants.GENERIC_KEY;
 
 /**
  * GateWayFilter
@@ -24,17 +25,20 @@ public class GateWayFilter extends ListenableFilter {
                 && invocation.getArguments().length == 3
                 && GatewayUtils.isGateWayInvoke(gateway)) {
 
-            String name = ((String) invocation.getArguments()[0]).trim();
+            /*String name = ((String) invocation.getArguments()[0]).trim();
             String[] types = (String[]) invocation.getArguments()[1];
-            Object[] args = (Object[]) invocation.getArguments()[2];
-            try {
-                Method method = ReflectUtils.findMethodByMethodSignature(invoker.getInterface(), name, types);
-                invocation.setAttachment(GATEWAY_KEY, invoker.getUrl().getParameter(GATEWAY_KEY));
+            Object[] args = (Object[]) invocation.getArguments()[2];*/
+//            try {
+//                Method method = ReflectUtils.findMethodByMethodSignature(invoker.getInterface(), name, types);
+//            invocation.setAttachment(GATEWAY_KEY, invoker.getUrl().getParameter(GATEWAY_KEY));
+            invocation.setAttachment(GENERIC_KEY, invoker.getUrl().getParameter(GENERIC_KEY));
 
-                return invoker.invoke(new RpcInvocation(method, args, invocation.getAttachments()));
-            } catch (NoSuchMethodException | ClassNotFoundException e) {
-                throw new RpcException(e.getMessage(), e);
-            }
+            return invoker.invoke(invocation);
+
+//                return invoker.invoke(new RpcInvocation(method, args, invocation.getAttachments()));
+//            } catch (NoSuchMethodException | ClassNotFoundException e) {
+//                throw new RpcException(e.getMessage(), e);
+//            }
         }
         return invoker.invoke(invocation);
     }

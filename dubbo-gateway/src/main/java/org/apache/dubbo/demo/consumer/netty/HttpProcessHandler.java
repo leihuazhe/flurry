@@ -87,7 +87,7 @@ public class HttpProcessHandler extends SimpleChannelInboundHandler<FullHttpRequ
             //普通
 //            result = demoService.getResultByColumn(new Column("maple", 12, new HashMap<>()), 1023);
 
-            result = gateWayService.invoke("getResultByColumn",
+            result = gateWayService.$invoke("getResultByColumn",
                     new String[]{"org.apache.dubbo.demo.Column", int.class.getName()},
                     new Object[]{params, 1023});
 

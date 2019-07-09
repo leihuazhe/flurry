@@ -1,5 +1,6 @@
 package org.apache.dubbo.rpc.protocol.dubbo;
 
+import com.yunji.json.JsonPost;
 import org.apache.dubbo.common.Version;
 import org.apache.dubbo.common.io.Bytes;
 import org.apache.dubbo.common.io.UnsafeByteArrayInputStream;
@@ -17,11 +18,14 @@ import org.apache.dubbo.remoting.transport.CodecSupport;
 import org.apache.dubbo.rpc.Invocation;
 import org.apache.dubbo.rpc.Result;
 import org.apache.dubbo.rpc.RpcInvocation;
-import org.apache.dubbo.rpc.protocol.dubbo.json.CustomJsonWriter;
+import org.apache.dubbo.util.DumpUtil;
+import org.apache.dubbo.util.GatewayUtil;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Objects;
 
+import static com.yunji.gateway.util.Constants.GATEWAY_KEY;
 import static org.apache.dubbo.common.constants.CommonConstants.PATH_KEY;
 import static org.apache.dubbo.common.constants.CommonConstants.VERSION_KEY;
 import static org.apache.dubbo.remoting.Constants.DUBBO_VERSION_KEY;
@@ -163,25 +167,32 @@ public class CustomDubboCodec extends ExchangeCodec {
         out.writeUTF(ReflectUtils.getDesc(inv.getParameterTypes()));
         //todo 这里进行自定义,请求参数传送过来的数据是 json 形式.
 
-//        if(inv.getInvoker().getUrl())
-
-        if (true) {
+        if (Boolean.valueOf(inv.getInvoker().getUrl().getParameter(GATEWAY_KEY))) {
             Object[] args = inv.getArguments();
-            String paramsJson = (String) args[0];
-            CustomJsonWriter.read(out, paramsJson);
 
+            String method = (String) args[0];
 
+            DumpUtil.dumpByteArray(Objects.requireNonNull(GatewayUtil.getHessian2Byte(out)));
+
+            for (int i = 0; i < args.length - 1; i++) {
+                out.writeObject(encodeInvocationArgument(channel, inv, i));
+                DumpUtil.dumpByteArray(Objects.requireNonNull(GatewayUtil.getHessian2Byte(out)));
+            }
+            JsonPost.post(method, (Object[]) args[args.length - 1], out);
         } else {
+            DumpUtil.dumpByteArray(Objects.requireNonNull(GatewayUtil.getHessian2Byte(out)));
             Object[] args = inv.getArguments();
             if (args != null) {
                 for (int i = 0; i < args.length; i++) {
                     out.writeObject(encodeInvocationArgument(channel, inv, i));
+                    DumpUtil.dumpByteArray(Objects.requireNonNull(GatewayUtil.getHessian2Byte(out)));
                 }
             }
         }
 
-
+        DumpUtil.dumpByteArray(Objects.requireNonNull(GatewayUtil.getHessian2Byte(out)));
         out.writeObject(inv.getAttachments());
+        DumpUtil.dumpByteArray(Objects.requireNonNull(GatewayUtil.getHessian2Byte(out)));
     }
 
     @Override

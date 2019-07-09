@@ -1,32 +1,16 @@
-/*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-package org.apache.dubbo.rpc.protocol.dubbo.json;
+package com.yunji.json;
 
-import com.yunji.json.JException;
-import com.yunji.json.JsonCallback;
+
+import java.io.IOException;
 
 /**
- * @author zxwang
+ * @author Denim.leihz 2019-07-08 8:40 PM
  */
-class JsonParser {
+public class JsonParser {
     private static final char EOI = '\uFFFF';
 
-    private final ParserInput input;
-    private final JsonCallback callback;
+    final ParserInput input;
+    final JsonCallback callback;
 
     private char cursorChar;
     private StringBuilder sb = new StringBuilder(64);
@@ -196,11 +180,13 @@ class JsonParser {
         return new ParsingException(summary, detail);
     }
 
-    void parseJsValue() throws JException {
+    void parseJsValue() throws JException, IOException {
         ws();
         value();
         require(EOI);
     }
+
+
 
     void ws() {
         while (((1L << cursorChar) & ((cursorChar - 64) >> 31) & 0x100002600L) != 0L) {
@@ -213,7 +199,7 @@ class JsonParser {
         return true;
     }
 
-    void value() throws JException {
+    void value() throws JException, IOException {
         int mark = input.cursor();
 
         switch (cursorChar) {
@@ -359,7 +345,7 @@ class JsonParser {
         return true;
     }
 
-    void object() throws JException {
+    void object() throws JException, IOException {
         ws();
         if (cursorChar != '}') {
             members();
@@ -368,7 +354,7 @@ class JsonParser {
         ws();
     }
 
-    void members() throws JException {
+    void members() throws JException, IOException {
         do {
             string();
             require(':');
@@ -397,7 +383,7 @@ class JsonParser {
         ws();
     }
 
-    void array() throws JException {
+    void array() throws JException, IOException {
         ws();
         int index = 0;
         if (cursorChar != ']') {
@@ -412,7 +398,7 @@ class JsonParser {
         ws();
     }
 
-    void number() throws JException {
+    void number() throws IOException {
         int start = input.cursor();
 
         ch('-');
@@ -455,3 +441,4 @@ class JsonParser {
         return cursorChar >= '0' && cursorChar <= '9' && advance();
     }
 }
+

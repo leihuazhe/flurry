@@ -135,7 +135,7 @@ public class CustomDecodeableRpcResult extends AppResponse implements Codec, Dec
             if (!(obj instanceof Throwable)) {
                 throw new IOException("Response data error, expect Throwable, but get " + obj);
             }
-            seJException((Throwable) obj);
+            setException((Throwable) obj);
         } catch (ClassNotFoundException e) {
             rethrow(e);
         }

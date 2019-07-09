@@ -85,6 +85,11 @@
             <artifactId>dubbo-metadata-report-zookeeper</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>com.yunji</groupId>
+            <artifactId>yunji-api</artifactId>
+            <version>1.0</version>
+        </dependency>
 
     </dependencies>
 

@@ -22,6 +22,12 @@ public class DumpUtil {
         System.out.println(dumpToStr(buffer));
     }
 
+    public static void dumpByteArray(byte[] buf) {
+        ByteBuf encoded = ByteBufAllocator.DEFAULT.buffer(4 * buf.length);
+        encoded.writeBytes(buf);
+        System.out.println(dumpToStr(encoded));
+    }
+
     public static String dumpToStr(ByteBuf buffer) {
         int readerIndex = buffer.readerIndex();
         int availabe = buffer.readableBytes();

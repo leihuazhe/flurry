@@ -15,14 +15,14 @@ public class GetUrlController {
     /***
      * netty mesh 容器状态,即将关闭时显示 GREEN
      */
-    public static MeshHealthStatus status = MeshHealthStatus.GREEN;
+    public static GatewayHealthStatus status = GatewayHealthStatus.GREEN;
 
     /**
      * @return resp
      */
     public HttpResponseEntity handlerHealth(String url) {
         logger.debug("handlerHealth check,container status: " + status);
-        if (status == MeshHealthStatus.YELLOW) {
+        if (status == GatewayHealthStatus.YELLOW) {
             logger.info("handlerHealth check,container status: " + status);
             return new HttpResponseEntity(
                     HttpProcessorUtils.wrapErrorResponse(GateWayErrorCode.MeshShutdownSoon),

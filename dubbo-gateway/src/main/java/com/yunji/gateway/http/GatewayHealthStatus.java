@@ -1,11 +1,11 @@
 package com.yunji.gateway.http;
 
 /**
- * MeshHealthStatus 网关 健康状况
+ * GatewayHealthStatus 网关 健康状况
  *
  * @author maple 2018.08.28 下午3:21
  */
-public enum MeshHealthStatus {
+public enum GatewayHealthStatus {
     /**
      * 不健康的运行状态
      */
@@ -17,11 +17,11 @@ public enum MeshHealthStatus {
 
     private int status;
 
-    MeshHealthStatus(int status) {
+    GatewayHealthStatus(int status) {
         this.status = status;
     }
 
-    public static MeshHealthStatus findByValue(int value) {
+    public static GatewayHealthStatus findByValue(int value) {
         switch (value) {
             case 500:
                 return YELLOW;

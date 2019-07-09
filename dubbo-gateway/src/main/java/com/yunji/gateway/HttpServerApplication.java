@@ -14,7 +14,7 @@ public class HttpServerApplication {
     private static Logger logger = LoggerFactory.getLogger(HttpServerApplication.class);
 
     public static void main(String[] args) throws Exception {
-        NettyHttpServer server = new NettyHttpServer(9000);
+        NettyHttpServer server = new NettyHttpServer(9001);
         logLogBanner();
         server.registerShutdownHook();
         server.start();

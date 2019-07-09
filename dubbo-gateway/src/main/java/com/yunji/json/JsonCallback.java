@@ -1,6 +1,8 @@
 package com.yunji.json;
 
 
+import java.io.IOException;
+
 /**
  * @author zxwang
  */
@@ -9,53 +11,53 @@ public interface JsonCallback {
     /**
      * Called at start of Json object, typical handle the '{'
      *
-     * @throws JException
+     * @throws IOException
      */
-    void onStartObject() throws JException;
+    void onStartObject() throws IOException;
 
     /**
      * Called at end of Json object, typical handle the '}'
      *
-     * @throws JException
+     * @throws IOException
      */
-    void onEndObject() throws JException;
+    void onEndObject() throws IOException;
 
     /**
      * Called at start of Json array, typical handle the '['
      *
-     * @throws JException
+     * @throws IOException
      */
-    void onStartArray() throws JException;
+    void onStartArray() throws IOException;
 
     /**
      * Called at end of Json array, typical handle the ']'
      *
-     * @throws JException
+     * @throws IOException
      */
-    void onEndArray() throws JException;
+    void onEndArray() throws IOException;
 
     /**
      * Called at start of Json field, such as: "orderId":130
      *
      * @param name name of the filed, as for the example above, that is "orderId"
-     * @throws JException
+     * @throws IOException
      */
-    void onStartField(String name) throws JException;
+    void onStartField(String name) throws IOException;
 
     /**
      * called begin an array element
      *
      * @param index
-     * @throws JException
+     * @throws IOException
      */
-    void onStartField(int index) throws JException;
+    void onStartField(int index) throws IOException;
 
     /**
      * Called at end of Json field
      *
-     * @throws JException
+     * @throws IOException
      */
-    void onEndField() throws JException;
+    void onEndField() throws IOException;
 
     /**
      * Called when a boolean value is met,
@@ -63,41 +65,41 @@ public interface JsonCallback {
      * First onStartField("expired") is called, followed by a call onBoolean(false) and a call onEndField()
      *
      * @param value
-     * @throws JException
+     * @throws IOException
      */
-    void onBoolean(boolean value) throws JException;
+    void onBoolean(boolean value) throws IOException;
 
     /**
      * Called when a double value is met.
      *
      * @param value
-     * @throws JException
+     * @throws IOException
      */
-    void onNumber(double value) throws JException;
+    void onNumber(double value) throws IOException;
 
     /**
      * Called when a long/int value is met.
      *
      * @param value
-     * @throws JException
+     * @throws IOException
      */
-    void onNumber(long value) throws JException;
+    void onNumber(long value) throws IOException;
 
     /**
      * Called when a null value is met.
      * Such as: "subItemId":null
      *
-     * @throws JException
+     * @throws IOException
      */
-    void onNull() throws JException;
+    void onNull() throws IOException;
 
     /**
      * Called when a String value is met.
      * Such as: "name": "Walt"
      *
      * @param value
-     * @throws JException
+     * @throws IOException
      */
-    void onString(String value) throws JException;
+    void onString(String value) throws IOException;
 }
 

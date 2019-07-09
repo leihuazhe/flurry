@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<service namespace="com.yunji.demo.api" name="HelloService">
+    <meta>
+        <version>1.0.0</version>
+        <timeout>30000</timeout>
+    </meta>
+    <doc>
+
+    </doc>
+
+    <annotations>
+        <annotation key="group" value="com.yunji"/>
+    </annotations>
+    <methods>
+        <method name="sayHello">
+            <doc>
+
+            </doc>
+
+            <request name="sayHello_args">
+                <fields>
+                    <field tag="0" name="arg0" optional="false" privacy="false">
+                        <dataType>
+                            <kind>STRING</kind>
+                        </dataType>
+                    </field>
+                </fields>
+            </request>
+            <response name="sayHello_result">
+                <fields>
+                    <field tag="0" name="success" optional="false" privacy="false">
+                        <dataType>
+                            <kind>STRING</kind>
+                        </dataType>
+                    </field>
+                </fields>
+            </response>
+        </method>
+        <method name="createOrder">
+            <doc>
+
+            </doc>
+
+            <request name="createOrder_args">
+                <fields>
+                    <field tag="0" name="request" optional="false" privacy="false">
+                        <dataType>
+                            <kind>STRUCT</kind>
+                            <ref>com.yunji.demo.api.OrderRequest</ref>
+                        </dataType>
+                    </field>
+                </fields>
+            </request>
+            <response name="createOrder_result">
+                <fields>
+                    <field tag="0" name="success" optional="false" privacy="false">
+                        <dataType>
+                            <kind>STRUCT</kind>
+                            <ref>com.yunji.demo.api.OrderResponse</ref>
+                        </dataType>
+                    </field>
+                </fields>
+            </response>
+        </method>
+    </methods>
+    <structs>
+        <struct namespace="com.yunji.demo.api" name="OrderDetail">
+            <fields>
+                <field tag="0" name="orderNo" optional="false" privacy="false">
+                    <dataType>
+                        <kind>STRING</kind>
+                    </dataType>
+                    <doc>
+
+                    </doc>
+
+                </field>
+                <field tag="1" name="detailSeq" optional="false" privacy="false">
+                    <dataType>
+                        <kind>INTEGER</kind>
+                    </dataType>
+                    <doc>
+
+                    </doc>
+
+                </field>
+                <field tag="2" name="Amount" optional="false" privacy="false">
+                    <dataType>
+                        <kind>DOUBLE</kind>
+                    </dataType>
+                    <doc>
+
+                    </doc>
+
+                </field>
+                <field tag="3" name="remark" optional="false" privacy="false">
+                    <dataType>
+                        <kind>STRING</kind>
+                    </dataType>
+                    <doc>
+
+                    </doc>
+
+                </field>
+            </fields>
+        </struct>
+        <struct namespace="com.yunji.demo.api" name="OrderResponse">
+            <fields>
+                <field tag="0" name="orderNo" optional="false" privacy="false">
+                    <dataType>
+                        <kind>STRING</kind>
+                    </dataType>
+                    <doc>
+
+                    </doc>
+
+                </field>
+                <field tag="1" name="totalAmount" optional="false" privacy="false">
+                    <dataType>
+                        <kind>DOUBLE</kind>
+                    </dataType>
+                    <doc>
+
+                    </doc>
+
+                </field>
+                <field tag="2" name="orderDetailResponses" optional="false" privacy="false">
+                    <dataType>
+                        <kind>LIST</kind>
+                        <valueType>
+                            <kind>STRUCT</kind>
+                            <ref>com.yunji.demo.api.OrderDetailResponse</ref>
+
+                        </valueType>
+                    </dataType>
+                    <doc>
+
+                    </doc>
+
+                </field>
+            </fields>
+        </struct>
+        <struct namespace="com.yunji.demo.api" name="OrderRequest">
+            <fields>
+                <field tag="0" name="orderNo" optional="false" privacy="false">
+                    <dataType>
+                        <kind>STRING</kind>
+                    </dataType>
+                    <doc>
+
+                    </doc>
+
+                </field>
+                <field tag="1" name="productCount" optional="false" privacy="false">
+                    <dataType>
+                        <kind>INTEGER</kind>
+                    </dataType>
+                    <doc>
+
+                    </doc>
+
+                </field>
+                <field tag="2" name="totalAmount" optional="false" privacy="false">
+                    <dataType>
+                        <kind>DOUBLE</kind>
+                    </dataType>
+                    <doc>
+
+                    </doc>
+
+                </field>
+                <field tag="3" name="storeId" optional="false" privacy="false">
+                    <dataType>
+                        <kind>STRING</kind>
+                    </dataType>
+                    <doc>
+
+                    </doc>
+
+                </field>
+                <field tag="4" name="orderDetialList" optional="false" privacy="false">
+                    <dataType>
+                        <kind>LIST</kind>
+                        <valueType>
+                            <kind>STRUCT</kind>
+                            <ref>com.yunji.demo.api.OrderDetail</ref>
+
+                        </valueType>
+                    </dataType>
+                    <doc>
+
+                    </doc>
+
+                </field>
+            </fields>
+        </struct>
+        <struct namespace="com.yunji.demo.api" name="OrderDetailResponse">
+            <fields>
+                <field tag="0" name="orderNo" optional="false" privacy="false">
+                    <dataType>
+                        <kind>STRING</kind>
+                    </dataType>
+                    <doc>
+
+                    </doc>
+
+                </field>
+            </fields>
+        </struct>
+    </structs>
+    <enums/>
+</service>
