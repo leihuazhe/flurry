@@ -300,7 +300,7 @@ public class JsonReader implements JsonCallback {
 
         switch (current.dataType.kind) {
             case LIST:
-                mH2o.writeListEnd();
+//                mH2o.writeListEnd();
                 //重写长度
                 reWriteByteBuf();
                 break;

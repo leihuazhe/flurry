@@ -77,7 +77,7 @@ public class PostUtil {
     }
 
     private static String beanPost(RequestContext context) {
-        HelloService helloService = ServiceCreator.getHelloService(ServiceCreator.HELLO_SERVICE);
+        HelloService helloService = ServiceCreator.getHelloServiceByName(ServiceCreator.HELLO_SERVICE);
 
         OrderRequest request = new OrderRequest();
         request.setOrderNo("10231023");

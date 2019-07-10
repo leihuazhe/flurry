@@ -18,7 +18,7 @@ public class JsonPost {
         ServiceCache.loadServicesMetadata(service);
     }
 
-    public static void post(String methodName, Object[] argsArray, ObjectOutput out) {
+    public static void encode(String methodName, Object[] argsArray, ObjectOutput out) {
 
         try {
             OptimizedMetadata.OptimizedService bizService = ServiceCache.getService(service, "1.0.0");
@@ -28,8 +28,6 @@ public class JsonPost {
 
             }
             encode(methodName, argsArray, bizService, out);
-        } catch (JException e) {
-            e.printStackTrace();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -38,7 +36,7 @@ public class JsonPost {
     /**
      * 利用 hessian2 encode object
      */
-    public static void encode(String methodName, Object[] paramsArray, OptimizedMetadata.OptimizedService optimizedService, ObjectOutput out) throws Exception {
+    private static void encode(String methodName, Object[] paramsArray, OptimizedMetadata.OptimizedService optimizedService, ObjectOutput out) throws Exception {
         Method method = optimizedService.getMethodMap().get(methodName);
 
         if (method == null) {

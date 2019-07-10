@@ -178,7 +178,7 @@ public class CustomDubboCodec extends ExchangeCodec {
                 out.writeObject(encodeInvocationArgument(channel, inv, i));
                 DumpUtil.dumpByteArray(Objects.requireNonNull(GatewayUtil.getHessian2Byte(out)));
             }
-            JsonPost.post(method, (Object[]) args[args.length - 1], out);
+            JsonPost.encode(method, (Object[]) args[args.length - 1], out);
         } else {
             DumpUtil.dumpByteArray(Objects.requireNonNull(GatewayUtil.getHessian2Byte(out)));
             Object[] args = inv.getArguments();
