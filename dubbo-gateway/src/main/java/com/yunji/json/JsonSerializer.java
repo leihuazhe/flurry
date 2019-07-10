@@ -3,14 +3,13 @@ package com.yunji.json;
 import com.alibaba.com.caucho.hessian.io.Hessian2Output;
 import com.yunji.metadata.tag.Method;
 import com.yunji.serialization.BeanSerializer;
+import com.yunji.serialization.hessian2.CustomHessian2ObjectOutput;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 import org.apache.dubbo.common.serialize.ObjectOutput;
 import org.apache.dubbo.common.serialize.hessian2.Hessian2ObjectOutput;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
 
 
 public class JsonSerializer implements BeanSerializer<String> {
@@ -62,7 +61,7 @@ public class JsonSerializer implements BeanSerializer<String> {
     public void write(String input, ObjectOutput oproto) throws Exception {
         JsonReader jsonReader = null;
         try {
-            jsonReader = new JsonReader(optimizedStruct, optimizedService, requestByteBuf, (Hessian2ObjectOutput) oproto);
+            jsonReader = new JsonReader(optimizedStruct, optimizedService, requestByteBuf, (CustomHessian2ObjectOutput) oproto);
             new JsonParser(input, jsonReader).parseJsValue();
             //write end
 //            writeObjectListEnd(oproto);

@@ -64,11 +64,11 @@
             <artifactId>dubbo-serialization-hessian2</artifactId>
         </dependency>
 
-        <dependency>
+        <!--<dependency>
             <groupId>com.yunji</groupId>
             <artifactId>yunji-api</artifactId>
             <version>1.0</version>
-        </dependency>
+        </dependency>-->
 
 
     </dependencies>

@@ -187,7 +187,6 @@ public class JsonParser {
     }
 
 
-
     void ws() {
         while (((1L << cursorChar) & ((cursorChar - 64) >> 31) & 0x100002600L) != 0L) {
             advance();

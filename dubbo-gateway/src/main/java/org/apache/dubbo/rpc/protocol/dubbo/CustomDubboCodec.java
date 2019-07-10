@@ -26,6 +26,7 @@ import java.io.InputStream;
 import java.util.Objects;
 
 import static com.yunji.gateway.util.Constants.GATEWAY_KEY;
+import static com.yunji.gateway.util.Constants.PARAMETER_TYPE;
 import static org.apache.dubbo.common.constants.CommonConstants.PATH_KEY;
 import static org.apache.dubbo.common.constants.CommonConstants.VERSION_KEY;
 import static org.apache.dubbo.remoting.Constants.DUBBO_VERSION_KEY;
@@ -164,35 +165,25 @@ public class CustomDubboCodec extends ExchangeCodec {
         out.writeUTF(inv.getAttachment(VERSION_KEY));
 
         out.writeUTF(inv.getMethodName());
-        out.writeUTF(ReflectUtils.getDesc(inv.getParameterTypes()));
-        //todo 这里进行自定义,请求参数传送过来的数据是 json 形式.
 
+        //todo 这里进行自定义,请求参数传送过来的数据是 json 形式.
         if (Boolean.valueOf(inv.getInvoker().getUrl().getParameter(GATEWAY_KEY))) {
+            String parameterTypes = inv.getAttachment(PARAMETER_TYPE);
+            out.writeUTF(GatewayUtil.getDescOfString(parameterTypes));
+
             Object[] args = inv.getArguments();
 
-            String method = (String) args[0];
-
-            DumpUtil.dumpByteArray(Objects.requireNonNull(GatewayUtil.getHessian2Byte(out)));
-
-            for (int i = 0; i < args.length - 1; i++) {
-                out.writeObject(encodeInvocationArgument(channel, inv, i));
-                DumpUtil.dumpByteArray(Objects.requireNonNull(GatewayUtil.getHessian2Byte(out)));
-            }
-            JsonPost.encode(method, (Object[]) args[args.length - 1], out);
+            JsonPost.writeObject(inv.getMethodName(), args[args.length - 1], out);
         } else {
-            DumpUtil.dumpByteArray(Objects.requireNonNull(GatewayUtil.getHessian2Byte(out)));
+            out.writeUTF(ReflectUtils.getDesc(inv.getParameterTypes()));
             Object[] args = inv.getArguments();
             if (args != null) {
                 for (int i = 0; i < args.length; i++) {
                     out.writeObject(encodeInvocationArgument(channel, inv, i));
-                    DumpUtil.dumpByteArray(Objects.requireNonNull(GatewayUtil.getHessian2Byte(out)));
                 }
             }
         }
-
-        DumpUtil.dumpByteArray(Objects.requireNonNull(GatewayUtil.getHessian2Byte(out)));
         out.writeObject(inv.getAttachments());
-        DumpUtil.dumpByteArray(Objects.requireNonNull(GatewayUtil.getHessian2Byte(out)));
     }
 
     @Override

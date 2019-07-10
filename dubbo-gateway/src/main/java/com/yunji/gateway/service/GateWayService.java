@@ -16,10 +16,10 @@ public interface GateWayService {
      * @return invocation return value
      * @throws GenericException potential exception thrown from the invocation
      */
-    Object $invoke(String method, String[] parameterTypes, Object[] args) throws GenericException;
+    Object invoke(String method, String[] parameterTypes, Object[] args) throws GenericException;
 
     default CompletableFuture<Object> invokeAsync(String method, String[] parameterTypes, Object[] args) throws GenericException {
-        Object object = $invoke(method, parameterTypes, args);
+        Object object = invoke(method, parameterTypes, args);
         if (object instanceof CompletableFuture) {
             return (CompletableFuture<Object>) object;
         }

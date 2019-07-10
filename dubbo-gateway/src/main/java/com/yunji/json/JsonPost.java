@@ -18,7 +18,7 @@ public class JsonPost {
         ServiceCache.loadServicesMetadata(service);
     }
 
-    public static void encode(String methodName, Object[] argsArray, ObjectOutput out) {
+    public static void writeObject(String methodName, Object object, ObjectOutput out) {
 
         try {
             OptimizedMetadata.OptimizedService bizService = ServiceCache.getService(service, "1.0.0");
@@ -27,16 +27,16 @@ public class JsonPost {
                 throw new JException("Service " + service + " metadata not found .");
 
             }
-            encode(methodName, argsArray, bizService, out);
+            writeObject(methodName, object, bizService, out);
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
     /**
-     * 利用 hessian2 encode object
+     * 利用 hessian2 writeObject object
      */
-    private static void encode(String methodName, Object[] paramsArray, OptimizedMetadata.OptimizedService optimizedService, ObjectOutput out) throws Exception {
+    private static void writeObject(String methodName, Object object, OptimizedMetadata.OptimizedService optimizedService, ObjectOutput out) throws Exception {
         Method method = optimizedService.getMethodMap().get(methodName);
 
         if (method == null) {
@@ -48,7 +48,7 @@ public class JsonPost {
 
         JsonSerializer jsonEncoder = new JsonSerializer(optimizedService, method, "1.0.0", req);
 
-        jsonEncoder.write((String) paramsArray[0], out);
+        jsonEncoder.write((String) object, out);
     }
 
 

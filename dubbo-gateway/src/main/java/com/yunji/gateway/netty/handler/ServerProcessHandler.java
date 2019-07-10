@@ -1,6 +1,6 @@
 package com.yunji.gateway.netty.handler;
 
-import com.yunji.demo.api.HelloService;
+//import com.yunji.demo.api.HelloService;
 import com.yunji.gateway.service.GateWayService;
 import com.yunji.gateway.http.HttpGetHeadProcessor;
 import com.yunji.gateway.http.HttpPostProcessor;
@@ -35,13 +35,13 @@ public class ServerProcessHandler extends SimpleChannelInboundHandler<RequestCon
 
     private GenericService genericService;
 
-    private HelloService helloService;
+//    private HelloService helloService;
 
 
     public ServerProcessHandler() {
         this.gateWayService = ServiceCreator.getGateWayService(HELLO_SERVICE);
 //        this.genericService = ServiceCreator.getGenericService(HELLO_SERVICE);
-        this.helloService = ServiceCreator.getHelloService(HELLO_SERVICE);
+//        this.helloService = ServiceCreator.getHelloService(HELLO_SERVICE);
     }
 
     @Override

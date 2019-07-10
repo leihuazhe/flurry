@@ -16,14 +16,13 @@
  */
 package org.apache.dubbo.demo.provider;
 
-import com.yunji.demo.api.Hello;
-import com.yunji.demo.api.HelloService;
-import com.yunji.demo.api.OrderRequest;
-import com.yunji.demo.api.OrderResponse;
+import com.yunji.demo.api.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class HelloServiceImpl implements HelloService {
@@ -47,6 +46,17 @@ public class HelloServiceImpl implements HelloService {
         System.out.println("orderRequest: " + orderRequest);
         OrderResponse resp = new OrderResponse();
         resp.setOrderNo(orderRequest.getOrderNo());
+        resp.setTotalAmount(orderRequest.getTotalAmount());
+
+        OrderDetailResponse detailResponse = new OrderDetailResponse();
+
+        List<OrderDetailResponse> detailList = new ArrayList<>();
+
+        detailResponse.setOrderNo(orderRequest.getOrderNo());
+        detailList.add(detailResponse);
+
+        resp.setOrderDetailResponses(detailList);
+
         return resp;
     }
 }

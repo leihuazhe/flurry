@@ -29,4 +29,22 @@ public class GatewayUtil {
         }
         return null;
     }
+
+    public static String getDescOfString(String parameterTypes) {
+        String[] types = parameterTypes.split(",");
+        if (types.length == 0) {
+            return "";
+        }
+
+        StringBuilder sb = new StringBuilder(64);
+        for (String c : types) {
+            sb.append(getDesc(c));
+        }
+
+        return sb.toString();
+    }
+
+    private static String getDesc(String c) {
+        return "L" + c.replace('.', '/') + ';';
+    }
 }

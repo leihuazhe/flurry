@@ -1,10 +1,9 @@
 package org.apache.dubbo.rpc.filter;
 
-import java.lang.reflect.Method;
 
 import org.apache.dubbo.common.constants.CommonConstants;
 import org.apache.dubbo.common.extension.Activate;
-import org.apache.dubbo.common.utils.ReflectUtils;
+import org.apache.dubbo.common.utils.StringUtils;
 import org.apache.dubbo.rpc.*;
 import com.yunji.gateway.util.GatewayUtils;
 
@@ -25,20 +24,17 @@ public class GateWayFilter extends ListenableFilter {
                 && invocation.getArguments().length == 3
                 && GatewayUtils.isGateWayInvoke(gateway)) {
 
-            /*String name = ((String) invocation.getArguments()[0]).trim();
+            String name = ((String) invocation.getArguments()[0]).trim();
             String[] types = (String[]) invocation.getArguments()[1];
-            Object[] args = (Object[]) invocation.getArguments()[2];*/
-//            try {
-//                Method method = ReflectUtils.findMethodByMethodSignature(invoker.getInterface(), name, types);
-//            invocation.setAttachment(GATEWAY_KEY, invoker.getUrl().getParameter(GATEWAY_KEY));
+            Object[] args = (Object[]) invocation.getArguments()[2];
+
+            invocation.setAttachment(GATEWAY_KEY, invoker.getUrl().getParameter(GATEWAY_KEY));
             invocation.setAttachment(GENERIC_KEY, invoker.getUrl().getParameter(GENERIC_KEY));
+            invocation.setAttachment(PARAMETER_TYPE, StringUtils.join(types, ","));
 
-            return invoker.invoke(invocation);
+            RpcInvocation newInv = new RpcInvocation(name, null, args, invocation.getAttachments());
 
-//                return invoker.invoke(new RpcInvocation(method, args, invocation.getAttachments()));
-//            } catch (NoSuchMethodException | ClassNotFoundException e) {
-//                throw new RpcException(e.getMessage(), e);
-//            }
+            return invoker.invoke(newInv);
         }
         return invoker.invoke(invocation);
     }
