@@ -1,6 +1,7 @@
 package org.apache.dubbo.rpc.protocol.dubbo;
 
 import com.google.gson.Gson;
+import com.yunji.json.JsonPost;
 import org.apache.dubbo.common.logger.Logger;
 import org.apache.dubbo.common.logger.LoggerFactory;
 import org.apache.dubbo.common.serialize.Cleanable;
@@ -22,6 +23,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Type;
 import java.util.Map;
+
+import static com.yunji.gateway.util.GateConstants.INTERFACE;
 
 
 public class CustomDecodeableRpcResult extends AppResponse implements Codec, Decodeable {
@@ -68,7 +71,8 @@ public class CustomDecodeableRpcResult extends AppResponse implements Codec, Dec
             case DubboCodec.RESPONSE_NULL_VALUE:
                 break;
             case DubboCodec.RESPONSE_VALUE:
-                handleValue(in);
+                handleJsonValue(in);
+//                handleValue(in);
                 break;
             case DubboCodec.RESPONSE_WITH_EXCEPTION:
                 handleException(in);
@@ -77,7 +81,8 @@ public class CustomDecodeableRpcResult extends AppResponse implements Codec, Dec
                 handleAttachment(in);
                 break;
             case DubboCodec.RESPONSE_VALUE_WITH_ATTACHMENTS:
-                handleValue(in);
+                handleJsonValue(in);
+//                handleValue(in);
                 handleAttachment(in);
                 break;
             case DubboCodec.RESPONSE_WITH_EXCEPTION_WITH_ATTACHMENTS:
@@ -110,6 +115,16 @@ public class CustomDecodeableRpcResult extends AppResponse implements Codec, Dec
         }
     }
 
+    /**
+     * 流式序列化 handle json value.
+     */
+    private void handleJsonValue(ObjectInput in) {
+        String service = invocation.getAttachment(INTERFACE);
+        Object value = JsonPost.readObject(service, invocation.getMethodName(), in);
+
+        setValue(value);
+    }
+
     private void handleValue(ObjectInput in) throws IOException {
         try {
             Type[] returnTypes = RpcUtils.getReturnTypes(invocation);
@@ -122,8 +137,6 @@ public class CustomDecodeableRpcResult extends AppResponse implements Codec, Dec
                 value = in.readObject((Class<?>) returnTypes[0], returnTypes[1]);
             }
             setValue(value);
-//            Object result = gson.toJson(value);
-//            setValue(result);
         } catch (ClassNotFoundException e) {
             rethrow(e);
         }

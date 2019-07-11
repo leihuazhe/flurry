@@ -279,7 +279,7 @@ public class ReferenceConfig<T> extends AbstractReferenceConfig {
         appendParameters(map, application);
         appendParameters(map, module);
         // remove 'default.' prefix for configs from ConsumerConfig
-        // appendParameters(map, consumer, Constants.DEFAULT_KEY);
+        // appendParameters(map, consumer, GateConstants.DEFAULT_KEY);
         appendParameters(map, consumer);
         appendParameters(map, this);
         Map<String, Object> attributes = null;

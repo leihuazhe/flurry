@@ -1,11 +1,14 @@
-package com.yunji.serialization;
+package com.yunji.json.serializer;
 
 /**
  * @author Denim.leihz 2019-07-08 8:43 PM
  */
 
-import com.yunji.json.JException;
+import com.yunji.json.util.JException;
+import org.apache.dubbo.common.serialize.ObjectInput;
 import org.apache.dubbo.common.serialize.ObjectOutput;
+
+import java.io.IOException;
 
 /**
  * 通用编解码器接口
@@ -22,7 +25,7 @@ public interface BeanSerializer<T> {
      * @return
      * @throws JException
      */
-    T read(ObjectOutput iproto) throws JException;
+    T read(ObjectInput iproto) throws IOException;
 
     /**
      * 序列化方法, 把PoJo转换为Thrift协议格式

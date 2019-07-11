@@ -18,15 +18,13 @@ import org.apache.dubbo.remoting.transport.CodecSupport;
 import org.apache.dubbo.rpc.Invocation;
 import org.apache.dubbo.rpc.Result;
 import org.apache.dubbo.rpc.RpcInvocation;
-import org.apache.dubbo.util.DumpUtil;
 import org.apache.dubbo.util.GatewayUtil;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Objects;
 
-import static com.yunji.gateway.util.Constants.GATEWAY_KEY;
-import static com.yunji.gateway.util.Constants.PARAMETER_TYPE;
+import static com.yunji.gateway.util.GateConstants.GATEWAY_KEY;
+import static com.yunji.gateway.util.GateConstants.PARAMETER_TYPE;
 import static org.apache.dubbo.common.constants.CommonConstants.PATH_KEY;
 import static org.apache.dubbo.common.constants.CommonConstants.VERSION_KEY;
 import static org.apache.dubbo.remoting.Constants.DUBBO_VERSION_KEY;
@@ -173,7 +171,10 @@ public class CustomDubboCodec extends ExchangeCodec {
 
             Object[] args = inv.getArguments();
 
-            JsonPost.writeObject(inv.getMethodName(), args[args.length - 1], out);
+            try {
+                JsonPost.writeObject(inv.getMethodName(), args[args.length - 1], out);
+            } catch (Exception ignored) {
+            }
         } else {
             out.writeUTF(ReflectUtils.getDesc(inv.getParameterTypes()));
             Object[] args = inv.getArguments();

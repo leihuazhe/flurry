@@ -57,6 +57,12 @@ public class HelloServiceImpl implements HelloService {
 
         resp.setOrderDetailResponses(detailList);
 
+        try {
+            Thread.sleep(5000);
+        } catch (InterruptedException ignored) {
+
+        }
+
         return resp;
     }
 }

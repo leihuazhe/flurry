@@ -1,7 +1,7 @@
 package com.yunji.gateway.http.util;
 
 /**
- * desc: Constants
+ * desc: GateConstants
  *
  * @author maple 2018.08.27 22:37
  */

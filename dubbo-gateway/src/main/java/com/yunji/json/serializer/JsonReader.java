@@ -1,10 +1,12 @@
-package com.yunji.json;
+package com.yunji.json.serializer;
 
+import com.yunji.metadata.OptimizedMetadata;
+import com.yunji.json.util.JException;
 import com.yunji.metadata.tag.DataType;
 import com.yunji.metadata.tag.Field;
 import com.yunji.metadata.tag.Struct;
-import com.yunji.serialization.hessian2.CustomHessian2ObjectOutput;
-import com.yunji.serialization.hessian2.CustomHessian2Output;
+import org.apache.dubbo.common.serialize.CustomHessian2ObjectOutput;
+import org.apache.dubbo.common.serialize.CustomHessian2Output;
 import io.netty.buffer.ByteBuf;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,9 +14,9 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.*;
 
-import static com.yunji.json.JsonUtils.isCollectionKind;
-import static com.yunji.json.JsonUtils.isMultiElementKind;
-import static com.yunji.json.JsonUtils.isValidMapKeyType;
+import static com.yunji.json.util.JsonUtils.isCollectionKind;
+import static com.yunji.json.util.JsonUtils.isMultiElementKind;
+import static com.yunji.json.util.JsonUtils.isValidMapKeyType;
 import static com.yunji.json.util.MetaDataUtil.dataType2Byte;
 
 /**

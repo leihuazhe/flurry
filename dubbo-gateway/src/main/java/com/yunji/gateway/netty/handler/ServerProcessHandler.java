@@ -7,7 +7,7 @@ import com.yunji.gateway.http.HttpPostProcessor;
 import com.yunji.gateway.http.HttpProcessorUtils;
 import com.yunji.gateway.http.HttpResponseEntity;
 import com.yunji.gateway.http.request.RequestContext;
-import com.yunji.gateway.service.ServiceCreator;
+import com.yunji.gateway.service.ReferenceServiceContext;
 import com.yunji.gateway.util.GateWayErrorCode;
 import com.yunji.gateway.util.GatewayException;
 import io.netty.channel.ChannelHandler;
@@ -19,7 +19,7 @@ import org.apache.dubbo.rpc.service.GenericService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static com.yunji.gateway.service.ServiceCreator.HELLO_SERVICE;
+import static com.yunji.gateway.service.ReferenceServiceContext.HELLO_SERVICE;
 
 /**
  * @author maple 2018.08.23 上午10:01
@@ -39,9 +39,9 @@ public class ServerProcessHandler extends SimpleChannelInboundHandler<RequestCon
 
 
     public ServerProcessHandler() {
-        this.gateWayService = ServiceCreator.getGateWayService(HELLO_SERVICE);
-//        this.genericService = ServiceCreator.getGenericService(HELLO_SERVICE);
-//        this.helloService = ServiceCreator.getHelloService(HELLO_SERVICE);
+        this.gateWayService = ReferenceServiceContext.getGateWayService(HELLO_SERVICE);
+//        this.genericService = ReferenceServiceContext.getGenericService(HELLO_SERVICE);
+//        this.helloService = ReferenceServiceContext.getHelloService(HELLO_SERVICE);
     }
 
     @Override

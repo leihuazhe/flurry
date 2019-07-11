@@ -1,4 +1,6 @@
-package com.yunji.json;
+package com.yunji.json.serializer;
+
+import com.yunji.json.serializer.JsonCallback;
 
 /**
  * thrift -> json

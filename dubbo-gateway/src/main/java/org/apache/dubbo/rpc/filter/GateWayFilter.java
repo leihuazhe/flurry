@@ -7,7 +7,7 @@ import org.apache.dubbo.common.utils.StringUtils;
 import org.apache.dubbo.rpc.*;
 import com.yunji.gateway.util.GatewayUtils;
 
-import static com.yunji.gateway.util.Constants.*;
+import static com.yunji.gateway.util.GateConstants.*;
 import static org.apache.dubbo.rpc.Constants.GENERIC_KEY;
 
 /**

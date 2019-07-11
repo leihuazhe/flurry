@@ -1,12 +1,6 @@
-package com.yunji.serialization;
+package org.apache.dubbo.common.serialize;
 
-import com.yunji.serialization.hessian2.CustomHessian2ObjectOutput;
 import org.apache.dubbo.common.URL;
-import org.apache.dubbo.common.serialize.ObjectInput;
-import org.apache.dubbo.common.serialize.ObjectOutput;
-import org.apache.dubbo.common.serialize.Serialization;
-import org.apache.dubbo.common.serialize.hessian2.Hessian2ObjectInput;
-import org.apache.dubbo.common.serialize.hessian2.Hessian2ObjectOutput;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -36,7 +30,7 @@ public class CustomHessian2Serialization implements Serialization {
 
     @Override
     public ObjectInput deserialize(URL url, InputStream is) throws IOException {
-        return new Hessian2ObjectInput(is);
+        return new CustomHessian2ObjectInput(is);
     }
 
 }

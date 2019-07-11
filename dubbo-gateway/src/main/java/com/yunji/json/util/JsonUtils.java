@@ -1,4 +1,4 @@
-package com.yunji.json;
+package com.yunji.json.util;
 
 import com.yunji.metadata.tag.DataType;
 
@@ -12,7 +12,7 @@ public class JsonUtils {
      * @param kind
      * @return
      */
-    static boolean isValidMapKeyType(DataType.KIND kind) {
+    public static boolean isValidMapKeyType(DataType.KIND kind) {
         return kind == DataType.KIND.INTEGER || kind == DataType.KIND.LONG
                 || kind == DataType.KIND.SHORT || kind == DataType.KIND.STRING;
     }
@@ -20,21 +20,21 @@ public class JsonUtils {
     /**
      * 是否集合类型
      */
-    static boolean isCollectionKind(DataType.KIND kind) {
+    public static boolean isCollectionKind(DataType.KIND kind) {
         return kind == DataType.KIND.LIST || kind == DataType.KIND.SET;
     }
 
     /**
      * 是否容器类型
      */
-    static boolean isMultiElementKind(DataType.KIND kind) {
+    public static boolean isMultiElementKind(DataType.KIND kind) {
         return isCollectionKind(kind) || kind == DataType.KIND.MAP;
     }
 
     /**
      * 是否复杂类型
      */
-    static boolean isComplexKind(DataType.KIND kind) {
+    public static boolean isComplexKind(DataType.KIND kind) {
         return isMultiElementKind(kind) || kind == DataType.KIND.STRUCT;
     }
 }

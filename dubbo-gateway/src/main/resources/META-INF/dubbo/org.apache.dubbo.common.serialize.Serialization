@@ -1,1 +1,1 @@
-custom_hessian2=com.yunji.serialization.CustomHessian2Serialization
+custom_hessian2=org.apache.dubbo.common.serialize.CustomHessian2Serialization

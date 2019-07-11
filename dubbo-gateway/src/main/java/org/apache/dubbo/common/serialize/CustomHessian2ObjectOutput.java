@@ -1,6 +1,5 @@
-package com.yunji.serialization.hessian2;
+package org.apache.dubbo.common.serialize;
 
-import org.apache.dubbo.common.serialize.ObjectOutput;
 import org.apache.dubbo.common.serialize.hessian2.Hessian2SerializerFactory;
 
 import java.io.IOException;

@@ -27,8 +27,10 @@ public class HttpPostProcessor {
             }
 
             try {
-                String jsonResponse = PostUtil.post(context);
-                HttpProcessorUtils.sendHttpResponse(ctx, jsonResponse, context.request(), HttpResponseStatus.OK);
+                String jsonResponse = PostUtil.post(context, ctx);
+                if (jsonResponse != null) {
+                    HttpProcessorUtils.sendHttpResponse(ctx, jsonResponse, context.request(), HttpResponseStatus.OK);
+                }
             } catch (Exception e) {
                 HttpProcessorUtils.sendHttpResponse(ctx, e.getMessage(), context.request(), HttpResponseStatus.OK);
             }

@@ -1,4 +1,4 @@
-package com.yunji.serialization.hessian2;
+package org.apache.dubbo.common.serialize;
 
 import com.alibaba.com.caucho.hessian.io.AbstractHessianOutput;
 import com.alibaba.com.caucho.hessian.io.Hessian2Constants;

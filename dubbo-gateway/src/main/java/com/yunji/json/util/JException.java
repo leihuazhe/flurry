@@ -1,4 +1,4 @@
-package com.yunji.json;
+package com.yunji.json.util;
 
 /**
  * @author Leihuazhe

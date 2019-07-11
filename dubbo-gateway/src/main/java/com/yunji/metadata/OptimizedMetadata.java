@@ -1,4 +1,4 @@
-package com.yunji.json;
+package com.yunji.metadata;
 
 import com.yunji.metadata.tag.*;
 
@@ -13,14 +13,13 @@ import java.util.Map;
 public class OptimizedMetadata {
 
     public static class OptimizedService {
-        final Service service;
+        public final Service service;
+        public final Map<String, OptimizedStruct> optimizedStructs = new HashMap<>(1024);
 
         final Map<String, Method> methodMap = new HashMap<>(128);
-
-        final Map<String, OptimizedStruct> optimizedStructs = new HashMap<>(1024);
         final Map<String, TEnum> enumMap = new HashMap<>(128);
 
-        public OptimizedService(Service service) {
+        OptimizedService(Service service) {
             this.service = service;
             for (Struct struct : service.structDefinitions) {
                 optimizedStructs.put(struct.namespace + "." + struct.name, new OptimizedStruct(struct));
@@ -28,7 +27,7 @@ public class OptimizedMetadata {
             for (TEnum tEnum : service.enumDefinitions) {
                 enumMap.put(tEnum.namespace + "." + tEnum.name, tEnum);
             }
-            for (Method method: service.methods) {
+            for (Method method : service.methods) {
                 methodMap.put(method.name, method);
                 optimizedStructs.put(method.request.namespace + "." + method.request.name, new OptimizedStruct(method.request));
 
@@ -71,20 +70,20 @@ public class OptimizedMetadata {
     }
 
     public static class OptimizedStruct {
-        final Struct struct;
+        public final Struct struct;
 
         /**
          *
          */
-        final Map<String, Field> fieldMap = new HashMap<>(128);
+        public final Map<String, Field> fieldMap = new HashMap<>(128);
 
-        final int tagBase; // maybe < 0
+        public final int tagBase; // maybe < 0
 
         /**
          * 数组方式， 更高效，需要注意，
          * 1. 不连续key很大的情况， 例如来了个tag为65546的field
          * 2. 有些结构体定时的时候没填tag， 结果生成元数据的时候就变成了负数
-         *
+         * <p>
          * 所以目前采用Map的方式
          */
         private final Map<Short, Field> fieldMapByTag;
@@ -102,23 +101,22 @@ public class OptimizedMetadata {
 
             for (Field f : struct.fields) {
                 this.fieldMap.put(f.name, f);
-                if(f.tag < tagBase) tagBase = f.tag;
-                if(f.tag > maxTag) maxTag = f.tag;
+                if (f.tag < tagBase) tagBase = f.tag;
+                if (f.tag > maxTag) maxTag = f.tag;
             }
 
             this.tagBase = tagBase;
             Field[] array = null;
             Map<Short, Field> map = null;
-            if(maxTag - tagBase + 1 <= 256) {
+            if (maxTag - tagBase + 1 <= 256) {
                 array = new Field[maxTag - tagBase + 1];
-                for(Field f: struct.fields) {
+                for (Field f : struct.fields) {
                     array[f.tag - tagBase] = f;
                 }
-            }
-            else {
+            } else {
                 map = new HashMap<>();
-                for(Field f: struct.fields) {
-                    map.put((short)f.tag, f);
+                for (Field f : struct.fields) {
+                    map.put((short) f.tag, f);
                 }
             }
             this.fieldArrayByTag = array;
@@ -126,7 +124,7 @@ public class OptimizedMetadata {
         }
 
         public Field get(short tag) {
-            if(fieldArrayByTag != null && tag >= tagBase && tag - tagBase < fieldArrayByTag.length)
+            if (fieldArrayByTag != null && tag >= tagBase && tag - tagBase < fieldArrayByTag.length)
                 return fieldArrayByTag[tag - tagBase];
             else return fieldMapByTag.get(tag);
         }
