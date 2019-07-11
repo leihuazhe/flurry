@@ -1,8 +1,8 @@
 package com.yunji.gateway.netty.handler;
 
-import com.yunji.gateway.http.HttpProcessorUtils;
-import com.yunji.gateway.http.match.UrlMappingResolver;
-import com.yunji.gateway.http.request.RequestContext;
+import com.yunji.gateway.util.HttpHandlerUtil;
+import com.yunji.gateway.netty.http.match.UrlMappingResolver;
+import com.yunji.gateway.netty.http.request.RequestContext;
 import com.yunji.gateway.util.GateWayErrorCode;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
@@ -44,8 +44,8 @@ public class HttpRequestHandler extends SimpleChannelInboundHandler<FullHttpRequ
             super.channelRead(ctx, context);
         } catch (Exception e) {
             logger.error("网关处理请求失败: " + e.getMessage(), e);
-            HttpProcessorUtils.sendHttpResponse(ctx,
-                    HttpProcessorUtils.wrapErrorResponse(GateWayErrorCode.ProcessReqFailed),
+            HttpHandlerUtil.sendHttpResponse(ctx,
+                    HttpHandlerUtil.wrapErrorResponse(GateWayErrorCode.ProcessReqFailed),
                     null,
                     HttpResponseStatus.INTERNAL_SERVER_ERROR);
         }

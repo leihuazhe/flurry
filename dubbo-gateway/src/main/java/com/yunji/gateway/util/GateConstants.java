@@ -28,4 +28,6 @@ public interface GateConstants {
      */
     String SERIALIZATION_CUSTOM = "custom_hessian2";
 
+    byte CUSTOM_HESSIAN2_SERIALIZATION_ID = 2;
+
 }

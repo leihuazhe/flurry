@@ -18,9 +18,9 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>com.maple.dubbo</groupId>
-        <artifactId>dubbo-demo</artifactId>
-        <version>1.0.0</version>
+        <groupId>com.yunji.gateway</groupId>
+        <artifactId>gateway-parent</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
     </parent>
     <artifactId>dubbo-gateway</artifactId>
     <packaging>jar</packaging>
@@ -30,47 +30,36 @@
         <skip_maven_deploy>true</skip_maven_deploy>
     </properties>
     <dependencies>
-        <dependency>
-            <groupId>com.maple.dubbo</groupId>
-            <artifactId>dubbo-demo-api</artifactId>
-            <version>1.0.0</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.dubbo</groupId>
-            <artifactId>dubbo-registry-multicast</artifactId>
-        </dependency>
+
         <dependency>
             <groupId>org.apache.dubbo</groupId>
             <artifactId>dubbo-registry-zookeeper</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.apache.dubbo</groupId>
-            <artifactId>dubbo-configcenter-zookeeper</artifactId>
-        </dependency>
+
+         <dependency>
+             <groupId>org.apache.dubbo</groupId>
+             <artifactId>dubbo-configcenter-zookeeper</artifactId>
+         </dependency>
+
         <dependency>
             <groupId>org.apache.dubbo</groupId>
             <artifactId>dubbo-config-spring</artifactId>
         </dependency>
+
         <dependency>
             <groupId>org.apache.dubbo</groupId>
             <artifactId>dubbo-rpc-dubbo</artifactId>
         </dependency>
+
         <dependency>
             <groupId>org.apache.dubbo</groupId>
             <artifactId>dubbo-remoting-netty4</artifactId>
         </dependency>
+
         <dependency>
             <groupId>org.apache.dubbo</groupId>
             <artifactId>dubbo-serialization-hessian2</artifactId>
         </dependency>
-
-        <!--<dependency>
-            <groupId>com.yunji</groupId>
-            <artifactId>yunji-api</artifactId>
-            <version>1.0</version>
-        </dependency>-->
-
-
     </dependencies>
 
     <build>

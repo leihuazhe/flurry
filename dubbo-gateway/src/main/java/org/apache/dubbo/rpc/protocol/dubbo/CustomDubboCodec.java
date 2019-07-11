@@ -1,6 +1,8 @@
 package org.apache.dubbo.rpc.protocol.dubbo;
 
+import com.yunji.gateway.util.GateConstants;
 import com.yunji.json.JsonPost;
+import com.yunji.json.util.JException;
 import org.apache.dubbo.common.Version;
 import org.apache.dubbo.common.io.Bytes;
 import org.apache.dubbo.common.io.UnsafeByteArrayInputStream;
@@ -171,9 +173,12 @@ public class CustomDubboCodec extends ExchangeCodec {
 
             Object[] args = inv.getArguments();
 
+            //Get interface
+            String service = inv.getAttachment(GateConstants.INTERFACE);
             try {
-                JsonPost.writeObject(inv.getMethodName(), args[args.length - 1], out);
-            } catch (Exception ignored) {
+                JsonPost.writeObject(service, inv.getMethodName(), args[args.length - 1], out);
+            } catch (Exception e) {
+                throw new IOException(e.getMessage(), e);
             }
         } else {
             out.writeUTF(ReflectUtils.getDesc(inv.getParameterTypes()));

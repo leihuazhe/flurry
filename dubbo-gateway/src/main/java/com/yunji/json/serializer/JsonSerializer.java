@@ -58,7 +58,7 @@ public class JsonSerializer implements BeanSerializer<String> {
     public void write(String input, ObjectOutput oproto) throws Exception {
         JsonReader jsonReader = null;
         try {
-            jsonReader = new JsonReader(optimizedStruct, optimizedService, requestByteBuf, (CustomHessian2ObjectOutput) oproto);
+            jsonReader = new JsonReader(optimizedStruct, optimizedService, (CustomHessian2ObjectOutput) oproto);
             new JsonParser(input, jsonReader).parseJsValue();
         } catch (Exception e) {
             if (jsonReader != null && jsonReader.current != null) {

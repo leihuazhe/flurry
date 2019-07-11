@@ -101,5 +101,12 @@ public interface JsonCallback {
      * @throws IOException
      */
     void onString(String value) throws IOException;
+
+    /**
+     * onColon ":"
+     *
+     * @throws IOException
+     */
+    void onColon() throws IOException;
 }
 

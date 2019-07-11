@@ -27,13 +27,10 @@ public class JsonReader implements JsonCallback {
 
     private final OptimizedMetadata.OptimizedStruct optimizedStruct;
     private final OptimizedMetadata.OptimizedService optimizedService;
-    private final ByteBuf requestByteBuf;
 
     /**
-     * Dubbo 序列化 writeObject interface
+     * Hessian2 Custom output
      */
-//    private final CustomHessian2ObjectOutput customOut;
-
     private final CustomHessian2Output cmH2o;
 
 
@@ -154,15 +151,17 @@ public class JsonReader implements JsonCallback {
      *  - 处理 current.isNull = true
      * </pre>
      */
-    Stack<StackNode> history = new Stack<>();
+    private Stack<StackNode> history = new Stack<>();
+    /**
+     * keep a minimum StackNode Pool
+     */
+    private List<StackNode> nodePool = new ArrayList<>(64);
 
-    List<StackNode> nodePool = new ArrayList<>(64);  // keep a minum StackNode Pool
 
-
-    JsonReader(OptimizedMetadata.OptimizedStruct optimizedStruct, OptimizedMetadata.OptimizedService optimizedService, ByteBuf requestByteBuf, CustomHessian2ObjectOutput out) throws Exception {
+    JsonReader(OptimizedMetadata.OptimizedStruct optimizedStruct, OptimizedMetadata.OptimizedService optimizedService,
+               CustomHessian2ObjectOutput out) throws Exception {
         this.optimizedStruct = optimizedStruct;
         this.optimizedService = optimizedService;
-        this.requestByteBuf = requestByteBuf;
         this.cmH2o = out.getCmH2o();
     }
 
@@ -170,8 +169,8 @@ public class JsonReader implements JsonCallback {
     @Override
     public void onStartObject() throws IOException {
         level++;
-
-        if (level == 0) return;  // it's the outside { body: ... } object
+        // it's the outside { body: ... } object
+        if (level == 0) return;
 
         if (skip) {
             skipDepth++;
@@ -210,12 +209,10 @@ public class JsonReader implements JsonCallback {
                         }
                     }
                 }
-
-//                customOut.writeStructBegin(new TStruct(struct.name));
                 break;
             case MAP:
                 assert isValidMapKeyType(current.dataType.keyType.kind);
-                writeMapBegin(dataType2Byte(current.dataType.keyType), dataType2Byte(current.dataType.valueType), 0);
+                writeMapBegin();
                 break;
             default:
                 logAndThrowTException();
@@ -226,24 +223,21 @@ public class JsonReader implements JsonCallback {
     @Override
     public void onEndObject() throws IOException {
         level--;
-        if (level == -1) return; // the outer body
+        // the outer body
+        if (level == -1) return;
 
         if (skip) {
             skipDepth--;
             return;
         }
-
         assert current.dataType.kind == DataType.KIND.STRUCT || current.dataType.kind == DataType.KIND.MAP;
 
         switch (current.dataType.kind) {
             case STRUCT:
                 validateStruct(current);
-//                customOut.writeFieldStop();
-//                customOut.writeStructEnd();
                 break;
             case MAP:
-//                customOut.writeMapEnd();
-                reWriteLength();
+                cmH2o.writeMapEnd();
                 break;
             default:
                 logAndThrowTException();
@@ -274,7 +268,7 @@ public class JsonReader implements JsonCallback {
         switch (current.dataType.kind) {
             case LIST:
             case SET:
-                writeCollectionBegin(dataType2Byte(current.dataType.valueType), 0);
+                writeCollectionBegin(0, dataType2Byte(current.dataType.valueType));
                 break;
             default:
                 logAndThrowTException();
@@ -294,13 +288,10 @@ public class JsonReader implements JsonCallback {
 
         switch (current.dataType.kind) {
             case LIST:
-//                mH2o.writeListEnd();
                 //重写长度
                 reWriteLength();
                 break;
             case SET:
-//                mH2o.writeListEnd();
-//                customOut.writeSetEnd();
                 reWriteLength();
                 break;
             default:
@@ -313,15 +304,16 @@ public class JsonReader implements JsonCallback {
         if (skip) {
             return;
         }
-        if (level == 0) { // expect only the "body"
-            if ("body".equals(name)) { // body
+        // expect only the "body"
+        if (level == 0) {
+            if ("body".equals(name)) {
                 DataType initDataType = new DataType();
                 initDataType.setKind(DataType.KIND.STRUCT);
                 initDataType.qualifiedName = optimizedStruct.struct.name;
-                push(initDataType, -1, // not a struct field
-                        requestByteBuf.writerIndex(), //
-                        optimizedStruct, "body");
-            } else { // others, just skip now
+                // not a struct field
+                push(initDataType, -1, optimizedStruct, "body");
+            } else {
+                // others, just skip now
                 skip = true;
                 skipDepth = 0;
             }
@@ -329,21 +321,18 @@ public class JsonReader implements JsonCallback {
             if (current.dataType.kind == DataType.KIND.MAP) {
                 assert isValidMapKeyType(current.dataType.keyType.kind);
 
-                int tFieldPos = requestByteBuf.writerIndex();
                 if (current.dataType.keyType.kind == DataType.KIND.STRING) {
-//                    customOut.writeString(name);
+                    cmH2o.writeString(name);
                 } else {
                     writeIntField(name, current.dataType.keyType.kind);
                 }
+                // so value can't be null
                 push(current.dataType.valueType,
-                        tFieldPos, // so value can't be null
-                        requestByteBuf.writerIndex(), // need for List/Map
+                        -1,
                         optimizedService.optimizedStructs.get(current.dataType.valueType.qualifiedName),
                         name);
             } else if (current.dataType.kind == DataType.KIND.STRUCT) {
-
                 Field field = current.optimizedStruct.fieldMap.get(name);
-
 
                 if (field == null) {
                     skip = true;
@@ -353,20 +342,9 @@ public class JsonReader implements JsonCallback {
                 } else {
                     skip = false;
                 }
-                /*//写 对象 className 全限定名
-                OptimizedMetadata.OptimizedStruct struct = optimizedService.optimizedStructs.get(field.dataType.qualifiedName);
-                mH2o.writeObjectBegin(field.dataType.qualifiedName);
-                //写对象的 Filed长度
-                mH2o.writeClassFieldLength(struct.fieldMap.size());
-                //写Filed名称*/
-
-
-//                int tFieldPos = requestByteBuf.writerIndex();
                 int tFieldPos = cmH2o.markIndex();
-//                customOut.writeFieldBegin(new TField(field.name, dataType2Byte(field.dataType), (short) field.getTag()));
                 push(field.dataType,
                         tFieldPos,
-                        requestByteBuf.writerIndex(),
                         optimizedService.optimizedStructs.get(field.dataType.qualifiedName),
                         name);
             } else {
@@ -385,26 +363,24 @@ public class JsonReader implements JsonCallback {
         DataType next = current.dataType.valueType;
         OptimizedMetadata.OptimizedStruct nextStruct = (next.kind == DataType.KIND.STRUCT) ?
                 optimizedService.optimizedStructs.get(next.qualifiedName) : null;
-        push(current.dataType.valueType,
-                -1,
-                requestByteBuf.writerIndex(),
-                nextStruct,
-                null);
+
+        push(current.dataType.valueType, -1, nextStruct, null);
 
     }
 
     @Override
     public void onEndField() throws IOException {
         if (skip) {
-            if (skipDepth == 0) { // reset skipFlag
+            // reset skipFlag
+            if (skipDepth == 0) {
                 skip = false;
             }
             return;
         }
-
         String fieldName = current.fieldName;
 
-        if (level > 0) { // level = 0 will having no current dataType
+        // level = 0 will having no current dataType
+        if (level > 0) {
             StackNode parent = peek();
             assert (parent != null);
 
@@ -417,21 +393,14 @@ public class JsonReader implements JsonCallback {
                     break;
                 case MAP:
                     if (current.isNull) {
-                        // peek().decrElementSize(); onNull not incrElementSize
-                        requestByteBuf.writerIndex(current.tFieldPosition);
                     }
                     break;
                 case STRUCT:
                     if (current.isNull) {
-                        // parent.fields4Struct.remove(fieldName);
-                        requestByteBuf.writerIndex(current.tFieldPosition);
-                       /* if (invocationCtx.codecProtocol() == CompressedBinary) {
-                            ((TCompactProtocol) customOut).resetLastFieldId();
-                        }*/
+
                     } else {
                         Field field = parent.optimizedStruct.fieldMap.get(fieldName);
                         parent.fields4Struct.set(field.tag - parent.optimizedStruct.tagBase);
-//                        customOut.writeFieldEnd();
                     }
                     break;
             }
@@ -455,8 +424,6 @@ public class JsonReader implements JsonCallback {
         if (peek != null && isMultiElementKind(peek.dataType.kind)) {
             peek.incrElementSize();
         }
-
-//        customOut.writeBool(value);
     }
 
     @Override
@@ -474,7 +441,7 @@ public class JsonReader implements JsonCallback {
 
         switch (currentType) {
             case SHORT:
-//                customOut.writeI16((short) value);
+                cmH2o.writeInt((int) value);
                 break;
             case INTEGER:
             case ENUM:
@@ -487,7 +454,7 @@ public class JsonReader implements JsonCallback {
                 cmH2o.writeDouble(value);
                 break;
             case BIGDECIMAL:
-//                customOut.writeString(String.valueOf(value));
+                cmH2o.writeString(String.valueOf(value));
                 break;
             case BYTE:
 //                customOut.writeByte((byte) value);
@@ -501,7 +468,6 @@ public class JsonReader implements JsonCallback {
 
     @Override
     public void onNumber(long value) throws IOException {
-//        throw new NotImplementedException();
     }
 
     @Override
@@ -534,22 +500,22 @@ public class JsonReader implements JsonCallback {
 //                customOut.writeI32(tValue);
                 break;
             case BOOLEAN:
-//                customOut.writeBool(Boolean.parseBoolean(value));
+                cmH2o.writeBoolean(Boolean.parseBoolean(value));
                 break;
             case DOUBLE:
-//                customOut.writeDouble(Double.parseDouble(value));
+                cmH2o.writeDouble(Double.parseDouble(value));
                 break;
             case BIGDECIMAL:
-//                customOut.writeString(value);
+                cmH2o.writeString(value);
                 break;
             case INTEGER:
-//                customOut.writeI32(Integer.parseInt(value));
+                cmH2o.writeInt(Integer.parseInt(value));
                 break;
             case LONG:
-//                customOut.writeI64(Long.parseLong(value));
+                cmH2o.writeLong(Long.parseLong(value));
                 break;
             case SHORT:
-//                customOut.writeI16(Short.parseShort(value));
+                cmH2o.writeInt(Integer.parseInt(value));
                 break;
             default:
                 if (current.dataType.kind != DataType.KIND.STRING) {
@@ -559,8 +525,19 @@ public class JsonReader implements JsonCallback {
         }
     }
 
+    /**
+     * onColon ":"
+     *
+     * @throws IOException
+     */
+    @Override
+    public void onColon() throws IOException {
+
+    }
+
     // only used in startField
-    private void push(final DataType dataType, final int tFieldPos, final int valuePos, final OptimizedMetadata.OptimizedStruct optimizedStruct, String fieldName) {
+    private void push(final DataType dataType, final int tFieldPos,
+                      final OptimizedMetadata.OptimizedStruct optimizedStruct, String fieldName) {
         StackNode node;
 
         if (nodePool.size() > 0) {
@@ -569,7 +546,7 @@ public class JsonReader implements JsonCallback {
             node = new StackNode();
         }
 
-        node.init(dataType, valuePos, tFieldPos, optimizedStruct, fieldName);
+        node.init(dataType, tFieldPos, optimizedStruct, fieldName);
         //if(current != null)
         history.push(node);
         this.current = node;
@@ -611,7 +588,8 @@ public class JsonReader implements JsonCallback {
          */
         OptimizedMetadata.OptimizedStruct struct = current.optimizedStruct;
         List<Field> fields = struct.struct.fields;
-        for (int i = 0; i < fields.size(); i++) { // iterator need more allocation
+        // iterator need more allocation
+        for (int i = 0; i < fields.size(); i++) {
             Field field = fields.get(i);
             if (field != null && !field.isOptional() && !current.fields4Struct.get(field.tag - struct.tagBase)) {
                 String fieldName = current.fieldName;
@@ -629,13 +607,11 @@ public class JsonReader implements JsonCallback {
     private void writeIntField(String value, DataType.KIND kind) throws IOException {
         switch (kind) {
             case SHORT:
-//                customOut.writeI16(Short.parseShort(value));
-                break;
             case INTEGER:
-//                customOut.writeI32(Integer.parseInt(value));
+                cmH2o.writeInt(Integer.valueOf(value));
                 break;
             case LONG:
-//                customOut.writeI64(Long.parseLong(value));
+                cmH2o.writeLong(Long.valueOf(value));
                 break;
             default:
                 logAndThrowTException();
@@ -653,14 +629,9 @@ public class JsonReader implements JsonCallback {
 //        int beginPosition = current.valuePosition;
         int elCount = current.elCount;
 
-        //备份最新的writerIndex
-        int currentIndex = requestByteBuf.writerIndex();
-
-        requestByteBuf.writerIndex(beginPosition);
-
         switch (current.dataType.kind) {
             case MAP:
-                reWriteMapBegin(dataType2Byte(current.dataType.keyType), dataType2Byte(current.dataType.valueType), elCount);
+                //Hessian2 Map 不需要 reWrite长度
                 break;
             case SET:
             case LIST:
@@ -669,33 +640,18 @@ public class JsonReader implements JsonCallback {
             default:
                 logger.error("Field:" + current.fieldName + ", won't be here", new Throwable());
         }
-/*
-        if (current.dataType.kind == DataType.KIND.MAP
-                && invocationCtx.codecProtocol() == CompressedBinary
-                && elCount == 0) {
-            requestByteBuf.writerIndex(beginPosition + 1);*/
-//        } else {
-//            requestByteBuf.writerIndex(currentIndex);
-//        }
     }
 
-    private void writeMapBegin(byte keyType, byte valueType, int defaultSize) throws IOException {
-//        customOut.writeMapBegin(new TMap(keyType, valueType, defaultSize));
+    private void writeMapBegin() throws IOException {
+        cmH2o.writeMapBegin(null);
     }
 
-    private void reWriteMapBegin(byte keyType, byte valueType, int size) throws IOException {
-//        customOut.writeMapBegin(new TMap(keyType, valueType, size));
-    }
 
     /**
      * TList just the same as TSet
-     *
-     * @param valueType
-     * @param defaultSize
      */
     //todo 其他 List，如 LinkedList等,除了 ArrayList
-    private void writeCollectionBegin(byte valueType, int defaultSize) throws IOException {
-//        cmH2o.writeListBegin(defaultSize, null);
+    private void writeCollectionBegin(int defaultSize, byte valueType) throws IOException {
         cmH2o.writeListBegin(defaultSize, null);
     }
 
@@ -732,12 +688,6 @@ public class JsonReader implements JsonCallback {
          * byteBuf position before this node created, maybe a Struct Field, or a Map field, or an array element
          */
         private int tFieldPosition;
-
-        /**
-         * byteBuf position after this node created
-         */
-        private int valuePosition;
-
         /**
          * optimizedStruct if dataType.kind==STRUCT
          */
@@ -763,9 +713,9 @@ public class JsonReader implements JsonCallback {
         StackNode() {
         }
 
-        public StackNode init(final DataType dataType, final int valuePosition, int tFieldPosition, final OptimizedMetadata.OptimizedStruct optimizedStruct, String fieldName) {
+        public StackNode init(final DataType dataType, int tFieldPosition,
+                              final OptimizedMetadata.OptimizedStruct optimizedStruct, String fieldName) {
             this.dataType = dataType;
-            this.valuePosition = valuePosition;
             this.tFieldPosition = tFieldPosition;
             this.optimizedStruct = optimizedStruct;
             this.fieldName = fieldName;
@@ -788,9 +738,6 @@ public class JsonReader implements JsonCallback {
             return tFieldPosition;
         }
 
-        public int getValuePosition() {
-            return valuePosition;
-        }
 
         public OptimizedMetadata.OptimizedStruct getOptimizedStruct() {
             return optimizedStruct;

@@ -5,7 +5,7 @@ import org.apache.dubbo.common.constants.CommonConstants;
 import org.apache.dubbo.common.extension.Activate;
 import org.apache.dubbo.common.utils.StringUtils;
 import org.apache.dubbo.rpc.*;
-import com.yunji.gateway.util.GatewayUtils;
+import com.yunji.gateway.util.GatewayUtil;
 
 import static com.yunji.gateway.util.GateConstants.*;
 import static org.apache.dubbo.rpc.Constants.GENERIC_KEY;
@@ -22,7 +22,7 @@ public class GateWayFilter extends ListenableFilter {
         if ((invocation.getMethodName().equals(GATEWAY_SYNC) || invocation.getMethodName().equals(GATEWAY_ASYNC))
                 && invocation.getArguments() != null
                 && invocation.getArguments().length == 3
-                && GatewayUtils.isGateWayInvoke(gateway)) {
+                && GatewayUtil.isGateWayInvoke(gateway)) {
 
             String name = ((String) invocation.getArguments()[0]).trim();
             String[] types = (String[]) invocation.getArguments()[1];

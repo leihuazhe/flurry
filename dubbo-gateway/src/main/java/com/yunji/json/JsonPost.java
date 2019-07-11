@@ -1,12 +1,14 @@
 package com.yunji.json;
 
+import com.yunji.gateway.service.ReferenceServiceContext;
 import com.yunji.json.serializer.JsonSerializer;
 import com.yunji.json.util.JException;
+import com.yunji.metadata.MetadataFetcher;
 import com.yunji.metadata.OptimizedMetadata;
-import com.yunji.metadata.ServiceCache;
 import com.yunji.metadata.tag.Method;
 import org.apache.dubbo.common.serialize.ObjectInput;
 import org.apache.dubbo.common.serialize.ObjectOutput;
+import org.apache.dubbo.rpc.RpcException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,15 +20,10 @@ import java.io.IOException;
  */
 public class JsonPost {
     private static final Logger LOGGER = LoggerFactory.getLogger(JsonPost.class);
-    private static final String service = "com.yunji.demo.api.HelloService";
 
-    static {
-        ServiceCache.loadServicesMetadata(service);
-    }
-
-    public static void writeObject(String methodName, Object object, ObjectOutput out) throws Exception {
+    public static void writeObject(String service, String method, Object object, ObjectOutput out) throws Exception {
         OptimizedMetadata.OptimizedService bizService = getServiceMetadata(service);
-        writeObject(methodName, object, bizService, out);
+        writeObject(method, object, bizService, out);
     }
 
 
@@ -35,9 +32,10 @@ public class JsonPost {
         try {
             bizService = getServiceMetadata(service);
             return readObject(bizService, methodName, in);
-        } catch (JException | IOException ignored) {
+        } catch (JException | IOException e) {
+            LOGGER.error(e.getMessage(), e);
+            throw new RpcException("Got occurred when custom readObject.");
         }
-        return "";
     }
 
 
@@ -71,9 +69,9 @@ public class JsonPost {
 
 
     private static OptimizedMetadata.OptimizedService getServiceMetadata(String service) throws JException {
-        OptimizedMetadata.OptimizedService bizService = ServiceCache.getService(JsonPost.service, "1.0.0");
+        OptimizedMetadata.OptimizedService bizService = MetadataFetcher.getService(ReferenceServiceContext.HELLO_SERVICE, "1.0.0");
         if (bizService == null) {
-            throw new JException("Service " + JsonPost.service + " metadata not found .");
+            throw new JException("Service " + ReferenceServiceContext.HELLO_SERVICE + " metadata not found .");
         }
         return bizService;
     }

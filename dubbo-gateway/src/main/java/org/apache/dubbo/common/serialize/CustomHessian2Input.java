@@ -521,15 +521,25 @@ public class CustomHessian2Input extends AbstractCustomHessian2Input {
 
             case 'H': {
 
-                boolean keyValuePair = expectedTypes != null && expectedTypes.size() == 2;
+                if (ifExist()) {
+                    jsonWriter.onStartObject();
+                }
+                customReadMap();
 
+                //替换掉 hessian 原有的
+                /*boolean keyValuePair = expectedTypes != null && expectedTypes.size() == 2;
                 // fix deserialize of short type
                 Deserializer reader;
                 reader = findSerializerFactory().getDeserializer(Map.class);
 
-                return reader.readMap(this
+                Object obj = reader.readMap(this
                         , keyValuePair ? expectedTypes.get(0) : null
-                        , keyValuePair ? expectedTypes.get(1) : null);
+                        , keyValuePair ? expectedTypes.get(1) : null);*/
+
+                if (ifExist()) {
+                    jsonWriter.onEndObject();
+                }
+                return null;
             }
 
             case 'M': {
@@ -600,6 +610,7 @@ public class CustomHessian2Input extends AbstractCustomHessian2Input {
         }
     }
 
+
     @Override
     protected Object readObjectInstance(Class cl, ObjectDefinition def)
             throws IOException {
@@ -621,6 +632,17 @@ public class CustomHessian2Input extends AbstractCustomHessian2Input {
 
     private boolean ifExist() {
         return jsonWriter != null;
+    }
+
+    private void customReadMap() throws IOException {
+        //key
+        while (!isEnd()) {
+            readObject();
+            jsonWriter.onColon();
+            readObject();
+            jsonWriter.onEndField();
+        }
+        readEnd();
     }
 
 }

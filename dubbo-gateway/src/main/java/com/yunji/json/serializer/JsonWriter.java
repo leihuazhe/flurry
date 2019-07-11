@@ -2,6 +2,8 @@ package com.yunji.json.serializer;
 
 import com.yunji.json.serializer.JsonCallback;
 
+import java.io.IOException;
+
 /**
  * thrift -> json
  *
@@ -72,6 +74,14 @@ public class JsonWriter implements JsonCallback {
         builder.append('\"');
         escapeString(value, builder);
         builder.append('\"');
+    }
+
+    /**
+     * onColon ":"
+     */
+    @Override
+    public void onColon() {
+        builder.append(":");
     }
 
     private void removeTailSplitor() {

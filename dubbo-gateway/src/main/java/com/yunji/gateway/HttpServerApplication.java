@@ -1,6 +1,7 @@
 package com.yunji.gateway;
 
 import com.yunji.gateway.netty.NettyHttpServer;
+import com.yunji.metadata.MetadataFetcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,6 +16,8 @@ public class HttpServerApplication {
 
     public static void main(String[] args) throws Exception {
         NettyHttpServer server = new NettyHttpServer(9001);
+        //初始化元数据信息.
+        MetadataFetcher.init();
         logLogBanner();
         server.registerShutdownHook();
         server.start();

@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+import static com.yunji.gateway.util.GateConstants.CUSTOM_HESSIAN2_SERIALIZATION_ID;
 import static org.apache.dubbo.common.serialize.Constants.HESSIAN2_SERIALIZATION_ID;
 
 /**

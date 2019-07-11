@@ -18,7 +18,7 @@ import static com.yunji.gateway.util.GateConstants.*;
 public class ReferenceServiceContext {
     private static ApplicationConfig application = new ApplicationConfig();
     //Fixme Just for test.
-    public static final String HELLO_SERVICE = "com.yunji.demo.api.HelloService";
+    public static final String HELLO_SERVICE = "org.apache.dubbo.hello.HelloService";
 
     private static final ConcurrentMap<String, GateWayService> SERVICE_MAP = new ConcurrentHashMap<>(32);
 
