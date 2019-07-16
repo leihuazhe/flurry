@@ -491,12 +491,8 @@ public class CustomHessian2Input extends AbstractCustomHessian2Input {
                 String type = readType();
                 int length = tag - 0x70;
 
-                Deserializer reader;
-                reader = findSerializerFactory().getListDeserializer(type, null);
-
-                boolean valueType = expectedTypes != null && expectedTypes.size() == 1;
-
-                return reader.readLengthList(this, length, valueType ? expectedTypes.get(0) : null);
+                customReadList(length);
+                return null;
             }
 
             // compact fixed untyped list
@@ -511,34 +507,12 @@ public class CustomHessian2Input extends AbstractCustomHessian2Input {
                 // fixed length lists
                 int length = tag - 0x78;
 
-                Deserializer reader;
-                reader = findSerializerFactory().getListDeserializer(null, null);
-
-                boolean valueType = expectedTypes != null && expectedTypes.size() == 1;
-
-                return reader.readLengthList(this, length, valueType ? expectedTypes.get(0) : null);
+                customReadList(length);
+                return null;
             }
 
             case 'H': {
-
-                if (ifExist()) {
-                    jsonWriter.onStartObject();
-                }
                 customReadMap();
-
-                //替换掉 hessian 原有的
-                /*boolean keyValuePair = expectedTypes != null && expectedTypes.size() == 2;
-                // fix deserialize of short type
-                Deserializer reader;
-                reader = findSerializerFactory().getDeserializer(Map.class);
-
-                Object obj = reader.readMap(this
-                        , keyValuePair ? expectedTypes.get(0) : null
-                        , keyValuePair ? expectedTypes.get(1) : null);*/
-
-                if (ifExist()) {
-                    jsonWriter.onEndObject();
-                }
                 return null;
             }
 
@@ -550,16 +524,8 @@ public class CustomHessian2Input extends AbstractCustomHessian2Input {
 
             case 'C': {
                 //开始一个 object
-                if (ifExist()) {
-                    jsonWriter.onStartObject();
-                }
                 readObjectDefinition(null);
-                Object object = readObject();
-
-                if (ifExist()) {
-                    jsonWriter.onEndObject();
-                }
-                return object;
+                return readObject();
             }
 
             case 0x60:
@@ -614,7 +580,9 @@ public class CustomHessian2Input extends AbstractCustomHessian2Input {
     @Override
     protected Object readObjectInstance(Class cl, ObjectDefinition def)
             throws IOException {
-        String type = def.getType();
+        if (ifExist()) {
+            jsonWriter.onStartObject();
+        }
         String[] fieldNames = def.getFieldNames();
 
         for (int i = 0; i < fieldNames.length; i++) {
@@ -627,6 +595,9 @@ public class CustomHessian2Input extends AbstractCustomHessian2Input {
                 jsonWriter.onEndField();
             }
         }
+        if (ifExist()) {
+            jsonWriter.onEndObject();
+        }
         return null;
     }
 
@@ -634,15 +605,42 @@ public class CustomHessian2Input extends AbstractCustomHessian2Input {
         return jsonWriter != null;
     }
 
-    private void customReadMap() throws IOException {
-        //key
-        while (!isEnd()) {
-            readObject();
-            jsonWriter.onColon();
+
+    private void customReadList(int length) throws IOException {
+        if (ifExist()) {
+            jsonWriter.onStartArray();
+        }
+        for (; length > 0; length--) {
             readObject();
             jsonWriter.onEndField();
         }
+        if (ifExist()) {
+            jsonWriter.onEndArray();
+        }
+    }
+
+    private void customReadMap() throws IOException {
+        if (ifExist()) {
+            jsonWriter.onStartObject();
+        }
+
+        while (!isEnd()) {
+            readObject();
+
+            if (ifExist()) {
+                jsonWriter.onColon();
+            }
+            readObject();
+
+            if (ifExist()) {
+                jsonWriter.onEndField();
+            }
+        }
         readEnd();
+
+        if (ifExist()) {
+            jsonWriter.onEndObject();
+        }
     }
 
 }

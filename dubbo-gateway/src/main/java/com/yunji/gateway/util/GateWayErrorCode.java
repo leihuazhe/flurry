@@ -24,7 +24,8 @@ public enum GateWayErrorCode {
     AuthSecretEx("Err-Mesh-512", "请求校验参数secret,secret2 至少有一个不为空"),
     ParameterError("Err-Mesh-513", "请求参数 Request 部分参数不能为空"),
 
-    IllegalParams("Err-Gateway-514", "缺失请求参数");
+    IllegalParams("Err-Gateway-514", "缺失请求参数"),
+    RemotingError("Err-Gateway-550", "Request got remote exception error when send,please check the log");
 
 
     private String code;

@@ -7,11 +7,14 @@ import com.yunji.gateway.util.GatewayException;
 import com.yunji.gateway.util.HttpHandlerUtil;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.HttpResponseStatus;
+import org.apache.dubbo.remoting.RemotingException;
 import org.apache.dubbo.rpc.RpcException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.CompletableFuture;
+
+import static com.yunji.gateway.util.GateWayErrorCode.RemotingError;
 
 /**
  * @author maple 2018.08.28 下午3:21
@@ -56,11 +59,15 @@ public class HttpPostProcessor {
 
             try {
                 CompletableFuture<String> jsonResponse = PostUtil.postAsync(context, ctx);
-
+                //todo How to show  concrete and detail exception message.
                 jsonResponse.whenComplete((result, ex) -> {
                     if (ex != null) {
                         logger.error("Post async result error: {}", ex.getMessage());
-                        HttpHandlerUtil.sendHttpResponse(ctx, ex.getMessage(), context.request(), HttpResponseStatus.OK);
+                        if (ex instanceof RemotingException) {
+                            HttpHandlerUtil.sendHttpResponse(ctx, HttpHandlerUtil.wrapErrorResponse(RemotingError), context.request(), HttpResponseStatus.OK);
+                        } else {
+                            HttpHandlerUtil.sendHttpResponse(ctx, ex.getMessage(), context.request(), HttpResponseStatus.OK);
+                        }
                     } else {
                         HttpHandlerUtil.sendHttpResponse(ctx, result, context.request(), HttpResponseStatus.OK);
                     }
