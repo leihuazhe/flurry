@@ -1,9 +1,5 @@
 package com.yunji.json.serializer;
 
-
-import com.yunji.json.serializer.JsonCallback;
-import com.yunji.json.util.JException;
-
 import java.io.IOException;
 
 /**
@@ -183,7 +179,7 @@ public class JsonParser {
         return new ParsingException(summary, detail);
     }
 
-    void parseJsValue() throws JException, IOException {
+    void parseJsValue() throws IOException {
         ws();
         value();
         require(EOI);
@@ -201,7 +197,7 @@ public class JsonParser {
         return true;
     }
 
-    void value() throws JException, IOException {
+    void value() throws IOException {
         int mark = input.cursor();
 
         switch (cursorChar) {
@@ -347,7 +343,7 @@ public class JsonParser {
         return true;
     }
 
-    void object() throws JException, IOException {
+    void object() throws IOException {
         ws();
         if (cursorChar != '}') {
             members();
@@ -356,7 +352,7 @@ public class JsonParser {
         ws();
     }
 
-    void members() throws JException, IOException {
+    void members() throws IOException {
         do {
             string();
             require(':');
@@ -385,7 +381,7 @@ public class JsonParser {
         ws();
     }
 
-    void array() throws JException, IOException {
+    void array() throws IOException {
         ws();
         int index = 0;
         if (cursorChar != ']') {

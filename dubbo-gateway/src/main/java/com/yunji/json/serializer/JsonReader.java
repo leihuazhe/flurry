@@ -159,7 +159,7 @@ public class JsonReader implements JsonCallback {
 
 
     JsonReader(OptimizedMetadata.OptimizedStruct optimizedStruct, OptimizedMetadata.OptimizedService optimizedService,
-               CustomHessian2ObjectOutput out) throws Exception {
+               CustomHessian2ObjectOutput out) {
         this.optimizedStruct = optimizedStruct;
         this.optimizedService = optimizedService;
         this.cmH2o = out.getCmH2o();
@@ -588,18 +588,16 @@ public class JsonReader implements JsonCallback {
          */
         OptimizedMetadata.OptimizedStruct struct = current.optimizedStruct;
         List<Field> fields = struct.struct.fields;
+
         // iterator need more allocation
         for (int i = 0; i < fields.size(); i++) {
             Field field = fields.get(i);
             if (field != null && !field.isOptional() && !current.fields4Struct.get(field.tag - struct.tagBase)) {
-                String fieldName = current.fieldName;
                 String structName = struct.struct.name;
-                IOException ex = new IOException("JsonError, please check:"
-                        + structName + "." + fieldName
-                        + ", optimizedStruct mandatory fields missing:"
-                        + field.name);
-                logger.error(ex.getMessage());
-                throw ex;
+                String fieldName = current.fieldName;
+
+                throw new IOException(String.format("JsonError, please check:%s.%s, optimizedStruct mandatory fields missing:%s",
+                        structName, fieldName, field.name));
             }
         }
     }

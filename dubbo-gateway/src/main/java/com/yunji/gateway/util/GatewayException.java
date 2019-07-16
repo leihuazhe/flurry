@@ -1,6 +1,6 @@
 package com.yunji.gateway.util;
 
-public class GatewayException extends Exception {
+public class GatewayException extends RuntimeException {
 
     private String code;
     private String msg;
@@ -22,6 +22,10 @@ public class GatewayException extends Exception {
         super(cause);
         this.code = code;
         this.msg = msg;
+    }
+
+    public GatewayException(GateWayErrorCode errorCode) {
+        this(errorCode.getCode(), errorCode.getMsg());
     }
 
     public String getCode() {

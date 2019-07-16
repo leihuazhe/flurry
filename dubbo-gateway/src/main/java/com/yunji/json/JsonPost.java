@@ -1,8 +1,6 @@
 package com.yunji.json;
 
-import com.yunji.gateway.service.ReferenceServiceContext;
 import com.yunji.json.serializer.JsonSerializer;
-import com.yunji.json.util.JException;
 import com.yunji.metadata.MetadataFetcher;
 import com.yunji.metadata.OptimizedMetadata;
 import com.yunji.metadata.tag.Method;
@@ -21,7 +19,7 @@ import java.io.IOException;
 public class JsonPost {
     private static final Logger LOGGER = LoggerFactory.getLogger(JsonPost.class);
 
-    public static void writeObject(String service, String method, Object object, ObjectOutput out) throws Exception {
+    public static void writeObject(String service, String method, Object object, ObjectOutput out) throws IOException {
         OptimizedMetadata.OptimizedService bizService = getServiceMetadata(service);
         writeObject(method, object, bizService, out);
     }
@@ -32,7 +30,7 @@ public class JsonPost {
         try {
             bizService = getServiceMetadata(service);
             return readObject(bizService, methodName, in);
-        } catch (JException | IOException e) {
+        } catch (IOException e) {
             LOGGER.error(e.getMessage(), e);
             throw new RpcException("Got occurred when custom readObject.");
         }
@@ -42,16 +40,13 @@ public class JsonPost {
     /**
      * 利用 hessian2 writeObject object
      */
-    private static void writeObject(String methodName, Object object, OptimizedMetadata.OptimizedService optimizedService, ObjectOutput out) throws Exception {
+    private static void writeObject(String methodName, Object object, OptimizedMetadata.OptimizedService optimizedService, ObjectOutput out) throws IOException {
         Method method = optimizedService.getMethodMap().get(methodName);
-
         if (method == null) {
-            throw new JException("method:" + methodName + " for service: not found");
+            throw new IOException(String.format("Specific method %s's metadata info does not found", methodName));
         }
 
         OptimizedMetadata.OptimizedStruct req = optimizedService.getOptimizedStructs().get(method.request.namespace + "." + method.request.name);
-//        OptimizedMetadata.OptimizedStruct resp = optimizedService.getOptimizedStructs().get(method.response.namespace + "." + method.response.name);
-
         JsonSerializer jsonEncoder = new JsonSerializer(optimizedService, method, "1.0.0", req);
 
         jsonEncoder.write((String) object, out);
@@ -68,10 +63,10 @@ public class JsonPost {
     }
 
 
-    private static OptimizedMetadata.OptimizedService getServiceMetadata(String service) throws JException {
-        OptimizedMetadata.OptimizedService bizService = MetadataFetcher.getService(ReferenceServiceContext.HELLO_SERVICE, "1.0.0");
+    private static OptimizedMetadata.OptimizedService getServiceMetadata(String service) throws IOException {
+        OptimizedMetadata.OptimizedService bizService = MetadataFetcher.getService(service, "1.0.0");
         if (bizService == null) {
-            throw new JException("Service " + ReferenceServiceContext.HELLO_SERVICE + " metadata not found .");
+            throw new IOException(String.format("Specific service %s's metadata info does not found", service));
         }
         return bizService;
     }

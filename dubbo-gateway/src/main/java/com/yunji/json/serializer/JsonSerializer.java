@@ -51,23 +51,21 @@ public class JsonSerializer implements BeanSerializer<String> {
 
     /**
      * json -> hessian2 buffer
-     *
-     * @throws JException
      */
     @Override
-    public void write(String input, ObjectOutput oproto) throws Exception {
-        JsonReader jsonReader = null;
-        try {
-            jsonReader = new JsonReader(optimizedStruct, optimizedService, (CustomHessian2ObjectOutput) oproto);
-            new JsonParser(input, jsonReader).parseJsValue();
-        } catch (Exception e) {
-            if (jsonReader != null && jsonReader.current != null) {
-                String errorMsg = "Please check field:" + jsonReader.current.getFieldName();
-                logger.error(errorMsg + "\n" + e.getMessage(), e);
-                throw new JException(errorMsg);
-            }
-            throw e;
-        }
+    public void write(String input, ObjectOutput oproto) throws IOException {
+        JsonReader jsonReader;
+//        try {
+        jsonReader = new JsonReader(optimizedStruct, optimizedService, (CustomHessian2ObjectOutput) oproto);
+        new JsonParser(input, jsonReader).parseJsValue();
+//        } catch (IOException e) {
+//            if (jsonReader.current != null) {
+//                String errorMsg = "Please check field:" + jsonReader.current.getFieldName();
+//                logger.error(errorMsg + "\n" + e.getMessage());
+//                throw new IOException(e);
+//            }
+//            throw e;
+//        }
     }
 
     @Override
