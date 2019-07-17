@@ -1,1 +1,0 @@
-custom=org.apache.dubbo.remoting.zookeeper.curator.CustomCuratorZookeeperTransporter
