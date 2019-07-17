@@ -34,7 +34,7 @@ public class HttpGetHeadProcessor {
         }
         logger.info("not support url request, uri: {}", url);
         return new HttpResponseEntity(
-                HttpHandlerUtil.wrapErrorResponse(url, GateWayErrorCode.RequestUrlNotSupport),
+                HttpHandlerUtil.wrapCode(url, GateWayErrorCode.RequestUrlNotSupport),
                 HttpResponseStatus.OK);
     }
 

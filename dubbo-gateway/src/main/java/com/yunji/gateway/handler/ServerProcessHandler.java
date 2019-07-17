@@ -1,6 +1,4 @@
-package com.yunji.gateway.netty.handler;
-
-//import com.yunji.demo.api.HelloService;
+package com.yunji.gateway.handler;
 
 import com.yunji.gateway.netty.http.HttpGetHeadProcessor;
 import com.yunji.gateway.netty.http.HttpPostProcessor;
@@ -14,8 +12,6 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.codec.http.HttpResponseStatus;
-import org.apache.dubbo.gateway.GateWayService;
-import org.apache.dubbo.rpc.service.GenericService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,7 +44,7 @@ public class ServerProcessHandler extends SimpleChannelInboundHandler<RequestCon
         } catch (Exception e) {
             logger.error("网关处理请求失败: " + e.getMessage(), e);
             HttpHandlerUtil.sendHttpResponse(ctx,
-                    HttpHandlerUtil.wrapErrorResponse(GateWayErrorCode.ProcessReqFailed),
+                    HttpHandlerUtil.wrapCode(GateWayErrorCode.ProcessReqFailed),
                     null,
                     HttpResponseStatus.INTERNAL_SERVER_ERROR);
         }
@@ -57,8 +53,6 @@ public class ServerProcessHandler extends SimpleChannelInboundHandler<RequestCon
     private void dispatchRequest(RequestContext context, ChannelHandlerContext ctx) throws GatewayException {
         HttpMethod httpMethod = context.httpMethod();
         if (HttpMethod.POST.equals(httpMethod)) {
-            //暂时同步
-//            postHandler.handlerPost(context, ctx);
             postHandler.handlerPostAsync(context, ctx);
             return;
         }
@@ -68,7 +62,7 @@ public class ServerProcessHandler extends SimpleChannelInboundHandler<RequestCon
             return;
         }
         HttpHandlerUtil.sendHttpResponse(ctx,
-                HttpHandlerUtil.wrapErrorResponse(GateWayErrorCode.RequestTypeNotSupport),
+                HttpHandlerUtil.wrapCode(GateWayErrorCode.RequestTypeNotSupport),
                 context.request(),
                 HttpResponseStatus.OK);
     }
@@ -95,7 +89,7 @@ public class ServerProcessHandler extends SimpleChannelInboundHandler<RequestCon
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
         logger.error("网关handler exceptionCaught未知异常: " + cause.getMessage(), cause);
         HttpHandlerUtil.sendHttpResponse(ctx,
-                HttpHandlerUtil.wrapErrorResponse(GateWayErrorCode.MeshUnknownError),
+                HttpHandlerUtil.wrapCode(GateWayErrorCode.MeshUnknownError),
                 null,
                 HttpResponseStatus.INTERNAL_SERVER_ERROR);
 

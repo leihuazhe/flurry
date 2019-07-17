@@ -26,10 +26,10 @@ public class GetUrlController {
         if (status == GatewayHealthStatus.YELLOW) {
             logger.info("handlerHealth check,container status: " + status);
             return new HttpResponseEntity(
-                    HttpHandlerUtil.wrapErrorResponse(GateWayErrorCode.MeshShutdownSoon),
+                    HttpHandlerUtil.wrapCode(GateWayErrorCode.MeshShutdownSoon),
                     HttpResponseStatus.INTERNAL_SERVER_ERROR);
         }
-        return new HttpResponseEntity(HttpHandlerUtil.wrapResponse(url,
+        return new HttpResponseEntity(HttpHandlerUtil.wrapSuccess(url,
                 "health check container is running"),
                 HttpResponseStatus.OK);
     }
@@ -41,7 +41,7 @@ public class GetUrlController {
      */
     public HttpResponseEntity getCheck(String url) {
         logger.debug("check support url request, uri: {}", url);
-        return new HttpResponseEntity(HttpHandlerUtil.wrapResponse(url, "dapeng-mesh is running"), HttpResponseStatus.OK);
+        return new HttpResponseEntity(HttpHandlerUtil.wrapSuccess(url, "dapeng-mesh is running"), HttpResponseStatus.OK);
     }
 
     /**

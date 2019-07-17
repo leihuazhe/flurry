@@ -1,8 +1,8 @@
 package com.yunji.gateway.netty;
 
 import com.yunji.gateway.netty.http.util.Constants;
-import com.yunji.gateway.netty.handler.HttpRequestHandler;
-import com.yunji.gateway.netty.handler.ServerProcessHandler;
+import com.yunji.gateway.handler.HttpRequestHandler;
+import com.yunji.gateway.handler.ServerProcessHandler;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.*;

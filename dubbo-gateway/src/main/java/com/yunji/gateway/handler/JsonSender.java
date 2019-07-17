@@ -47,15 +47,7 @@ public class JsonSender {
             parameterTypes[i] = requestFields.get(i).dataType.qualifiedName;
         }
 
-
         gateWayService.invoke(methodName, parameterTypes, new Object[]{paramsJson});
-
-        CompletableFuture<String> resultFuture = RpcContext.getContext().getCompletableFuture();
-        logger.info("异步请求结束，返回 CompletableFuture:  " + resultFuture);
-        return resultFuture;
-
-
+        return RpcContext.getContext().getCompletableFuture();
     }
-
-
 }

@@ -63,8 +63,8 @@ public class HttpHandlerUtil {
     }
 
 
-    public static String wrapErrorResponse(GateWayErrorCode code) {
-        return wrapErrorResponse(null, code);
+    public static String wrapCode(GateWayErrorCode code) {
+        return wrapCode(null, code);
     }
 
 
@@ -78,7 +78,7 @@ public class HttpHandlerUtil {
      * @param code
      * @return
      */
-    public static String wrapErrorResponse(String url, GateWayErrorCode code) {
+    public static String wrapCode(String url, GateWayErrorCode code) {
         String resp = String.format("{\"responseCode\":\"%s\", \"responseMsg\":\"%s\", \"success\":\"%s\", \"status\":0}", code.getCode(), code.getMsg(), "{}");
         logger.info("mesh-response: url: {}, info: {}", url, resp);
         return resp;
@@ -99,7 +99,7 @@ public class HttpHandlerUtil {
     /**
      * wrap message response for json format.
      */
-    public static String wrapResponse(String url, Object msg) {
+    public static String wrapSuccess(String url, Object msg) {
         String resp = String.format("{\"responseCode\":\"%s\", \"responseMsg\":\"%s\", \"success\":\"%s\", \"status\":1}", "0000", msg, "{}");
         logger.debug("mesh-response: url: {}, info: {}", url, resp);
         return resp;
