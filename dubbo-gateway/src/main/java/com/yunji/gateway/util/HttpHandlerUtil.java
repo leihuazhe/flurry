@@ -100,7 +100,7 @@ public class HttpHandlerUtil {
      * wrap message response for json format.
      */
     public static String wrapSuccess(String url, Object msg) {
-        String resp = String.format("{\"responseCode\":\"%s\", \"responseMsg\":\"%s\", \"success\":\"%s\", \"status\":1}", "0000", msg, "{}");
+        String resp = String.format("{\"responseCode\":\"%s\", \"responseMsg\":%s, \"success\":\"%s\", \"status\":1}", "0000", msg, "{}");
         logger.debug("mesh-response: url: {}, info: {}", url, resp);
         return resp;
     }

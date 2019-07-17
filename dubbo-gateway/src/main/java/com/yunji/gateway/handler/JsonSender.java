@@ -4,8 +4,6 @@ import com.yunji.gateway.netty.http.request.RequestContext;
 import com.yunji.gateway.util.GateWayErrorCode;
 import com.yunji.gateway.util.GatewayException;
 import io.netty.channel.ChannelHandlerContext;
-import org.apache.dubbo.common.logger.Logger;
-import org.apache.dubbo.common.logger.LoggerFactory;
 import org.apache.dubbo.gateway.GateWayService;
 import org.apache.dubbo.gateway.ReferenceServiceContext;
 import org.apache.dubbo.jsonserializer.metadata.MetadataFetcher;
@@ -18,8 +16,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
 
 public class JsonSender {
-    private static Logger logger = LoggerFactory.getLogger(JsonSender.class);
-
     private static Supplier<GatewayException> paramsSupplier = () -> {
         throw new GatewayException(GateWayErrorCode.IllegalParams);
     };
