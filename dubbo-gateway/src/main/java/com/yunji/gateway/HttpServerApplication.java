@@ -1,7 +1,7 @@
 package com.yunji.gateway;
 
 import com.yunji.gateway.netty.NettyHttpServer;
-import com.yunji.metadata.MetadataFetcher;
+import org.apache.dubbo.jsonserializer.metadata.MetadataFetcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -1,7 +1,7 @@
 package com.yunji.gateway.netty.http;
 
 import com.yunji.gateway.netty.http.request.RequestContext;
-import com.yunji.gateway.handler.PostUtil;
+import com.yunji.gateway.handler.JsonSender;
 import com.yunji.gateway.util.GateWayErrorCode;
 import com.yunji.gateway.util.GatewayException;
 import com.yunji.gateway.util.HttpHandlerUtil;
@@ -23,32 +23,6 @@ public class HttpPostProcessor {
     private static final Logger logger = LoggerFactory.getLogger(HttpPostProcessor.class);
 
     /**
-     * Sync
-     */
-    public void handlerPost(RequestContext context, ChannelHandlerContext ctx) throws RpcException {
-        if (context.isLegal()) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("Http:{}, 请求参数: {} ", context.requestUrl(), context.argumentToString());
-            }
-
-            try {
-                String jsonResponse = PostUtil.post(context, ctx);
-                if (jsonResponse != null) {
-                    HttpHandlerUtil.sendHttpResponse(ctx, jsonResponse, context.request(), HttpResponseStatus.OK);
-                }
-            } catch (Exception e) {
-                HttpHandlerUtil.sendHttpResponse(ctx, e.getMessage(), context.request(), HttpResponseStatus.OK);
-            }
-        } else {
-            HttpHandlerUtil.sendHttpResponse(ctx,
-                    HttpHandlerUtil.wrapErrorResponse(GateWayErrorCode.IllegalRequest),
-                    context.request(),
-                    HttpResponseStatus.OK);
-        }
-    }
-
-
-    /**
      * Async
      */
     public void handlerPostAsync(RequestContext context, ChannelHandlerContext ctx) throws RpcException {
@@ -58,7 +32,7 @@ public class HttpPostProcessor {
             }
 
             try {
-                CompletableFuture<String> jsonResponse = PostUtil.postAsync(context, ctx);
+                CompletableFuture<String> jsonResponse = JsonSender.sendAsync(context, ctx);
                 //todo How to show  concrete and detail exception message.
                 jsonResponse.whenComplete((result, ex) -> {
                     if (ex != null) {

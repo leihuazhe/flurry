@@ -35,6 +35,7 @@
 
     <modules>
         <module>dubbo-gateway</module>
+        <module>dubbo-custom-api</module>
     </modules>
 
     <dependencyManagement>
