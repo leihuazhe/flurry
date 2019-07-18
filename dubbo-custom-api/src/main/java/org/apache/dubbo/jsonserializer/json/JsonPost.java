@@ -1,5 +1,7 @@
 package org.apache.dubbo.jsonserializer.json;
 
+import org.apache.dubbo.common.serialize.CustomHessian2Input;
+import org.apache.dubbo.common.serialize.CustomHessian2ObjectInput;
 import org.apache.dubbo.jsonserializer.metadata.MetadataFetcher;
 import org.apache.dubbo.jsonserializer.metadata.OptimizedMetadata;
 import org.apache.dubbo.jsonserializer.metadata.tag.Method;
@@ -10,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.List;
 
 
 /**
@@ -70,4 +73,14 @@ public class JsonPost {
         return bizService;
     }
 
+    public static Object readMetadata(ObjectInput in) {
+        CustomHessian2ObjectInput cmh2 = (CustomHessian2ObjectInput) in;
+        CustomHessian2Input cmH2i = cmh2.getCmH2i();
+        try {
+            return cmH2i.readObject((List<Class<?>>) null);
+        } catch (IOException e) {
+            LOGGER.error(e.getMessage(), e);
+            throw new RpcException("Got occurred when custom readMetadata.");
+        }
+    }
 }

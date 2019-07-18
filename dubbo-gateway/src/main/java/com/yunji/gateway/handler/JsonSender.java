@@ -25,6 +25,21 @@ public class JsonSender {
         return jsonPostAsync(context, ctx);
     }
 
+    public static CompletableFuture<String> getServiceMetadata(RequestContext context, ChannelHandlerContext ctx) {
+        String serviceName = context.service().orElseThrow(paramsSupplier);
+        String methodName = context.method().orElseThrow(paramsSupplier);
+        String paramsJson = context.parameter().orElseThrow(paramsSupplier);
+
+        //获取指定服务的GateWayService
+        GateWayService gateWayService = ReferenceServiceContext.getGateWayService(serviceName);
+
+        String[] parameterTypes = new String[0];
+
+
+        gateWayService.invoke(methodName, parameterTypes, new Object[]{paramsJson});
+        return RpcContext.getContext().getCompletableFuture();
+    }
+
     private static CompletableFuture<String> jsonPostAsync(RequestContext context, ChannelHandlerContext ctx) {
         String serviceName = context.service().orElseThrow(paramsSupplier);
         String methodName = context.method().orElseThrow(paramsSupplier);

@@ -25,6 +25,7 @@ import java.lang.reflect.Type;
 import java.util.Map;
 
 import static org.apache.dubbo.jsonserializer.util.GateConstants.INTERFACE;
+import static org.apache.dubbo.jsonserializer.util.GateConstants.METADATA_METHOD_NAME;
 
 
 public class CustomDecodeableRpcResult extends AppResponse implements Codec, Decodeable {
@@ -120,7 +121,14 @@ public class CustomDecodeableRpcResult extends AppResponse implements Codec, Dec
      */
     private void handleJsonValue(ObjectInput in) {
         String service = invocation.getAttachment(INTERFACE);
-        Object value = JsonPost.readObject(service, invocation.getMethodName(), in);
+        String methodName = invocation.getMethodName();
+
+        Object value;
+        if (METADATA_METHOD_NAME.equals(methodName)) {
+            value = JsonPost.readMetadata(in);
+        } else {
+            value = JsonPost.readObject(service, methodName, in);
+        }
 
         setValue(value);
     }

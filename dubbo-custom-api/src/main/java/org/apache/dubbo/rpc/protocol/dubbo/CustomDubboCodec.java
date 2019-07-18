@@ -175,7 +175,11 @@ public class CustomDubboCodec extends ExchangeCodec {
 
             //Get interface
             String service = inv.getAttachment(INTERFACE);
-            JsonPost.writeObject(service, inv.getMethodName(), args[args.length - 1], out);
+            String methodName = inv.getMethodName();
+
+            if (!METADATA_METHOD_NAME.equals(methodName)) {
+                JsonPost.writeObject(service, inv.getMethodName(), args[args.length - 1], out);
+            }
         } else {
             out.writeUTF(ReflectUtils.getDesc(inv.getParameterTypes()));
             Object[] args = inv.getArguments();

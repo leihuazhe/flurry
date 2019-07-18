@@ -34,7 +34,15 @@ public class HttpPostProcessor {
                 logger.debug("Http:{}, 请求参数: {} ", context.requestUrl(), context.argumentToString());
             }
             try {
-                CompletableFuture<String> jsonResponse = JsonSender.sendAsync(context, ctx);
+                String url = context.requestUrl();
+
+                CompletableFuture<String> jsonResponse;
+
+                if (url.endsWith("getServiceMetadata")) {
+                    jsonResponse = JsonSender.getServiceMetadata(context, ctx);
+                } else {
+                    jsonResponse = JsonSender.sendAsync(context, ctx);
+                }
 
                 //todo How to show  concrete and detail exception message.
                 jsonResponse.whenComplete((result, t) -> {
