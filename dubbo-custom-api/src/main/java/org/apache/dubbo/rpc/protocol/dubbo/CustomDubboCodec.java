@@ -11,7 +11,7 @@ import org.apache.dubbo.common.utils.ReflectUtils;
 import org.apache.dubbo.common.utils.StringUtils;
 
 
-import org.apache.dubbo.jsonserializer.json.JsonPost;
+import org.apache.dubbo.jsonserializer.json.JsonDuplexHandler;
 import org.apache.dubbo.remoting.Channel;
 import org.apache.dubbo.remoting.exchange.Request;
 import org.apache.dubbo.remoting.exchange.Response;
@@ -178,7 +178,7 @@ public class CustomDubboCodec extends ExchangeCodec {
             String methodName = inv.getMethodName();
 
             if (!METADATA_METHOD_NAME.equals(methodName)) {
-                JsonPost.writeObject(service, inv.getMethodName(), args[args.length - 1], out);
+                JsonDuplexHandler.writeObject(service, inv.getMethodName(), args[args.length - 1], out);
             }
         } else {
             out.writeUTF(ReflectUtils.getDesc(inv.getParameterTypes()));

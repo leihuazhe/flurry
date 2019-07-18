@@ -8,7 +8,7 @@ import org.apache.dubbo.common.serialize.ObjectInput;
 import org.apache.dubbo.common.utils.ArrayUtils;
 import org.apache.dubbo.common.utils.Assert;
 import org.apache.dubbo.common.utils.StringUtils;
-import org.apache.dubbo.jsonserializer.json.JsonPost;
+import org.apache.dubbo.jsonserializer.json.JsonDuplexHandler;
 import org.apache.dubbo.remoting.Channel;
 import org.apache.dubbo.remoting.Codec;
 import org.apache.dubbo.remoting.Decodeable;
@@ -125,9 +125,9 @@ public class CustomDecodeableRpcResult extends AppResponse implements Codec, Dec
 
         Object value;
         if (METADATA_METHOD_NAME.equals(methodName)) {
-            value = JsonPost.readMetadata(in);
+            value = JsonDuplexHandler.readMetadata(in);
         } else {
-            value = JsonPost.readObject(service, methodName, in);
+            value = JsonDuplexHandler.readObject(service, methodName, in);
         }
 
         setValue(value);
@@ -136,7 +136,7 @@ public class CustomDecodeableRpcResult extends AppResponse implements Codec, Dec
     private void handleValue(ObjectInput in) throws IOException {
         try {
             Type[] returnTypes = RpcUtils.getReturnTypes(invocation);
-            Object value = null;
+            Object value;
             if (ArrayUtils.isEmpty(returnTypes)) {
                 value = in.readObject();
             } else if (returnTypes.length == 1) {

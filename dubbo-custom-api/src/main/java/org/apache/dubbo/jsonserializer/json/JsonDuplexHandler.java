@@ -16,10 +16,12 @@ import java.util.List;
 
 
 /**
+ * Json encode 与 decode
+ *
  * @author Denim.leihz 2019-07-08 10:10 PM
  */
-public class JsonPost {
-    private static final Logger LOGGER = LoggerFactory.getLogger(JsonPost.class);
+public class JsonDuplexHandler {
+    private static final Logger LOGGER = LoggerFactory.getLogger(JsonDuplexHandler.class);
 
     public static void writeObject(String service, String method, Object object, ObjectOutput out) throws IOException {
         OptimizedMetadata.OptimizedService bizService = getServiceMetadata(service);
