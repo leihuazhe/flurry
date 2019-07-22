@@ -11,6 +11,10 @@ public class GatewayException extends RuntimeException {
         this.msg = err.getMessage();
     }
 
+    public GatewayException(String msg) {
+        this.msg = msg;
+    }
+
     public GatewayException(String code, String msg) {
         super(code + ":" + msg);
 

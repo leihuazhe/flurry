@@ -1,4 +1,4 @@
-package org.apache.dubbo.jsonserializer.util;
+package org.apache.dubbo.util;
 
 public interface GateConstants {
 
@@ -29,6 +29,10 @@ public interface GateConstants {
     String SERIALIZATION_CUSTOM = "custom_hessian2";
 
     String METADATA_METHOD_NAME = "getServiceMetadata";
+
+    String REGISTRY_URL = "dubbo.gateway.registry";
+
+    String DEFAULT_REGISTRY_URL = "127.0.0.1:2181";
 
 
 }

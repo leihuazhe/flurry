@@ -5,12 +5,14 @@ import com.yunji.gateway.util.GateWayErrorCode;
 import com.yunji.gateway.util.GatewayException;
 import io.netty.channel.ChannelHandlerContext;
 import org.apache.dubbo.gateway.GateWayService;
-import org.apache.dubbo.gateway.ReferenceServiceContext;
+import org.apache.dubbo.gateway.GatewayServiceFactory;
+import org.apache.dubbo.gateway.RestServiceConfig;
 import org.apache.dubbo.jsonserializer.metadata.MetadataFetcher;
 import org.apache.dubbo.jsonserializer.metadata.OptimizedMetadata;
 import org.apache.dubbo.jsonserializer.metadata.tag.Field;
 import org.apache.dubbo.rpc.RpcContext;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
@@ -25,29 +27,16 @@ public class JsonSender {
         return jsonPostAsync(context, ctx);
     }
 
-    public static CompletableFuture<String> getServiceMetadata(RequestContext context, ChannelHandlerContext ctx) {
-        String serviceName = context.service().orElseThrow(paramsSupplier);
-        String methodName = context.method().orElseThrow(paramsSupplier);
-        String paramsJson = context.parameter().orElseThrow(paramsSupplier);
-
-        //获取指定服务的GateWayService
-        GateWayService gateWayService = ReferenceServiceContext.getGateWayService(serviceName);
-
-        String[] parameterTypes = new String[0];
-
-
-        gateWayService.invoke(methodName, parameterTypes, new Object[]{paramsJson});
-        return RpcContext.getContext().getCompletableFuture();
-    }
 
     private static CompletableFuture<String> jsonPostAsync(RequestContext context, ChannelHandlerContext ctx) {
         String serviceName = context.service().orElseThrow(paramsSupplier);
         String methodName = context.method().orElseThrow(paramsSupplier);
+        String version = context.version().orElseThrow(paramsSupplier);
         String callService = context.service().orElseThrow(paramsSupplier);
         String paramsJson = context.parameter().orElseThrow(paramsSupplier);
 
         //获取指定服务的GateWayService
-        GateWayService gateWayService = ReferenceServiceContext.getGateWayService(serviceName);
+        GateWayService gateWayService = GatewayServiceFactory.create(buildRestConfig(serviceName, version, null));
 
         //获取 parameterTypes 参数
         OptimizedMetadata.OptimizedService service = MetadataFetcher.getService(callService, null);
@@ -60,5 +49,29 @@ public class JsonSender {
 
         gateWayService.invoke(methodName, parameterTypes, new Object[]{paramsJson});
         return RpcContext.getContext().getCompletableFuture();
+    }
+
+
+    /**
+     * 获取服务元数据信息
+     */
+    public static CompletableFuture<String> getServiceMetadata(RequestContext context, ChannelHandlerContext ctx) {
+        String serviceName = context.service().orElseThrow(paramsSupplier);
+        String methodName = context.method().orElseThrow(paramsSupplier);
+        String version = context.version().orElseThrow(paramsSupplier);
+
+        //获取指定服务的GateWayService
+        GateWayService gateWayService = GatewayServiceFactory.create(buildRestConfig(serviceName, version, null));
+
+        String[] parameterTypes = new String[0];
+
+        gateWayService.invoke(methodName, parameterTypes, new Object[]{});
+
+        return RpcContext.getContext().getCompletableFuture();
+    }
+
+    private static RestServiceConfig buildRestConfig(String serviceName, String version, String group) {
+
+        return new RestServiceConfig(serviceName, version, group, new HashMap<>());
     }
 }

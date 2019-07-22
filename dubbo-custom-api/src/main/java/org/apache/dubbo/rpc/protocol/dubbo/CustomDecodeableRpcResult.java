@@ -24,8 +24,8 @@ import java.io.OutputStream;
 import java.lang.reflect.Type;
 import java.util.Map;
 
-import static org.apache.dubbo.jsonserializer.util.GateConstants.INTERFACE;
-import static org.apache.dubbo.jsonserializer.util.GateConstants.METADATA_METHOD_NAME;
+import static org.apache.dubbo.util.GateConstants.INTERFACE;
+import static org.apache.dubbo.util.GateConstants.METADATA_METHOD_NAME;
 
 
 public class CustomDecodeableRpcResult extends AppResponse implements Codec, Decodeable {

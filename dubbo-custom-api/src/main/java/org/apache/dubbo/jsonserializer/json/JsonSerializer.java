@@ -5,7 +5,6 @@ import org.apache.dubbo.jsonserializer.metadata.tag.Method;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 import org.apache.dubbo.common.serialize.*;
-import org.apache.dubbo.jsonserializer.util.JException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

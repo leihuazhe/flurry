@@ -7,7 +7,7 @@ import org.apache.dubbo.common.utils.StringUtils;
 import org.apache.dubbo.rpc.*;
 import org.apache.dubbo.util.GatewayUtil;
 
-import static org.apache.dubbo.jsonserializer.util.GateConstants.*;
+import static org.apache.dubbo.util.GateConstants.*;
 import static org.apache.dubbo.rpc.Constants.GENERIC_KEY;
 
 /**
