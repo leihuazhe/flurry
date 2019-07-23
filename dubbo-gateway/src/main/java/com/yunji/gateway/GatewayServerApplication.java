@@ -1,7 +1,7 @@
 package com.yunji.gateway;
 
 import com.yunji.gateway.netty.NettyHttpServer;
-import com.yunji.gateway.util.PropertyUtils;
+import org.apache.dubbo.util.PropertyUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,7 +16,7 @@ public class GatewayServerApplication {
     /*public static void main(String[] args) throws Exception {
         NettyHttpServer server = new NettyHttpServer(9001);
         //初始化元数据信息.
-        MetadataFetcher.init();
+        ServiceMetadataRepository.init();
         logLogBanner();
         server.registerShutdownHook();
         server.start();

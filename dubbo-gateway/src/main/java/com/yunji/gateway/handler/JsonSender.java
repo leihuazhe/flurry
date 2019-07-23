@@ -7,7 +7,7 @@ import io.netty.channel.ChannelHandlerContext;
 import org.apache.dubbo.gateway.GateWayService;
 import org.apache.dubbo.gateway.GatewayServiceFactory;
 import org.apache.dubbo.gateway.RestServiceConfig;
-import org.apache.dubbo.jsonserializer.metadata.MetadataFetcher;
+import org.apache.dubbo.jsonserializer.metadata.ServiceMetadataRepository;
 import org.apache.dubbo.jsonserializer.metadata.OptimizedMetadata;
 import org.apache.dubbo.jsonserializer.metadata.tag.Field;
 import org.apache.dubbo.rpc.RpcContext;
@@ -18,6 +18,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
 
 public class JsonSender {
+    private static ServiceMetadataRepository repository = ServiceMetadataRepository.getRepository();
+
     private static Supplier<GatewayException> paramsSupplier = () -> {
         throw new GatewayException(GateWayErrorCode.IllegalParams);
     };
@@ -39,7 +41,7 @@ public class JsonSender {
         GateWayService gateWayService = GatewayServiceFactory.create(buildRestConfig(serviceName, version, null));
 
         //获取 parameterTypes 参数
-        OptimizedMetadata.OptimizedService service = MetadataFetcher.getService(callService, null);
+        OptimizedMetadata.OptimizedService service = repository.getService(callService, null);
         List<Field> requestFields = service.getMethodMap().get(methodName).request.fields;
 
         String[] parameterTypes = new String[requestFields.size()];

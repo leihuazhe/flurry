@@ -18,6 +18,7 @@ import static org.apache.dubbo.util.GateConstants.*;
  * Dubbo {@link GateWayService} Factory
  */
 public class GatewayServiceFactory {
+
     private Logger logger = LoggerFactory.getLogger(GatewayServiceFactory.class);
     private static ApplicationConfig application = new ApplicationConfig();
 

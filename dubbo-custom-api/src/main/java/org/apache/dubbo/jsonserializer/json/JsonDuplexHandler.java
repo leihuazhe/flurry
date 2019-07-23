@@ -2,7 +2,7 @@ package org.apache.dubbo.jsonserializer.json;
 
 import org.apache.dubbo.common.serialize.CustomHessian2Input;
 import org.apache.dubbo.common.serialize.CustomHessian2ObjectInput;
-import org.apache.dubbo.jsonserializer.metadata.MetadataFetcher;
+import org.apache.dubbo.jsonserializer.metadata.ServiceMetadataRepository;
 import org.apache.dubbo.jsonserializer.metadata.OptimizedMetadata;
 import org.apache.dubbo.jsonserializer.metadata.tag.Method;
 import org.apache.dubbo.common.serialize.ObjectInput;
@@ -22,6 +22,8 @@ import java.util.List;
  */
 public class JsonDuplexHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(JsonDuplexHandler.class);
+
+    private static ServiceMetadataRepository repository = ServiceMetadataRepository.getRepository();
 
     public static void writeObject(String service, String method, Object object, ObjectOutput out) throws IOException {
         OptimizedMetadata.OptimizedService bizService = getServiceMetadata(service);
@@ -68,7 +70,7 @@ public class JsonDuplexHandler {
 
 
     private static OptimizedMetadata.OptimizedService getServiceMetadata(String service) throws IOException {
-        OptimizedMetadata.OptimizedService bizService = MetadataFetcher.getService(service, "1.0.0");
+        OptimizedMetadata.OptimizedService bizService = repository.getService(service, "1.0.0");
         if (bizService == null) {
             throw new IOException(String.format("Specific service %s's metadata info does not found", service));
         }

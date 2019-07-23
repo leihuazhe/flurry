@@ -35,4 +35,10 @@ public interface GateConstants {
     String DEFAULT_REGISTRY_URL = "127.0.0.1:2181";
 
 
+    String SERVICE_RUNTIME_PATH = "/soa/runtime/services";
+    String SERVICE_WITHELIST_PATH = "/soa/whitelist/services";
+    String CONFIG_FREQ_PATH = "/soa/config/freq";
+    String CONFIG_ROUTER_PATH = "/soa/config/routes";
+    String CONFIG_SERVICE_PATH = "/soa/config/services";
+
 }

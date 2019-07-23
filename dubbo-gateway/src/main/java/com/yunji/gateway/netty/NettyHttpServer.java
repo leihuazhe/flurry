@@ -14,7 +14,9 @@ import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpRequestDecoder;
 import io.netty.handler.codec.http.HttpResponseEncoder;
 import io.netty.util.concurrent.DefaultThreadFactory;
-import org.apache.dubbo.jsonserializer.metadata.MetadataFetcher;
+import org.apache.dubbo.jsonserializer.metadata.ServiceMetadataRepository;
+import org.apache.dubbo.jsonserializer.metadata.ServiceMetadataResolver;
+import org.apache.dubbo.jsonserializer.metadata.util.DiscoveryUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -140,7 +142,7 @@ public class NettyHttpServer {
     }
 
     public NettyHttpServer initMetadata() throws Exception {
-        MetadataFetcher.init();
+        ServiceMetadataResolver.init(DiscoveryUtil.createRegistryUrl(registryUrl));
         return this;
     }
 }

@@ -1,4 +1,7 @@
-package com.yunji.gateway.util;
+package org.apache.dubbo.util;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Properties;
@@ -7,12 +10,18 @@ import java.util.Properties;
  * @author Denim.leihz 2019-07-22 4:47 PM
  */
 public class PropertyUtils {
+    private static Logger logger = LoggerFactory.getLogger(PropertyUtils.class);
 
-    public static String getProperty(String key,String defaultValue) throws IOException {
+    public static String getProperty(String key, String defaultValue) {
         Properties prop = new Properties();
-        prop.load(getClassLoader(PropertyUtils.class).getResourceAsStream("gateway.properties"));
+        try {
+            prop.load(getClassLoader(PropertyUtils.class).getResourceAsStream("gateway.properties"));
+            return prop.getProperty(key, defaultValue);
 
-        return prop.getProperty(key,defaultValue);
+        } catch (IOException e) {
+            logger.error("Cannot load gateway.properties", e.getMessage());
+            return defaultValue;
+        }
     }
 
     private static ClassLoader getClassLoader(Class<?> clazz) {
