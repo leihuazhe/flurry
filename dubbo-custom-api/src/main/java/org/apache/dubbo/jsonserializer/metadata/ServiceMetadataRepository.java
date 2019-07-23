@@ -21,6 +21,11 @@ public class ServiceMetadataRepository {
     private Map<String, OptimizedMetadata.OptimizedService> fullNameService = Collections.synchronizedMap(new TreeMap<>());
 
 
+    private Map<String, String> pathServiceMapping = Collections.synchronizedMap(new HashMap<>());
+
+    private Map<String, String> fullPathServiceMapping = Collections.synchronizedMap(new HashMap<>());
+
+
     private ServiceMetadataRepository() {
     }
 
@@ -33,12 +38,14 @@ public class ServiceMetadataRepository {
     }
 
 
-    public void putService(String serviceKey, OptimizedMetadata.OptimizedService service) {
+    public void putService(String serviceKey, String serviceInterface, OptimizedMetadata.OptimizedService service) {
         this.services.put(serviceKey, service);
+        this.pathServiceMapping.put(serviceInterface, serviceKey);
     }
 
-    public void putFullService(String fullServiceKey, OptimizedMetadata.OptimizedService service) {
+    public void putFullService(String fullServiceKey, String serviceInterface, OptimizedMetadata.OptimizedService service) {
         this.fullNameService.put(fullServiceKey, service);
+        this.fullPathServiceMapping.put(serviceInterface, fullServiceKey);
     }
 
     public Map<String, OptimizedMetadata.OptimizedService> getServices() {
@@ -52,6 +59,21 @@ public class ServiceMetadataRepository {
         } else {
             return services.get(MetadataUtil.getServiceKey(name, version));
         }
+    }
+
+    public void removeServiceByRoundInterface(String serviceName) {
+        String serviceKey = pathServiceMapping.get(serviceName);
+        String fullServiceKey = fullPathServiceMapping.get(serviceName);
+
+        if (serviceKey != null && services.get(serviceKey) != null) {
+            services.remove(serviceKey);
+        }
+
+        if (fullServiceKey != null && fullNameService.get(fullServiceKey) != null) {
+            fullNameService.remove(fullServiceKey);
+        }
+
+        LOGGER.info("service size: {}, fullService size: {}", services.size(), fullNameService.size());
     }
 
     public void resetCache() {

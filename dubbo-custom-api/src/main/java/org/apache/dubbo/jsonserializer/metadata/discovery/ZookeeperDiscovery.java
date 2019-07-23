@@ -101,25 +101,36 @@ public class ZookeeperDiscovery {
     private void notifyProviderList(List<String> children) {
         for (String child : children) {
             if (serviceProviders.get(child) != null) {
-                logger.debug("I already in there.");
+                logger.debug("child {} is in serviceProviders,no need to addChildListener again.", child);
+                return;
             }
             String path = root + "/" + child + "/" + RegistryConstants.PROVIDER;
 
-            logger.info("path: {}", path);
-
+            logger.info("notifyProviderList path: {}", path);
             List<String> serviceChildren = zkClient.addChildListener(path, new ChildListener() {
                 @Override
                 public void childChanged(String path, List<String> currentChildren) {
                     logger.info("Parent path: {}, child: {}", path, currentChildren);
                     if (currentChildren != null) {
                         processInstance(currentChildren);
+                    } else {
+                        //移除
+                        removeServiceInstance(path);
                     }
                 }
             });
             if (serviceChildren != null) {
+                serviceProviders.put(child, child);
                 processInstance(serviceChildren);
             }
         }
+    }
+
+    /**
+     * 移除MetadataService 缓存
+     */
+    private void removeServiceInstance(String path) {
+        ServiceMetadataResolver.removeServiceMetadata(path);
     }
 
     private void processInstance(List<String> currentChildren) {

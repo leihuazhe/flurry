@@ -58,7 +58,7 @@ public class ServiceDefinition {
         return instances;
     }
 
-    static class Builder {
+    public static class Builder {
         ServiceDefinition info = new ServiceDefinition();
 
         public ServiceDefinition serviceInterface(String serviceInterface) {

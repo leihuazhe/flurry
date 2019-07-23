@@ -27,51 +27,72 @@ public class ServiceMetadataResolver {
 
 
     public static void init(URL url) {
-
         ZookeeperDiscoveryFactory zookeeperDiscoveryFactory = new ZookeeperDiscoveryFactory();
-        ZookeeperDiscovery registry = zookeeperDiscoveryFactory.createRegistry(url);
+//        ZookeeperDiscovery registry = zookeeperDiscoveryFactory.createRegistry(url);
+        OriginalZkClientDiscovery registry = zookeeperDiscoveryFactory.createRegistry();
         registry.loadAllService();
     }
 
     public static void resolveServiceMetadata(ServiceDefinition serviceDefinition, MetadataListener metadataListener) {
+        logger.info("ServiceMetadataResolver fetchAndStoreMetadata begin to fetch metadata. ");
+        int tryCount = 1;
+        while (tryCount <= 3) {
+            try {
+                CompletableFuture<String> resultFuture = getServiceMetadata(serviceDefinition);
+                String metadata = resultFuture.get();
+
+                processMetaString(metadata, serviceDefinition);
+                break;
+            } catch (Exception e) {
+                tryCount++;
+                logger.error("ResolveServiceMetadata get error: " + e.getMessage(), e);
+                /*if (metadataListener != null) {
+                    metadataListener.callback(false);
+                }*/
+            }
+            logger.info("tryCount: {},准备重试 ", tryCount);
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException ignored) {
+            }
+        }
+
+
+    }
+
+    public static void removeServiceMetadata(String path) {
         try {
+            logger.info("ServiceMetadataResolver removeServiceMetadata path: {}", path);
+            repository.removeServiceCache(path, false);
 
-            logger.info("ServiceMetadataResolver fetchAndStoreMetadata begin to fetch metadata. ");
-
-            CompletableFuture<String> resultFuture = getServiceMetadata(serviceDefinition);
-            resultFuture.whenComplete((obj, t) -> {
-                if (t != null) {
-                    if (metadataListener != null) {
-                        metadataListener.callback(false);
-                    }
-                }
-
-                try (StringReader reader = new StringReader(obj)) {
-                    Service serviceData = JAXB.unmarshal(reader, Service.class);
-                    //serviceName:version
-                    String serviceKey = MetadataUtil.getServiceKey(serviceData);
-                    //qualifier serviceName:version
-                    String fullNameKey = MetadataUtil.getServiceFullNameKey(serviceData);
-
-                    OptimizedMetadata.OptimizedService optimizedService = new OptimizedMetadata.OptimizedService(serviceData);
-
-                    repository.putService(serviceKey, optimizedService);
-                    repository.putFullService(fullNameKey, optimizedService);
-
-                    Map<String, OptimizedMetadata.OptimizedService> storeServices = repository.getServices();
-                    logger.info(" ----------------- [ service size :  " + storeServices.size() + "] ----");
-
-                    StringBuilder logBuilder = new StringBuilder();
-                    storeServices.forEach((k, v) -> logBuilder.append(k).append(",  "));
-                    logger.info("服务实例列表: {}", logBuilder);
-                } catch (Exception e) {
-                    logger.error(e.getMessage(), e);
-                }
-            });
+            logServiceMap(repository.getServices());
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
         }
 
+    }
+
+
+    private static void processMetaString(String metaStr, ServiceDefinition serviceDefinition) {
+        try (StringReader reader = new StringReader(metaStr)) {
+            Service serviceData = JAXB.unmarshal(reader, Service.class);
+            //serviceName:version
+            String serviceKey = MetadataUtil.getServiceKey(serviceData);
+            //qualifier serviceName:version
+            String fullNameKey = MetadataUtil.getServiceFullNameKey(serviceData);
+
+            OptimizedMetadata.OptimizedService optimizedService = new OptimizedMetadata.OptimizedService(serviceData);
+
+            repository.putService(serviceKey, serviceDefinition.getServiceInterface(), optimizedService);
+            repository.putFullService(fullNameKey, serviceDefinition.getServiceInterface(), optimizedService);
+
+            Map<String, OptimizedMetadata.OptimizedService> storeServices = repository.getServices();
+            logger.info(" ----------------- [ service size :  " + storeServices.size() + "] ----");
+
+            logServiceMap(storeServices);
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+        }
     }
 
     private static CompletableFuture<String> getServiceMetadata(ServiceDefinition serviceInfo) {
@@ -87,5 +108,11 @@ public class ServiceMetadataResolver {
                 serviceInfo.getVersion(),
                 serviceInfo.getVersion(),
                 GlobalReferenceConfig.buildGlobalConfig());
+    }
+
+    private static void logServiceMap(Map<String, OptimizedMetadata.OptimizedService> storeServices) {
+        StringBuilder logBuilder = new StringBuilder();
+        storeServices.forEach((k, v) -> logBuilder.append(k).append(",  "));
+        logger.info("\n服务实例列表: {}\n", logBuilder);
     }
 }

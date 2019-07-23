@@ -18,4 +18,8 @@ public class ZookeeperDiscoveryFactory {
     public ZookeeperDiscovery createRegistry(URL url) {
         return new ZookeeperDiscovery(url, zookeeperTransporter);
     }
+
+    public OriginalZkClientDiscovery createRegistry() {
+        return new OriginalZkClientDiscovery();
+    }
 }
