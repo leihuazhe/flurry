@@ -2,7 +2,7 @@ package com.yunji.gateway;
 
 
 import org.apache.dubbo.common.URL;
-import org.apache.dubbo.jsonserializer.metadata.discovery.ZookeeperDiscovery;
+import org.apache.dubbo.jsonserializer.metadata.discovery.curator.CuratorClientDiscovery;
 import org.apache.dubbo.jsonserializer.metadata.discovery.ZookeeperDiscoveryFactory;
 
 /**
@@ -14,7 +14,7 @@ public class Main {
 
     public static void main(String[] args) {
         ZookeeperDiscoveryFactory zookeeperDiscoveryFactory = new ZookeeperDiscoveryFactory();
-        ZookeeperDiscovery registry = (ZookeeperDiscovery) zookeeperDiscoveryFactory.createRegistry(URL.valueOf(url));
-        registry.loadAllService();
+        CuratorClientDiscovery registry = (CuratorClientDiscovery) zookeeperDiscoveryFactory.createRegistry(URL.valueOf(url));
+        registry.subscribeRootServices();
     }
 }

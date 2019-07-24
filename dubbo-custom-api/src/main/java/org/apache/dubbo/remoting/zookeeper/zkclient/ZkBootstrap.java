@@ -13,12 +13,12 @@
 //
 //    private static final Logger LOGGER = LoggerFactory.getLogger(ZkBootstrap.class);
 //
-//    private OriginalZkClient zookeeperClient;
+//    private ZookeeperClientDiscovery zookeeperClient;
 //
 //
 //    public void init() {
 //        String zkHost = PropertyUtils.getProperty(REGISTRY_URL, DEFAULT_REGISTRY_URL);
-//        zookeeperClient = new OriginalZkClient(zkHost);
+//        zookeeperClient = new ZookeeperClientDiscovery(zkHost);
 //        zookeeperClient.init(false);
 //    }
 //}

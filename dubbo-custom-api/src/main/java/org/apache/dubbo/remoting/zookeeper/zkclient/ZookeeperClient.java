@@ -18,8 +18,8 @@
 ///**
 // * @author Denim.leihz 2019-07-22 5:31 PM
 // */
-//public class OriginalZkClient implements Watcher {
-//    private static final Logger LOGGER = LoggerFactory.getLogger(OriginalZkClient.class);
+//public class ZookeeperClientDiscovery implements Watcher {
+//    private static final Logger LOGGER = LoggerFactory.getLogger(ZookeeperClientDiscovery.class);
 //
 //    private final static Map<String, List<ServiceDefinition>> caches = new ConcurrentHashMap<>();
 //
@@ -31,7 +31,7 @@
 //
 //    private static Set<String> whitelist = Collections.synchronizedSet(new HashSet<>());
 //
-//    OriginalZkClient(final String zookeeperHost) {
+//    ZookeeperClientDiscovery(final String zookeeperHost) {
 //        this.zookeeperHost = zookeeperHost;
 //    }
 //
@@ -93,9 +93,9 @@
 //
 //    @Override
 //    public void process(WatchedEvent event) {
-//        LOGGER.warn("OriginalZkClient::process zkEvent: " + event);
+//        LOGGER.warn("ZookeeperClientDiscovery::process zkEvent: " + event);
 //        if (event.getPath() == null) {
-//            LOGGER.warn("OriginalZkClient::process just ignore this event: " + event);
+//            LOGGER.warn("ZookeeperClientDiscovery::process just ignore this event: " + event);
 //            return;
 //        }
 //        switch (event.getType()) {
@@ -105,10 +105,10 @@
 //                    whitelist.clear();
 //                    syncWhiteList();
 //                } else if (event.getPath().equals(SERVICE_RUNTIME_PATH)) {
-//                    LOGGER.info("OriginalZkClient::process 服务runtime子节点发生变化, 重新获取子节点");
+//                    LOGGER.info("ZookeeperClientDiscovery::process 服务runtime子节点发生变化, 重新获取子节点");
 //                    filterServersList();
 //                } else if (event.getPath().startsWith(SERVICE_RUNTIME_PATH + "/")) {
-//                    LOGGER.info("OriginalZkClient::process 服务path: " + event.getPath() + " 的子节点发生变化，重新获取信息");
+//                    LOGGER.info("ZookeeperClientDiscovery::process 服务path: " + event.getPath() + " 的子节点发生变化，重新获取信息");
 //                    String serviceName = event.getPath().substring(event.getPath().lastIndexOf('/') + 1);
 //                    syncServiceRuntimeInfo(serviceName);
 //                }
@@ -133,16 +133,16 @@
 //            CountDownLatch semaphore = new CountDownLatch(1);
 //
 //            zk = new ZooKeeper(zookeeperHost, 15000, e -> {
-//                LOGGER.warn("OriginalZkClient::connect zkEvent: " + e);
+//                LOGGER.warn("ZookeeperClientDiscovery::connect zkEvent: " + e);
 //                switch (e.getState()) {
 //                    case Expired:
-//                        LOGGER.info("OriginalZkClient::connect zookeeper Watcher 到zookeeper Server的session过期，重连");
+//                        LOGGER.info("ZookeeperClientDiscovery::connect zookeeper Watcher 到zookeeper Server的session过期，重连");
 //                        disconnect();
 //                        connect(caseParams, o);
 //                        break;
 //
 //                    case SyncConnected:
-//                        LOGGER.info("OriginalZkClient::connect Zookeeper Watcher 已连接 zookeeper Server,Zookeeper host: {}", zookeeperHost);
+//                        LOGGER.info("ZookeeperClientDiscovery::connect Zookeeper Watcher 已连接 zookeeper Server,Zookeeper host: {}", zookeeperHost);
 //                        if (null != caseParams) {
 //                            switch (caseParams) {
 //                                case SERVICE_WITHELIST_PATH:

@@ -2,6 +2,8 @@ package org.apache.dubbo.jsonserializer.metadata.discovery;
 
 import org.apache.dubbo.common.URL;
 import org.apache.dubbo.common.extension.ExtensionLoader;
+import org.apache.dubbo.jsonserializer.metadata.discovery.curator.CuratorClientDiscovery;
+import org.apache.dubbo.jsonserializer.metadata.discovery.zkclient.ZookeeperClientDiscovery;
 import org.apache.dubbo.remoting.zookeeper.ZookeeperTransporter;
 
 /**
@@ -15,11 +17,11 @@ public class ZookeeperDiscoveryFactory {
             .getExtensionLoader(ZookeeperTransporter.class)
             .getAdaptiveExtension();
 
-    public ZookeeperDiscovery createRegistry(URL url) {
-        return new ZookeeperDiscovery(url, zookeeperTransporter);
+    public CuratorClientDiscovery createRegistry(URL url) {
+        return new CuratorClientDiscovery(url, zookeeperTransporter);
     }
 
-    public OriginalZkClientDiscovery createRegistry() {
-        return new OriginalZkClientDiscovery();
+    public ZookeeperClientDiscovery createOriginalRegistry(URL url) {
+        return new ZookeeperClientDiscovery(url);
     }
 }

@@ -4,9 +4,7 @@ import org.apache.dubbo.common.URL;
 import org.apache.dubbo.common.utils.ConcurrentHashSet;
 import org.apache.dubbo.jsonserializer.metadata.ServiceMetadataRepository;
 import org.apache.dubbo.jsonserializer.metadata.ServiceMetadataResolver;
-import org.apache.dubbo.jsonserializer.metadata.discovery.MetadataListener;
-import org.apache.dubbo.jsonserializer.metadata.discovery.RegistryConstants;
-import org.apache.dubbo.jsonserializer.metadata.discovery.ServiceDefinition;
+import org.apache.dubbo.jsonserializer.metadata.discovery.*;
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.WatchedEvent;
 import org.apache.zookeeper.Watcher;
@@ -17,18 +15,18 @@ import org.slf4j.LoggerFactory;
 import java.util.*;
 import java.util.concurrent.*;
 
-import static org.apache.dubbo.common.constants.CommonConstants.GROUP_KEY;
-import static org.apache.dubbo.common.constants.CommonConstants.VERSION_KEY;
+import static org.apache.dubbo.common.constants.CommonConstants.PATH_SEPARATOR;
 import static org.apache.zookeeper.ZooKeeper.States.CONNECTED;
 
 /**
- * OriginalZkClient
+ * ZookeeperClientDiscovery
  *
  * @author Denim.leihz 2019-07-23 8:30 PM
  */
-public class OriginalZkClient implements Watcher {
+public class ZookeeperClientDiscovery extends AbstractZookeeperDiscovery implements Watcher {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ZookeeperClientDiscovery.class);
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(OriginalZkClient.class);
+    private static final String ROOT_PATH = PATH_SEPARATOR + DEFAULT_ROOT;
 
     private static ServiceMetadataRepository repository = ServiceMetadataRepository.getRepository();
 
@@ -42,8 +40,9 @@ public class OriginalZkClient implements Watcher {
 
     private static Set<String> whitelist = Collections.synchronizedSet(new HashSet<>());
 
-    public OriginalZkClient(final String zookeeperHost) {
-        this.zookeeperHost = zookeeperHost;
+
+    public ZookeeperClientDiscovery(URL url) {
+        this.zookeeperHost = url.getHost() + ":" + url.getPort();
         init();
     }
 
@@ -79,6 +78,9 @@ public class OriginalZkClient implements Watcher {
         LOGGER.info("关闭当前zk连接");
     }
 
+    public void loadAllServices() {
+        getChildrenForWatcher(ROOT_PATH);
+    }
 
     public void getChildrenForWatcher(String path) {
         try {
@@ -100,9 +102,9 @@ public class OriginalZkClient implements Watcher {
 
     @Override
     public void process(WatchedEvent event) {
-        LOGGER.warn("OriginalZkClient::process zkEvent: " + event);
+        LOGGER.warn("ZookeeperClientDiscovery::process zkEvent: " + event);
         if (event.getPath() == null) {
-            LOGGER.warn("OriginalZkClient::process just ignore this event: " + event);
+            LOGGER.warn("ZookeeperClientDiscovery::process just ignore this event: " + event);
             return;
         }
         switch (event.getType()) {
@@ -114,7 +116,7 @@ public class OriginalZkClient implements Watcher {
                     LOGGER.info("/dubbo 节点下的 children 发生变化,重新获取子节点");
                     getChildrenForWatcher(event.getPath());
                 } else if (path.startsWith("/dubbo/")) {
-                    LOGGER.info("OriginalZkClient::process 服务path: " + event.getPath() + " 的子节点发生变化，重新获取信息");
+                    LOGGER.info("ZookeeperClientDiscovery::process 服务path: " + event.getPath() + " 的子节点发生变化，重新获取信息");
                     processPerInstance(path);
                 }
                 break;
@@ -138,16 +140,16 @@ public class OriginalZkClient implements Watcher {
             CountDownLatch semaphore = new CountDownLatch(1);
 
             zookeeper = new ZooKeeper(zookeeperHost, 15000, e -> {
-                LOGGER.warn("OriginalZkClient::connect zkEvent: " + e);
+                LOGGER.warn("ZookeeperClientDiscovery::connect zkEvent: " + e);
                 switch (e.getState()) {
                     case Expired:
-                        LOGGER.info("OriginalZkClient::connect zookeeper Watcher 到zookeeper Server的session过期，重连");
+                        LOGGER.info("ZookeeperClientDiscovery::connect zookeeper Watcher 到zookeeper Server的session过期，重连");
                         disconnect();
                         connect();
                         break;
 
                     case SyncConnected:
-                        LOGGER.info("OriginalZkClient::connect Zookeeper Watcher 已连接 zookeeper Server,Zookeeper host: {}", zookeeperHost);
+                        LOGGER.info("ZookeeperClientDiscovery::connect Zookeeper Watcher 已连接 zookeeper Server,Zookeeper host: {}", zookeeperHost);
                         semaphore.countDown();
                         break;
 
@@ -231,30 +233,14 @@ public class OriginalZkClient implements Watcher {
         System.out.println("serviceInfo: " + serviceInfo);
     }
 
-    private ServiceDefinition buildServiceInfo(List<String> instanceUrls) {
-        if (instanceUrls.size() > 0) {
 
-            ServiceDefinition.Builder builder = new ServiceDefinition.Builder();
-            for (int i = 0; i < instanceUrls.size(); i++) {
-                URL url = URL.valueOf(URL.decode(instanceUrls.get(i)));
+    @Override
+    protected void subscribe(String serviceKey, RegistryDefinition definition) {
 
-                if (i == 0) {
-                    String serviceInterface = url.getServiceInterface();
-                    String group = url.getParameter(GROUP_KEY);
-                    String version = url.getParameter(VERSION_KEY);
+    }
 
-                    builder.serviceInterface(serviceInterface);
-                    builder.group(group);
-                    builder.version(version);
-                }
+    @Override
+    protected void subscribeRootServices(String rootKey) {
 
-                String host = url.getHost();
-                int port = url.getPort();
-                builder.instance(new ServiceDefinition.Instance(host, port));
-            }
-
-            return builder.build();
-        }
-        return null;
     }
 }

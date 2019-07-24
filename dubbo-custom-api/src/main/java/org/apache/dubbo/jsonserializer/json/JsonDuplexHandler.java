@@ -25,8 +25,8 @@ public class JsonDuplexHandler {
 
     private static ServiceMetadataRepository repository = ServiceMetadataRepository.getRepository();
 
-    public static void writeObject(String service, String method, Object object, ObjectOutput out) throws IOException {
-        OptimizedMetadata.OptimizedService bizService = getServiceMetadata(service);
+    public static void writeObject(String service, String version, String method, Object object, ObjectOutput out) throws IOException {
+        OptimizedMetadata.OptimizedService bizService = getServiceMetadata(service, version);
         writeObject(method, object, bizService, out);
     }
 
@@ -34,7 +34,8 @@ public class JsonDuplexHandler {
     public static String readObject(String service, String methodName, ObjectInput in) {
         OptimizedMetadata.OptimizedService bizService;
         try {
-            bizService = getServiceMetadata(service);
+            //todo version 版本
+            bizService = getServiceMetadata(service, "1.0.0");
             return readObject(bizService, methodName, in);
         } catch (IOException e) {
             LOGGER.error(e.getMessage(), e);
@@ -69,8 +70,8 @@ public class JsonDuplexHandler {
     }
 
 
-    private static OptimizedMetadata.OptimizedService getServiceMetadata(String service) throws IOException {
-        OptimizedMetadata.OptimizedService bizService = repository.getService(service, "1.0.0");
+    private static OptimizedMetadata.OptimizedService getServiceMetadata(String service, String version) throws IOException {
+        OptimizedMetadata.OptimizedService bizService = repository.getService(service, version);
         if (bizService == null) {
             throw new IOException(String.format("Specific service %s's metadata info does not found", service));
         }

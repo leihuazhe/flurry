@@ -6,6 +6,8 @@ import org.apache.dubbo.gateway.GatewayServiceFactory;
 import org.apache.dubbo.gateway.GlobalReferenceConfig;
 import org.apache.dubbo.gateway.RestServiceConfig;
 import org.apache.dubbo.jsonserializer.metadata.discovery.*;
+import org.apache.dubbo.jsonserializer.metadata.discovery.curator.CuratorClientDiscovery;
+import org.apache.dubbo.jsonserializer.metadata.discovery.zkclient.ZookeeperClientDiscovery;
 import org.apache.dubbo.jsonserializer.metadata.tag.Service;
 import org.apache.dubbo.jsonserializer.metadata.util.MetadataUtil;
 import org.apache.dubbo.rpc.RpcContext;
@@ -28,14 +30,15 @@ public class ServiceMetadataResolver {
 
     public static void init(URL url) {
         ZookeeperDiscoveryFactory zookeeperDiscoveryFactory = new ZookeeperDiscoveryFactory();
-//        ZookeeperDiscovery registry = zookeeperDiscoveryFactory.createRegistry(url);
-        OriginalZkClientDiscovery registry = zookeeperDiscoveryFactory.createRegistry();
-        registry.loadAllService();
+        CuratorClientDiscovery registry = zookeeperDiscoveryFactory.createRegistry(url);
+        registry.subscribeRootServices();
+//        ZookeeperClientDiscovery registry = zookeeperDiscoveryFactory.createOriginalRegistry(url);
+//        registry.loadAllServices();
     }
 
     public static void resolveServiceMetadata(ServiceDefinition serviceDefinition, MetadataListener metadataListener) {
         logger.info("ServiceMetadataResolver fetchAndStoreMetadata begin to fetch metadata. ");
-        int tryCount = 1;
+        int tryCount = 0;
         while (tryCount <= 3) {
             try {
                 CompletableFuture<String> resultFuture = getServiceMetadata(serviceDefinition);
@@ -50,7 +53,7 @@ public class ServiceMetadataResolver {
                     metadataListener.callback(false);
                 }*/
             }
-            logger.info("tryCount: {},准备重试 ", tryCount);
+            logger.info("已经重试 tryCount: {} 次 ", tryCount);
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException ignored) {
@@ -60,9 +63,9 @@ public class ServiceMetadataResolver {
 
     }
 
-    public static void removeServiceMetadata(String path) {
+    public static void removeServiceMetadataCache(String path) {
         try {
-            logger.info("ServiceMetadataResolver removeServiceMetadata path: {}", path);
+            logger.info("ServiceMetadataResolver removeServiceMetadataCache path: {}", path);
             repository.removeServiceCache(path, false);
 
             logServiceMap(repository.getServices());
@@ -113,6 +116,6 @@ public class ServiceMetadataResolver {
     private static void logServiceMap(Map<String, OptimizedMetadata.OptimizedService> storeServices) {
         StringBuilder logBuilder = new StringBuilder();
         storeServices.forEach((k, v) -> logBuilder.append(k).append(",  "));
-        logger.info("\n服务实例列表: {}\n", logBuilder);
+        logger.info("\n\n --------------- 服务实例列表: {} --------\n\n", logBuilder);
     }
 }
