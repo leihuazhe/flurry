@@ -109,7 +109,7 @@ public class ServiceMetadataResolver {
     private static RestServiceConfig buildConfig(ServiceDefinition serviceInfo) {
         return new RestServiceConfig(serviceInfo.getServiceInterface(),
                 serviceInfo.getVersion(),
-                serviceInfo.getVersion(),
+                serviceInfo.getGroup(),
                 GlobalReferenceConfig.buildGlobalConfig());
     }
 

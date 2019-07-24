@@ -1,4 +1,4 @@
-package org.apache.dubbo.jsonserializer.metadata.discovery;
+package com.yunji.gateway;
 
 import org.apache.dubbo.common.URL;
 import org.apache.dubbo.remoting.zookeeper.ChildListener;

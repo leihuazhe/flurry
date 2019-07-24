@@ -27,7 +27,7 @@ public class JsonDuplexHandler {
 
     public static void writeObject(String service, String version, String method, Object object, ObjectOutput out) throws IOException {
         OptimizedMetadata.OptimizedService bizService = getServiceMetadata(service, version);
-        writeObject(method, object, bizService, out);
+        writeObject(method, version, object, bizService, out);
     }
 
 
@@ -47,14 +47,14 @@ public class JsonDuplexHandler {
     /**
      * 利用 hessian2 writeObject object
      */
-    private static void writeObject(String methodName, Object object, OptimizedMetadata.OptimizedService optimizedService, ObjectOutput out) throws IOException {
+    private static void writeObject(String methodName, String version, Object object, OptimizedMetadata.OptimizedService optimizedService, ObjectOutput out) throws IOException {
         Method method = optimizedService.getMethodMap().get(methodName);
         if (method == null) {
             throw new IOException(String.format("Specific method %s's metadata info does not found", methodName));
         }
 
         OptimizedMetadata.OptimizedStruct req = optimizedService.getOptimizedStructs().get(method.request.namespace + "." + method.request.name);
-        JsonSerializer jsonEncoder = new JsonSerializer(optimizedService, method, "1.0.0", req);
+        JsonSerializer jsonEncoder = new JsonSerializer(optimizedService, method, version, req);
 
         jsonEncoder.write((String) object, out);
     }
