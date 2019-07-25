@@ -24,6 +24,7 @@ public class GatewayServiceFactory {
 
     private static final ConcurrentMap<Integer, CustomReferenceConfig<GateWayService>> SERVICE_CACHE = new ConcurrentHashMap<>();
 
+    //todo 创建 application 时需要修改
     static {
         application.setName("gateway");
         RegistryConfig registryConfig = new RegistryConfig();
