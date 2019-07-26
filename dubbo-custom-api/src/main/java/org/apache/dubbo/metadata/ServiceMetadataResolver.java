@@ -1,39 +1,55 @@
-package org.apache.dubbo.jsonserializer.metadata;
+package org.apache.dubbo.metadata;
 
 import org.apache.dubbo.common.URL;
 import org.apache.dubbo.gateway.GateWayService;
 import org.apache.dubbo.gateway.GatewayServiceFactory;
 import org.apache.dubbo.gateway.GlobalReferenceConfig;
 import org.apache.dubbo.gateway.RestServiceConfig;
-import org.apache.dubbo.jsonserializer.metadata.discovery.*;
-import org.apache.dubbo.jsonserializer.metadata.discovery.curator.CuratorClientDiscovery;
-import org.apache.dubbo.jsonserializer.metadata.discovery.zkclient.ZookeeperClientDiscovery;
-import org.apache.dubbo.jsonserializer.metadata.tag.Service;
-import org.apache.dubbo.jsonserializer.metadata.util.MetadataUtil;
+import org.apache.dubbo.metadata.discovery.*;
+import org.apache.dubbo.metadata.discovery.curator.CuratorClientDiscovery;
+import org.apache.dubbo.metadata.tag.Service;
+import org.apache.dubbo.metadata.util.DiscoveryUtil;
+import org.apache.dubbo.metadata.util.MetadataUtil;
+import org.apache.dubbo.metadata.whitelist.ConfigContext;
+import org.apache.dubbo.metadata.whitelist.WhiteServiceEvent;
 import org.apache.dubbo.rpc.RpcContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.xml.bind.JAXB;
 import java.io.StringReader;
+import java.util.EventListener;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 /**
  * @author Denim.leihz 2019-07-23 5:38 PM
  */
-public class ServiceMetadataResolver {
+public class ServiceMetadataResolver implements EventListener {
     private static final Logger logger = LoggerFactory.getLogger(ServiceMetadataResolver.class);
 
     private static ServiceMetadataRepository repository = ServiceMetadataRepository.getRepository();
 
+    private static ServiceMetadataResolver resolver = new ServiceMetadataResolver();
 
-    public static void init(URL url) {
-        ZookeeperDiscoveryFactory zookeeperDiscoveryFactory = new ZookeeperDiscoveryFactory();
-        CuratorClientDiscovery registry = zookeeperDiscoveryFactory.createRegistry(url);
-        registry.subscribeRootServices();
-//        ZookeeperClientDiscovery registry = zookeeperDiscoveryFactory.createOriginalRegistry(url);
-//        registry.loadAllServices();
+    private CuratorClientDiscovery registry;
+
+    public static ServiceMetadataResolver getResolver() {
+        return resolver;
+    }
+
+    /**
+     * 监听器路口
+     */
+    public void onServiceListChanged(WhiteServiceEvent event) {
+        ConfigContext context = event.getSource();
+
+        if (registry == null) {
+            init(context);
+        }
+//        List<String> whiteServiceList = context.getWhiteServiceSet();
+        registry.subscribeRootServices(/*whiteServiceList*/);
     }
 
     public static void resolveServiceMetadata(ServiceDefinition serviceDefinition, MetadataListener metadataListener) {
@@ -73,6 +89,13 @@ public class ServiceMetadataResolver {
             logger.error(e.getMessage(), e);
         }
 
+    }
+
+    private void init(ConfigContext context) {
+        URL url = DiscoveryUtil.createRegistryUrl(context);
+        ZookeeperDiscoveryFactory zookeeperDiscoveryFactory = new ZookeeperDiscoveryFactory();
+
+        registry = zookeeperDiscoveryFactory.createRegistry(url, context);
     }
 
 

@@ -7,10 +7,10 @@ import io.netty.channel.ChannelHandlerContext;
 import org.apache.dubbo.gateway.GateWayService;
 import org.apache.dubbo.gateway.GatewayServiceFactory;
 import org.apache.dubbo.gateway.RestServiceConfig;
-import org.apache.dubbo.jsonserializer.metadata.ServiceMetadataRepository;
-import org.apache.dubbo.jsonserializer.metadata.OptimizedMetadata;
-import org.apache.dubbo.jsonserializer.metadata.tag.DataType;
-import org.apache.dubbo.jsonserializer.metadata.tag.Field;
+import org.apache.dubbo.metadata.ServiceMetadataRepository;
+import org.apache.dubbo.metadata.OptimizedMetadata;
+import org.apache.dubbo.metadata.tag.DataType;
+import org.apache.dubbo.metadata.tag.Field;
 import org.apache.dubbo.rpc.RpcContext;
 
 import java.util.*;

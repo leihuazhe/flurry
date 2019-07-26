@@ -14,49 +14,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.dubbo.jsonserializer.metadata.tag;
+package org.apache.dubbo.metadata.tag;
 
 import javax.xml.bind.annotation.*;
 import java.util.List;
-
 /**
  * @author Denim.leihz 2019-07-08 8:21 PM
  */
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD)
-public class Field {
-
-    @XmlAttribute
-    public int tag;
+public class Method {
 
     @XmlAttribute
     public String name;
-
-    @XmlAttribute
-    public boolean optional;
-
-    public DataType dataType;
-
     public String doc;
+    public String label;
 
-    public String defaultLiteral;
-
-    @XmlAttribute
-    public boolean privacy;
-
-    public String sample_value;
+    public Struct request;
+    public Struct response;
 
     @XmlElementWrapper(name = "annotations")
     @XmlElement(name = "annotation")
     public List<Annotation> annotations;
 
-    public int getTag() {
-        return tag;
-    }
-
-    public void setTag(int tag) {
-        this.tag = tag;
-    }
+    public boolean isSoaTransactionProcess;
 
     public String getName() {
         return name;
@@ -64,22 +45,6 @@ public class Field {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public boolean isOptional() {
-        return optional;
-    }
-
-    public void setOptional(boolean optional) {
-        this.optional = optional;
-    }
-
-    public DataType getDataType() {
-        return dataType;
-    }
-
-    public void setDataType(DataType dataType) {
-        this.dataType = dataType;
     }
 
     public String getDoc() {
@@ -90,28 +55,37 @@ public class Field {
         this.doc = doc;
     }
 
-    public String getDefaultLiteral() {
-        return defaultLiteral;
+    public String getLabel() {
+        return label;
     }
 
-    public void setDefaultLiteral(String defaultLiteral) {
-        this.defaultLiteral = defaultLiteral;
+    public void setLabel(String label) {
+        this.label = label;
     }
 
-    public boolean isPrivacy() {
-        return privacy;
+    public Struct getRequest() {
+        return request;
     }
 
-    public void setPrivacy(boolean privacy) {
-        this.privacy = privacy;
+    public void setRequest(Struct request) {
+        this.request = request;
     }
 
-    public String getSample_value() {
-        return sample_value;
+    public Struct getResponse() {
+        return response;
     }
 
-    public void setSample_value(String sample_value) {
-        this.sample_value = sample_value;
+    public void setResponse(Struct response) {
+        this.response = response;
+    }
+
+
+    public boolean isSoaTransactionProcess() {
+        return isSoaTransactionProcess;
+    }
+
+    public void setSoaTransactionProcess(boolean soaTransactionProcess) {
+        isSoaTransactionProcess = soaTransactionProcess;
     }
 
     public List<Annotation> getAnnotations() {

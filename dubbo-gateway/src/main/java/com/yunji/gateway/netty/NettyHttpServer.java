@@ -1,9 +1,19 @@
 package com.yunji.gateway.netty;
 
+import com.yunji.diamond.client.api.DiamondClient;
 import com.yunji.gateway.netty.http.util.Constants;
 import com.yunji.gateway.handler.HttpRequestHandler;
 import com.yunji.gateway.handler.ServerProcessHandler;
 import com.yunji.gateway.util.GatewayException;
+
+import org.apache.dubbo.metadata.ServiceMetadataResolver;
+import org.apache.dubbo.metadata.util.MetadataUtil;
+import org.apache.dubbo.metadata.whitelist.ConfigContext;
+import org.apache.dubbo.metadata.whitelist.WhiteServiceManagerListener;
+import org.apache.dubbo.util.GateConstants;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.*;
@@ -14,11 +24,9 @@ import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpRequestDecoder;
 import io.netty.handler.codec.http.HttpResponseEncoder;
 import io.netty.util.concurrent.DefaultThreadFactory;
-import org.apache.dubbo.jsonserializer.metadata.ServiceMetadataRepository;
-import org.apache.dubbo.jsonserializer.metadata.ServiceMetadataResolver;
-import org.apache.dubbo.jsonserializer.metadata.util.DiscoveryUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import java.util.List;
+
 
 /**
  * @author maple NettyHttpServer
@@ -142,7 +150,28 @@ public class NettyHttpServer {
     }
 
     public NettyHttpServer initMetadata() throws Exception {
-        ServiceMetadataResolver.init(DiscoveryUtil.createRegistryUrl(registryUrl));
+        ConfigContext context = new ConfigContext();
+        DiamondClient diamondClient = diamondInit(context);
+
+        List<String> serviceList = MetadataUtil.parseConfig(diamondClient.getConfig());
+        context.setWhiteServiceSet(serviceList);
+        context.setRegistryUrl(registryUrl);
+        ServiceMetadataResolver resolver = ServiceMetadataResolver.getResolver();
+        context.addListener(resolver);
+        context.refresh();
+
+//        ServiceMetadataResolver.init(context, DiscoveryUtil.createRegistryUrl(registryUrl));
         return this;
+    }
+
+    private DiamondClient diamondInit(ConfigContext context) {
+        DiamondClient diamondClient = new DiamondClient();
+        diamondClient.setDataId(GateConstants.DATA_ID);
+        diamondClient.setPollingIntervalTime(GateConstants.POLLING_INTERVAL_TIME);
+        diamondClient.setTimeout(GateConstants.TIME_OUT);
+        diamondClient.setManagerListener(new WhiteServiceManagerListener(context));
+        diamondClient.init();
+
+        return diamondClient;
     }
 }

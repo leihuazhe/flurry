@@ -32,4 +32,8 @@ public interface GateConstants {
 
     String DEFAULT_REGISTRY_URL = "127.0.0.1:2181";
 
+
+    String DATA_ID = "gateway_config";
+    int POLLING_INTERVAL_TIME = 10;
+    long TIME_OUT = 2000L;
 }

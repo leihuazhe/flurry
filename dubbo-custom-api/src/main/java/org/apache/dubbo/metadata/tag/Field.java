@@ -14,39 +14,48 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.dubbo.jsonserializer.metadata.tag;
+package org.apache.dubbo.metadata.tag;
 
 import javax.xml.bind.annotation.*;
 import java.util.List;
+
 /**
  * @author Denim.leihz 2019-07-08 8:21 PM
  */
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD)
-public class Struct {
+public class Field {
 
     @XmlAttribute
-    public String namespace;
+    public int tag;
+
     @XmlAttribute
     public String name;
 
-    public String label;
+    @XmlAttribute
+    public boolean optional;
+
+    public DataType dataType;
+
     public String doc;
 
-    @XmlElementWrapper(name = "fields")
-    @XmlElement(name = "field")
-    public List<Field> fields;
+    public String defaultLiteral;
+
+    @XmlAttribute
+    public boolean privacy;
+
+    public String sample_value;
 
     @XmlElementWrapper(name = "annotations")
     @XmlElement(name = "annotation")
     public List<Annotation> annotations;
 
-    public String getNamespace() {
-        return namespace;
+    public int getTag() {
+        return tag;
     }
 
-    public void setNamespace(String namespace) {
-        this.namespace = namespace;
+    public void setTag(int tag) {
+        this.tag = tag;
     }
 
     public String getName() {
@@ -57,12 +66,20 @@ public class Struct {
         this.name = name;
     }
 
-    public String getLabel() {
-        return label;
+    public boolean isOptional() {
+        return optional;
     }
 
-    public void setLabel(String label) {
-        this.label = label;
+    public void setOptional(boolean optional) {
+        this.optional = optional;
+    }
+
+    public DataType getDataType() {
+        return dataType;
+    }
+
+    public void setDataType(DataType dataType) {
+        this.dataType = dataType;
     }
 
     public String getDoc() {
@@ -73,12 +90,28 @@ public class Struct {
         this.doc = doc;
     }
 
-    public List<Field> getFields() {
-        return fields;
+    public String getDefaultLiteral() {
+        return defaultLiteral;
     }
 
-    public void setFields(List<Field> fields) {
-        this.fields = fields;
+    public void setDefaultLiteral(String defaultLiteral) {
+        this.defaultLiteral = defaultLiteral;
+    }
+
+    public boolean isPrivacy() {
+        return privacy;
+    }
+
+    public void setPrivacy(boolean privacy) {
+        this.privacy = privacy;
+    }
+
+    public String getSample_value() {
+        return sample_value;
+    }
+
+    public void setSample_value(String sample_value) {
+        this.sample_value = sample_value;
     }
 
     public List<Annotation> getAnnotations() {

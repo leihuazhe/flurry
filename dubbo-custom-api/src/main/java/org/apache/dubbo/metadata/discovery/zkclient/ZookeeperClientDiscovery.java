@@ -1,10 +1,10 @@
-package org.apache.dubbo.jsonserializer.metadata.discovery.zkclient;
+package org.apache.dubbo.metadata.discovery.zkclient;
 
 import org.apache.dubbo.common.URL;
 import org.apache.dubbo.common.utils.ConcurrentHashSet;
-import org.apache.dubbo.jsonserializer.metadata.ServiceMetadataRepository;
-import org.apache.dubbo.jsonserializer.metadata.ServiceMetadataResolver;
-import org.apache.dubbo.jsonserializer.metadata.discovery.*;
+import org.apache.dubbo.metadata.ServiceMetadataRepository;
+import org.apache.dubbo.metadata.ServiceMetadataResolver;
+import org.apache.dubbo.metadata.discovery.*;
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.WatchedEvent;
 import org.apache.zookeeper.Watcher;

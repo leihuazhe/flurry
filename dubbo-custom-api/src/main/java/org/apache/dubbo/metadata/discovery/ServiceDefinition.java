@@ -1,4 +1,4 @@
-package org.apache.dubbo.jsonserializer.metadata.discovery;
+package org.apache.dubbo.metadata.discovery;
 
 import java.util.ArrayList;
 import java.util.List;

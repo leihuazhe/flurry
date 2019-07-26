@@ -1,6 +1,6 @@
-package org.apache.dubbo.jsonserializer.metadata;
+package org.apache.dubbo.metadata;
 
-import org.apache.dubbo.jsonserializer.metadata.tag.*;
+import org.apache.dubbo.metadata.tag.*;
 
 import java.util.ArrayList;
 import java.util.Collections;

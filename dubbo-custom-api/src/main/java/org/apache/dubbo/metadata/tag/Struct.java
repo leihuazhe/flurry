@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.dubbo.jsonserializer.metadata.tag;
+package org.apache.dubbo.metadata.tag;
 
 import javax.xml.bind.annotation.*;
 import java.util.List;
@@ -23,21 +23,31 @@ import java.util.List;
  */
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD)
-public class Method {
+public class Struct {
 
     @XmlAttribute
+    public String namespace;
+    @XmlAttribute
     public String name;
-    public String doc;
-    public String label;
 
-    public Struct request;
-    public Struct response;
+    public String label;
+    public String doc;
+
+    @XmlElementWrapper(name = "fields")
+    @XmlElement(name = "field")
+    public List<Field> fields;
 
     @XmlElementWrapper(name = "annotations")
     @XmlElement(name = "annotation")
     public List<Annotation> annotations;
 
-    public boolean isSoaTransactionProcess;
+    public String getNamespace() {
+        return namespace;
+    }
+
+    public void setNamespace(String namespace) {
+        this.namespace = namespace;
+    }
 
     public String getName() {
         return name;
@@ -45,14 +55,6 @@ public class Method {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public String getDoc() {
-        return doc;
-    }
-
-    public void setDoc(String doc) {
-        this.doc = doc;
     }
 
     public String getLabel() {
@@ -63,29 +65,20 @@ public class Method {
         this.label = label;
     }
 
-    public Struct getRequest() {
-        return request;
+    public String getDoc() {
+        return doc;
     }
 
-    public void setRequest(Struct request) {
-        this.request = request;
+    public void setDoc(String doc) {
+        this.doc = doc;
     }
 
-    public Struct getResponse() {
-        return response;
+    public List<Field> getFields() {
+        return fields;
     }
 
-    public void setResponse(Struct response) {
-        this.response = response;
-    }
-
-
-    public boolean isSoaTransactionProcess() {
-        return isSoaTransactionProcess;
-    }
-
-    public void setSoaTransactionProcess(boolean soaTransactionProcess) {
-        isSoaTransactionProcess = soaTransactionProcess;
+    public void setFields(List<Field> fields) {
+        this.fields = fields;
     }
 
     public List<Annotation> getAnnotations() {

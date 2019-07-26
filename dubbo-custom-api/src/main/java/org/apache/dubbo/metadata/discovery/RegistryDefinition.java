@@ -1,4 +1,4 @@
-package org.apache.dubbo.jsonserializer.metadata.discovery;
+package org.apache.dubbo.metadata.discovery;
 
 
 import org.apache.dubbo.remoting.zookeeper.ChildListener;

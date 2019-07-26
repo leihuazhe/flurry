@@ -1,4 +1,4 @@
-package org.apache.dubbo.jsonserializer.metadata.discovery;
+package org.apache.dubbo.metadata.discovery;
 
 /**
  * @author Denim.leihz 2019-07-23 2:23 PM

@@ -1,8 +1,9 @@
-package org.apache.dubbo.jsonserializer.metadata.discovery;
+package org.apache.dubbo.metadata.discovery;
 
 import org.apache.dubbo.common.URL;
 import org.apache.dubbo.common.utils.ConcurrentHashSet;
-import org.apache.dubbo.jsonserializer.metadata.ServiceMetadataResolver;
+import org.apache.dubbo.metadata.ServiceMetadataResolver;
+import org.apache.dubbo.metadata.whitelist.ConfigContext;
 import org.apache.dubbo.remoting.zookeeper.ChildListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,8 +40,9 @@ public abstract class AbstractZookeeperDiscovery {
     }
 
 
-    protected void recover() throws Exception {
-        logger.info("Begin to recover path root.");
+    protected void recover(ConfigContext context) throws Exception {
+        logger.info("recover the curator registry,root: {},context white list: {}",
+                root, String.join(",", context.getWhiteServiceSet()));
 
         subscribeRootServices();
         // subscribe
@@ -58,13 +60,13 @@ public abstract class AbstractZookeeperDiscovery {
         }
     }
 
-    public void subscribeRootServices() {
-        subscribeRootServices(root);
+    public void subscribeRootServices(/*List<String> whiteServiceList*/) {
+        subscribeRootServices(root/*, whiteServiceList*/);
     }
 
     protected abstract void subscribe(String serviceKey, RegistryDefinition definition);
 
-    protected abstract void subscribeRootServices(String rootKey);
+    protected abstract void subscribeRootServices(String rootKey/*, List<String> whiteServiceList*/);
 
     /**
      * @param serviceKey etc. org.apache.dubbo.demo.DemoService

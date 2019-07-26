@@ -1,6 +1,6 @@
 package org.apache.dubbo.jsonserializer.util;
 
-import org.apache.dubbo.jsonserializer.metadata.tag.DataType;
+import org.apache.dubbo.metadata.tag.DataType;
 
 /**
  * @author Denim.leihz 2019-07-08 8:35 PM

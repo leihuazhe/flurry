@@ -65,6 +65,8 @@
             <groupId>com.yunji.gateway</groupId>
             <artifactId>dubbo-custom-api</artifactId>
         </dependency>
+
+
     </dependencies>
 
     <build>

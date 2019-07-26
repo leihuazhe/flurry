@@ -1,6 +1,6 @@
-package org.apache.dubbo.jsonserializer.metadata;
+package org.apache.dubbo.metadata;
 
-import org.apache.dubbo.jsonserializer.metadata.util.MetadataUtil;
+import org.apache.dubbo.metadata.util.MetadataUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -154,43 +154,6 @@ public class ServiceMetadataRepository {
 
 
 
-    /*private static void loadAllMetadataOfDir() throws Exception {
-        File file = ResourceUtils.getFile("classpath:metadata");
 
-        if (!file.isDirectory()) {
-            throw new RuntimeException("Specific dir name is not a directory.");
-        }
-        List<File> subFileList = Arrays.stream(Objects.requireNonNull(file.listFiles())).filter(File::isFile).collect(Collectors.toList());
-
-        for (File subFile : subFileList) {
-
-            String metadata = IOUtils.read(new FileReader(subFile));
-            LOGGER.info("begin to fetch metadataClient ...");
-
-            try (StringReader reader = new StringReader(metadata)) {
-
-                Service serviceData = JAXB.unmarshal(reader, Service.class);
-                String serviceKey = getKey(serviceData);
-
-                String fullNameKey = getFullNameKey(serviceData);
-
-                OptimizedMetadata.OptimizedService optimizedService = new OptimizedMetadata.OptimizedService(serviceData);
-
-                services.put(serviceKey, optimizedService);
-
-                LOGGER.info("----------------- service size :  " + services.size());
-
-                StringBuilder logBuilder = new StringBuilder();
-                services.forEach((k, v) -> logBuilder.append(k).append(",  "));
-
-                LOGGER.info("服务实例列表: {}", logBuilder);
-
-                fullNameService.put(fullNameKey, optimizedService);
-
-            } catch (Exception e) {
-                LOGGER.error(e.getMessage(), e);
-            }
-        }
-    }*/
 
 }

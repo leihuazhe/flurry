@@ -42,6 +42,11 @@
             <groupId>org.apache.dubbo</groupId>
             <artifactId>dubbo-serialization-hessian2</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>com.taobao.diamond</groupId>
+            <artifactId>diamondx-client</artifactId>
+        </dependency>
     </dependencies>
 
 

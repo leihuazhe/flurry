@@ -1,6 +1,6 @@
 //package org.apache.dubbo.remoting.zookeeper.zkclient;
 //
-//import org.apache.dubbo.jsonserializer.metadata.ServiceDefinition;
+//import org.apache.dubbo.metadata.ServiceDefinition;
 //import org.apache.zookeeper.KeeperException;
 //import org.apache.zookeeper.WatchedEvent;
 //import org.apache.zookeeper.Watcher;

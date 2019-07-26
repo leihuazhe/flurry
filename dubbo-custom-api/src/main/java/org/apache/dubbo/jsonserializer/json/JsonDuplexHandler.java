@@ -2,9 +2,9 @@ package org.apache.dubbo.jsonserializer.json;
 
 import org.apache.dubbo.common.serialize.CustomHessian2Input;
 import org.apache.dubbo.common.serialize.CustomHessian2ObjectInput;
-import org.apache.dubbo.jsonserializer.metadata.ServiceMetadataRepository;
-import org.apache.dubbo.jsonserializer.metadata.OptimizedMetadata;
-import org.apache.dubbo.jsonserializer.metadata.tag.Method;
+import org.apache.dubbo.metadata.ServiceMetadataRepository;
+import org.apache.dubbo.metadata.OptimizedMetadata;
+import org.apache.dubbo.metadata.tag.Method;
 import org.apache.dubbo.common.serialize.ObjectInput;
 import org.apache.dubbo.common.serialize.ObjectOutput;
 import org.apache.dubbo.rpc.RpcException;

@@ -1,9 +1,10 @@
-package org.apache.dubbo.jsonserializer.metadata.discovery.curator;
+package org.apache.dubbo.metadata.discovery.curator;
 
 import com.google.common.collect.Sets;
 import org.apache.dubbo.common.URL;
-import org.apache.dubbo.jsonserializer.metadata.ServiceMetadataResolver;
-import org.apache.dubbo.jsonserializer.metadata.discovery.*;
+import org.apache.dubbo.metadata.ServiceMetadataResolver;
+import org.apache.dubbo.metadata.discovery.*;
+import org.apache.dubbo.metadata.whitelist.ConfigContext;
 import org.apache.dubbo.remoting.zookeeper.ChildListener;
 import org.apache.dubbo.remoting.zookeeper.StateListener;
 import org.apache.dubbo.remoting.zookeeper.ZookeeperClient;
@@ -14,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.apache.dubbo.common.constants.CommonConstants.*;
 
@@ -25,10 +27,13 @@ public class CuratorClientDiscovery extends AbstractZookeeperDiscovery {
 
     private final ZookeeperClient zkClient;
 
-    public CuratorClientDiscovery(URL url, ZookeeperTransporter zookeeperTransporter) {
+    private final ConfigContext context;
+
+    public CuratorClientDiscovery(URL url, ZookeeperTransporter zookeeperTransporter, ConfigContext context) {
         if (url.isAnyHost()) {
             throw new IllegalStateException("registry address == null");
         }
+        this.context = context;
 
         String group = url.getParameter(RegistryConstants.GROUP_KEY, DEFAULT_ROOT);
         if (!group.startsWith(PATH_SEPARATOR)) {
@@ -41,7 +46,7 @@ public class CuratorClientDiscovery extends AbstractZookeeperDiscovery {
             public void stateChanged(int state) {
                 if (state == RECONNECTED) {
                     try {
-                        recover();
+                        recover(context);
                     } catch (Exception e) {
                         logger.error(e.getMessage(), e);
                     }
@@ -51,7 +56,7 @@ public class CuratorClientDiscovery extends AbstractZookeeperDiscovery {
     }
 
     @Override
-    protected void subscribeRootServices(String rootKey) {
+    protected void subscribeRootServices(String rootKey/*, List<String> whiteServiceList*/) {
         List<String> children = zkClient.addChildListener(rootKey, new ChildListener() {
             @Override
             public void childChanged(String path, List<String> currentChildren) {
@@ -65,11 +70,11 @@ public class CuratorClientDiscovery extends AbstractZookeeperDiscovery {
     }
 
     private synchronized void rootPathNotify(String path, List<String> serviceUrls) {
-
         executorService.execute(() -> {
             Set<String> lastPath = lastServiceSet;
             if (lastPath.size() == 0) {
-                lastPath.addAll(serviceUrls);
+                Set<String> filterServices = filterWhiteList(context.getWhiteServiceSet(), serviceUrls);
+                lastPath.addAll(filterServices);
                 notifyAddedService(lastPath);
                 return;
             }
@@ -85,9 +90,15 @@ public class CuratorClientDiscovery extends AbstractZookeeperDiscovery {
             }
             //增加新的 service path.
             if (addedService.size() > 0) {
-                notifyAddedService(addedService.immutableCopy());
+                Set<String> filterServices = filterWhiteList(context.getWhiteServiceSet(), serviceUrls);
+                notifyAddedService(filterServices);
             }
         });
+    }
+
+    private Set<String> filterWhiteList(Set<String> whitelist, List<String> serviceUrls) {
+        return whitelist.isEmpty() ?
+                new HashSet<>(serviceUrls) : serviceUrls.stream().filter(whitelist::contains).collect(Collectors.toSet());
     }
 
 

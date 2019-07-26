@@ -1,7 +1,7 @@
 package org.apache.dubbo.jsonserializer.json;
 
-import org.apache.dubbo.jsonserializer.metadata.OptimizedMetadata;
-import org.apache.dubbo.jsonserializer.metadata.tag.Method;
+import org.apache.dubbo.metadata.OptimizedMetadata;
+import org.apache.dubbo.metadata.tag.Method;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 import org.apache.dubbo.common.serialize.*;

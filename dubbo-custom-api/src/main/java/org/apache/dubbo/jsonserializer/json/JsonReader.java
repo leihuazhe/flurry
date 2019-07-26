@@ -1,9 +1,9 @@
 package org.apache.dubbo.jsonserializer.json;
 
-import org.apache.dubbo.jsonserializer.metadata.OptimizedMetadata;
-import org.apache.dubbo.jsonserializer.metadata.tag.DataType;
-import org.apache.dubbo.jsonserializer.metadata.tag.Field;
-import org.apache.dubbo.jsonserializer.metadata.tag.Struct;
+import org.apache.dubbo.metadata.OptimizedMetadata;
+import org.apache.dubbo.metadata.tag.DataType;
+import org.apache.dubbo.metadata.tag.Field;
+import org.apache.dubbo.metadata.tag.Struct;
 import org.apache.dubbo.common.serialize.CustomHessian2ObjectOutput;
 import org.apache.dubbo.common.serialize.CustomHessian2Output;
 import org.slf4j.Logger;
@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Stack;
 
 import static org.apache.dubbo.jsonserializer.util.JsonUtils.*;
-import static org.apache.dubbo.jsonserializer.util.MetaDataUtil.dataType2Byte;
+import static org.apache.dubbo.metadata.util.MetadataUtil.dataType2Byte;
 
 /**
  * @author Denim.leihz 2019-07-08 8:30 PM
