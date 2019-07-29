@@ -32,8 +32,10 @@ public interface GateConstants {
 
     String DEFAULT_REGISTRY_URL = "127.0.0.1:2181";
 
+    String DATA_ID_CONSTANT = "gateway.diamond.data.id";
 
-    String DATA_ID = "gateway_config";
+
+    String DEFAULT_DATA_ID = "dubbo_gateway_config";
     int POLLING_INTERVAL_TIME = 10;
     long TIME_OUT = 2000L;
 }

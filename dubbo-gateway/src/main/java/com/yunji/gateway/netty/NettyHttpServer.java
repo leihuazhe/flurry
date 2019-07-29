@@ -46,33 +46,19 @@ public class NettyHttpServer {
     private Thread shutdownHook;
 
     private final int port;
+    private final EventLoopGroup bossGroup;
+    private final EventLoopGroup workerGroup;
 
-    private EventLoopGroup bossGroup;
-    private EventLoopGroup workerGroup;
-
-    private String registryUrl;
-
-
-    public NettyHttpServer(int port) {
-        this.port = port > 0 ? port : 0;
-    }
-
-    public NettyHttpServer registryUrl(String registryUrl) {
-        this.registryUrl = registryUrl;
-        return this;
+    public NettyHttpServer(int port, EventLoopGroup bossGroup, EventLoopGroup workerGroup) {
+        this.port = port;
+        this.bossGroup = bossGroup;
+        this.workerGroup = workerGroup;
     }
 
     /**
      * start
      */
     public void start() {
-        if (registryUrl == null) {
-            throw new GatewayException("registryUrl == null");
-        }
-        // eventGroup
-        bossGroup = new NioEventLoopGroup(1, new DefaultThreadFactory("netty-server-boss-group", Boolean.TRUE));
-        workerGroup = new NioEventLoopGroup(Constants.DEFAULT_IO_THREADS, new DefaultThreadFactory("netty-server-worker-group", Boolean.TRUE));
-
         // sharable handler
         HttpRequestHandler httpRequestHandler = new HttpRequestHandler();
         ServerProcessHandler serverProcessHandler = new ServerProcessHandler();
@@ -112,66 +98,5 @@ public class NettyHttpServer {
             bossGroup.shutdownGracefully();
             workerGroup.shutdownGracefully();
         }
-    }
-
-    @SuppressWarnings("AlibabaAvoidManuallyCreateThread")
-    public NettyHttpServer registerShutdownHook() {
-        if (this.shutdownHook == null) {
-            // No shutdown hook registered yet.
-            this.shutdownHook = new Thread(() -> {
-                synchronized (startupShutdownMonitor) {
-                    logger.info("ready to shutdown this gateway!");
-                    if (bossGroup != null) {
-                        bossGroup.shutdownGracefully();
-                    }
-                    if (workerGroup != null) {
-                        workerGroup.shutdownGracefully();
-                    }
-                    logger.info("end to shutdown this gateway!");
-                }
-            }, "netty-server-shutdownHook-thread");
-            Runtime.getRuntime().addShutdownHook(this.shutdownHook);
-        }
-
-        return this;
-    }
-
-    public NettyHttpServer logLogBanner() {
-        String banner =
-                "\n\n __   __  _   _   _   _       _   ___     ____    _   _   ____    ____     ___       ____      _      _____   _____  __        __     _     __   __\n" +
-                        " \\ \\ / / | | | | | \\ | |     | | |_ _|   |  _ \\  | | | | | __ )  | __ )   / _ \\     / ___|    / \\    |_   _| | ____| \\ \\      / /    / \\    \\ \\ / /\n" +
-                        "  \\ V /  | | | | |  \\| |  _  | |  | |    | | | | | | | | |  _ \\  |  _ \\  | | | |   | |  _    / _ \\     | |   |  _|    \\ \\ /\\ / /    / _ \\    \\ V / \n" +
-                        "   | |   | |_| | | |\\  | | |_| |  | |    | |_| | | |_| | | |_) | | |_) | | |_| |   | |_| |  / ___ \\    | |   | |___    \\ V  V /    / ___ \\    | |  \n" +
-                        "   |_|    \\___/  |_| \\_|  \\___/  |___|   |____/   \\___/  |____/  |____/   \\___/     \\____| /_/   \\_\\   |_|   |_____|    \\_/\\_/    /_/   \\_\\   |_|  \n" +
-                        "                                                                                                                                                   \n";
-        logger.info(banner);
-
-        return this;
-    }
-
-    public NettyHttpServer initMetadata() throws Exception {
-        ConfigContext context = new ConfigContext();
-        DiamondClient diamondClient = diamondInit(context);
-
-        List<String> serviceList = MetadataUtil.parseConfig(diamondClient.getConfig());
-        context.setWhiteServiceSet(serviceList);
-        context.setRegistryUrl(registryUrl);
-        ServiceMetadataResolver resolver = ServiceMetadataResolver.getResolver();
-        context.addListener(resolver);
-        context.refresh();
-
-//        ServiceMetadataResolver.init(context, DiscoveryUtil.createRegistryUrl(registryUrl));
-        return this;
-    }
-
-    private DiamondClient diamondInit(ConfigContext context) {
-        DiamondClient diamondClient = new DiamondClient();
-        diamondClient.setDataId(GateConstants.DATA_ID);
-        diamondClient.setPollingIntervalTime(GateConstants.POLLING_INTERVAL_TIME);
-        diamondClient.setTimeout(GateConstants.TIME_OUT);
-        diamondClient.setManagerListener(new WhiteServiceManagerListener(context));
-        diamondClient.init();
-
-        return diamondClient;
     }
 }
