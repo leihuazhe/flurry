@@ -18,10 +18,10 @@
             <artifactId>dubbo-registry-zookeeper</artifactId>
         </dependency>
 
-        <dependency>
+       <!-- <dependency>
             <groupId>org.apache.dubbo</groupId>
             <artifactId>dubbo-configcenter-zookeeper</artifactId>
-        </dependency>
+        </dependency>-->
 
         <dependency>
             <groupId>org.apache.dubbo</groupId>

@@ -22,7 +22,7 @@ public class JsonSerializer implements BeanSerializer<String> {
     private final OptimizedMetadata.OptimizedService optimizedService;
     private final Method method;
     private final String version;
-    private ByteBuf requestByteBuf = ByteBufAllocator.DEFAULT.buffer();
+//    private ByteBuf requestByteBuf = ByteBufAllocator.DEFAULT.buffer();
 
     public JsonSerializer(OptimizedMetadata.OptimizedService optimizedService,
                           Method method, String version,

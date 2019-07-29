@@ -62,6 +62,9 @@ public class ServiceMetadataResolver implements EventListener {
 
                 processMetaString(metadata, serviceDefinition);
                 break;
+            } catch (org.apache.dubbo.common.bytecode.NoSuchMethodException ex) {
+                logger.error("请求服务没有 getServiceMetadata动态方法,跳过: " + ex.getMessage(), ex);
+                return;
             } catch (Exception e) {
                 tryCount++;
                 logger.error("ResolveServiceMetadata get error: " + e.getMessage(), e);

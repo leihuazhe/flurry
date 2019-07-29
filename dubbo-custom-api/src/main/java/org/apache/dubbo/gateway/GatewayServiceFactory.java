@@ -4,6 +4,7 @@ import org.apache.dubbo.config.ApplicationConfig;
 import org.apache.dubbo.config.CustomReferenceConfig;
 import org.apache.dubbo.config.RegistryConfig;
 import org.apache.dubbo.remoting.Constants;
+import org.apache.dubbo.util.PropertyUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,21 +19,26 @@ import static org.apache.dubbo.util.GateConstants.*;
  * Dubbo {@link GateWayService} Factory
  */
 public class GatewayServiceFactory {
-
     private Logger logger = LoggerFactory.getLogger(GatewayServiceFactory.class);
-    private static ApplicationConfig application = new ApplicationConfig();
+
+    private static ApplicationConfig application;
 
     private static final ConcurrentMap<Integer, CustomReferenceConfig<GateWayService>> SERVICE_CACHE = new ConcurrentHashMap<>();
 
-    //todo 创建 application 时需要修改
-    static {
+
+    private static void init() {
+        application = new ApplicationConfig();
         application.setName("gateway");
         RegistryConfig registryConfig = new RegistryConfig();
-        registryConfig.setAddress("zookeeper://127.0.0.1:2181");
+        registryConfig.setProtocol("zookeeper");
+        registryConfig.setAddress(/*"zookeeper://" +*/ PropertyUtils.getProperty(REGISTRY_URL, DEFAULT_REGISTRY_URL));
         application.setRegistry(registryConfig);
     }
 
     public static GateWayService create(RestServiceConfig config) {
+        if (application == null) {
+            init();
+        }
         String interfaceName = config.getInterfaceName();
         String version = config.getVersion();
         String group = config.getGroup();
