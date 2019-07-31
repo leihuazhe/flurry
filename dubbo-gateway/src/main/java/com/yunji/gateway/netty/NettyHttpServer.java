@@ -1,31 +1,19 @@
 package com.yunji.gateway.netty;
 
-import com.yunji.diamond.client.api.DiamondClient;
-import com.yunji.gateway.netty.http.util.Constants;
 import com.yunji.gateway.handler.HttpRequestHandler;
 import com.yunji.gateway.handler.ServerProcessHandler;
-import com.yunji.gateway.util.GatewayException;
 
-import org.apache.dubbo.metadata.ServiceMetadataResolver;
-import org.apache.dubbo.metadata.util.MetadataUtil;
-import org.apache.dubbo.metadata.whitelist.ConfigContext;
-import org.apache.dubbo.metadata.whitelist.WhiteServiceManagerListener;
-import org.apache.dubbo.util.GateConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.*;
-import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpRequestDecoder;
 import io.netty.handler.codec.http.HttpResponseEncoder;
-import io.netty.util.concurrent.DefaultThreadFactory;
-
-import java.util.List;
 
 
 /**
@@ -34,16 +22,6 @@ import java.util.List;
  */
 public class NettyHttpServer {
     private static final Logger logger = LoggerFactory.getLogger(NettyHttpServer.class);
-
-    /**
-     * Synchronization monitor for the "refresh" and "destroy"
-     */
-    private final Object startupShutdownMonitor = new Object();
-
-    /**
-     * Reference to the JVM shutdown hook, if registered
-     */
-    private Thread shutdownHook;
 
     private final int port;
     private final EventLoopGroup bossGroup;

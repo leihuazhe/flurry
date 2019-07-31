@@ -63,7 +63,7 @@
 
         <dependency>
             <groupId>com.yunji.gateway</groupId>
-            <artifactId>dubbo-custom-api</artifactId>
+            <artifactId>dubbo-gateway-base</artifactId>
         </dependency>
 
 

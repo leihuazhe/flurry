@@ -36,7 +36,8 @@
 
     <modules>
         <module>dubbo-gateway</module>
-        <module>dubbo-custom-api</module>
+        <module>dubbo-gateway-base</module>
+        <module>dubbo-open-api</module>
     </modules>
 
     <dependencyManagement>
@@ -51,7 +52,7 @@
 
             <dependency>
                 <groupId>com.yunji.gateway</groupId>
-                <artifactId>dubbo-custom-api</artifactId>
+                <artifactId>dubbo-gateway-base</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
@@ -60,6 +61,19 @@
                 <artifactId>diamondx-client</artifactId>
                 <version>3.0.2</version>
             </dependency>
+
+            <dependency>
+                <groupId>org.projectlombok</groupId>
+                <artifactId>lombok</artifactId>
+                <version>1.16.22</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-context</artifactId>
+                <version>5.0.9.RELEASE</version>
+            </dependency>
+
         </dependencies>
     </dependencyManagement>
 

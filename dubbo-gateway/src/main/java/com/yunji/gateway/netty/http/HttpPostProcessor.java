@@ -1,7 +1,7 @@
 package com.yunji.gateway.netty.http;
 
+import com.yunji.gateway.handler.GatewayAsyncSender;
 import com.yunji.gateway.netty.http.request.RequestContext;
-import com.yunji.gateway.handler.JsonSender;
 import com.yunji.gateway.util.GateWayErrorCode;
 import com.yunji.gateway.util.GatewayException;
 import com.yunji.gateway.util.HttpHandlerUtil;
@@ -34,20 +34,12 @@ public class HttpPostProcessor {
                 logger.debug("Http:{}, 请求参数: {} ", context.requestUrl(), context.argumentToString());
             }
             try {
-                String url = context.requestUrl();
-
-                CompletableFuture<String> jsonResponse;
-
-                if (url.endsWith("getServiceMetadata")) {
-                    jsonResponse = JsonSender.getServiceMetadata(context, ctx);
-                } else {
-                    jsonResponse = JsonSender.sendAsync(context, ctx);
-                }
+                CompletableFuture<String> jsonResponse = GatewayAsyncSender.sendAsync(context, ctx);
 
                 //todo How to show  concrete and detail exception message.
                 jsonResponse.whenComplete((result, t) -> {
                     if (t != null) {
-                        logger.error("JsonSender handlerPostAsync result got error: {}", t.getMessage());
+                        logger.error("GatewayAsyncSender handlerPostAsync result got error: {}", t.getMessage());
 
                         String errorMessage;
                         if (t instanceof RemotingException) {
