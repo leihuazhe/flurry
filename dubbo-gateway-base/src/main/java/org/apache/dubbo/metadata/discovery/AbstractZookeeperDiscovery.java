@@ -98,7 +98,7 @@ public abstract class AbstractZookeeperDiscovery {
                     });
                 }
             } else {
-                metadataResolver.removeServiceMetadataCache(serviceKey);
+                metadataResolver.removeServiceMetadata(serviceKey);
                 logger.warn("service {} 下已无任何实例,移除元数据服务 cache.", serviceKey);
             }
         });

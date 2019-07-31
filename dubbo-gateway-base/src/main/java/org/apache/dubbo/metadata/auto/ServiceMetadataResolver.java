@@ -98,9 +98,9 @@ public class ServiceMetadataResolver implements MetadataResolver {
     }
 
     @Override
-    public void removeServiceMetadataCache(String path) {
+    public void removeServiceMetadata(String path) {
         try {
-            logger.info("ServiceMetadataResolver removeServiceMetadataCache path: {}", path);
+            logger.info("ServiceMetadataResolver removeServiceMetadata path: {}", path);
             repository.removeServiceCache(path, false);
 
             logServiceMap(repository.getServices());

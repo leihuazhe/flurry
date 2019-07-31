@@ -128,7 +128,7 @@ public class CuratorClientDiscovery extends AbstractZookeeperDiscovery {
         if (definition != null) {
             logger.info("Unsubscribe childUrl {} ,fullPath: {}", childUrl, definition.getFullPath());
             zkClient.removeChildListener(childUrl, definition.getChildListener());
-            metadataResolver.removeServiceMetadataCache(childUrl);
+            metadataResolver.removeServiceMetadata(childUrl);
         }
     }
 

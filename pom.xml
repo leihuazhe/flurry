@@ -38,6 +38,7 @@
         <module>dubbo-gateway</module>
         <module>dubbo-gateway-base</module>
         <module>dubbo-open-api</module>
+        <module>dubbo-service-doc-api</module>
     </modules>
 
     <dependencyManagement>
