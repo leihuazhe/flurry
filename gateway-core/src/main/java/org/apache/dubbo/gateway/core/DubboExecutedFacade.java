@@ -31,15 +31,18 @@ public class DubboExecutedFacade {
 
     private final MetadataResolver metadataResolver;
 
-    public DubboExecutedFacade(String registryUrl, String dataId) {
+    public DubboExecutedFacade(String registryUrl, String dataId, boolean needInitMetadata) {
         this.registryUrl = registryUrl;
         this.dataId = dataId;
         this.metadataResolver = GatewayUtil.getSupportedExtension(MetadataResolver.class);
 
-        init();
+        init(needInitMetadata);
     }
 
-    public void init() {
+    /**
+     * @param needInitMetadata 是否需要初始化元数据搜集信息
+     */
+    public void init(boolean needInitMetadata) {
         ApplicationConfig application = new ApplicationConfig();
         application.setName(GATEWAY_APPLICATION_NAME);
         RegistryConfig registryConfig = new RegistryConfig();
@@ -49,7 +52,9 @@ public class DubboExecutedFacade {
 
         ApplicationConfigHolder.setApplication(application);
 
-        MetadataUtil.initMetadata(dataId, registryUrl, metadataResolver);
+        if (needInitMetadata) {
+            MetadataUtil.initMetadata(dataId, registryUrl, metadataResolver);
+        }
     }
 
 

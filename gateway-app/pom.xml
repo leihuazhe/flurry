@@ -19,8 +19,8 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.yunji.gateway</groupId>
-        <artifactId>gateway-parent</artifactId>
-        <version>1.0.0-SNAPSHOT</version>
+        <artifactId>dubbo-gateway</artifactId>
+        <version>1.0.0</version>
     </parent>
     <artifactId>gateway-app</artifactId>
     <packaging>jar</packaging>
@@ -62,7 +62,7 @@
 
         <dependency>
             <groupId>com.yunji.gateway</groupId>
-            <artifactId>dubbo-gateway-base</artifactId>
+            <artifactId>gateway-core</artifactId>
         </dependency>
 
 
@@ -82,6 +82,20 @@
                     <execution>
                         <goals>
                             <goal>repackage</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>3.0.1</version>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <goals>
+                            <goal>jar</goal>
                         </goals>
                     </execution>
                 </executions>
