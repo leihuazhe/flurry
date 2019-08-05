@@ -58,7 +58,8 @@
             <dependency>
                 <groupId>com.taobao.diamond</groupId>
                 <artifactId>diamondx-client</artifactId>
-                <version>3.0.2</version>
+                <!--<version>3.0.2</version>-->
+                <version>3.0.3</version>
             </dependency>
 
             <dependency>
