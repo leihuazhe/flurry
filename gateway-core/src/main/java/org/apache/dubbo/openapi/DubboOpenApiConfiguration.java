@@ -31,7 +31,7 @@ public class DubboOpenApiConfiguration {
 
     @Bean
     public DubboExecutedFacade executedFacade() {
-        return new DubboExecutedFacade(registryUrl, dataId, true);
+        return new DubboExecutedFacade(registryUrl, dataId);
     }
 
 }

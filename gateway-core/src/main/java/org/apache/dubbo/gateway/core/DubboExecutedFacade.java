@@ -31,6 +31,11 @@ public class DubboExecutedFacade {
 
     private final MetadataResolver metadataResolver;
 
+
+    public DubboExecutedFacade(String registryUrl, String dataId) {
+        this(registryUrl, dataId, true);
+    }
+
     public DubboExecutedFacade(String registryUrl, String dataId, boolean needInitMetadata) {
         this.registryUrl = registryUrl;
         this.dataId = dataId;
