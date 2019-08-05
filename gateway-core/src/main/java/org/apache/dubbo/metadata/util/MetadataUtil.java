@@ -134,8 +134,8 @@ public class MetadataUtil {
         diamondClient.setDataId(dataId);
         diamondClient.setPollingIntervalTime(GateConstants.POLLING_INTERVAL_TIME);
         diamondClient.setTimeout(GateConstants.TIME_OUT);
-        diamondClient.setManagerListener(new WhiteServiceManagerListener(context));
         diamondClient.init();
+        diamondClient.setManagerListener(new WhiteServiceManagerListener(context));
 
         return diamondClient;
     }
