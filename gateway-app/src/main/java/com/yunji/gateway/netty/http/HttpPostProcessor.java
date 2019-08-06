@@ -40,12 +40,14 @@ public class HttpPostProcessor {
                 logger.debug("Http:{}, 请求参数: {} ", context.requestUrl(), context.argumentToString());
             }
             try {
+                long st = System.currentTimeMillis();
                 CompletableFuture<String> jsonResponse = asyncSender.sendAsync(context, ctx);
 
                 //todo How to show  concrete and detail exception message.
                 jsonResponse.whenComplete((result, t) -> {
+                    long et = System.currentTimeMillis();
                     if (t != null) {
-                        logger.error("GatewayAsyncSender handlerPostAsync result got error: {}", t.getMessage());
+                        logger.error("GatewayAsyncSender handlerPostAsync result got error: {}, cost: {} ms", t.getMessage(), (et - st));
 
                         String errorMessage;
                         if (t instanceof RemotingException) {
@@ -55,9 +57,12 @@ public class HttpPostProcessor {
                         } else {
                             errorMessage = t.getMessage();
                         }
-                        doResponse(ctx, errorMessage, context.request(), HttpResponseStatus.OK);
+                        doResponse(ctx, errorMessage, context.request());
                     } else {
-                        doResponse(ctx, wrapSuccess(context.requestUrl(), result), context.request(), HttpResponseStatus.OK);
+                        doResponse(ctx, wrapSuccess(context.requestUrl(), result), context.request());
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("handlerPostAsync result successful : {}, cost: {} ms", result, (et - st));
+                        }
                     }
                 });
 
@@ -76,8 +81,8 @@ public class HttpPostProcessor {
         }
     }
 
-    private void doResponse(ChannelHandlerContext ctx, String info, FullHttpRequest request, HttpResponseStatus status) {
-        HttpHandlerUtil.sendHttpResponse(ctx, info, request, status);
+    private void doResponse(ChannelHandlerContext ctx, String info, FullHttpRequest request) {
+        HttpHandlerUtil.sendHttpResponse(ctx, info, request, HttpResponseStatus.OK);
     }
 
 }

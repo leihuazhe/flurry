@@ -43,5 +43,7 @@ public interface GateConstants {
     int POLLING_INTERVAL_TIME = 10;
 
     long TIME_OUT = 2000L;
+
+    String REFERENCE_TIME_OUT = "reference.service.time.out";
 }
 

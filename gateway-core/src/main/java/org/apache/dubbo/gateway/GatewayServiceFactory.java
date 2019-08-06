@@ -17,7 +17,7 @@ import static org.apache.dubbo.util.GateConstants.*;
 public class GatewayServiceFactory {
     private static final Integer TIME_OUT = 10 * 1000;
 
-    private static final ConcurrentMap<Integer, CustomReferenceConfig<GateWayService>> SERVICE_CACHE = new ConcurrentHashMap<>();
+    private static final ConcurrentMap<Integer, GateWayService> SERVICE_CACHE = new ConcurrentHashMap<>();
 
 
     public static GateWayService create(RpcRequest request) {
@@ -32,23 +32,23 @@ public class GatewayServiceFactory {
 
     public static GateWayService create(MetaServiceInfo serviceInfo) {
         Integer key = getCacheKey(serviceInfo);
-        CustomReferenceConfig<GateWayService> referenceConfig = SERVICE_CACHE.get(key);
-        if (referenceConfig == null) {
+        GateWayService gateWayService = SERVICE_CACHE.get(key);
+        if (gateWayService == null) {
             synchronized (GatewayServiceFactory.class) {
-                referenceConfig = SERVICE_CACHE.get(key);
-                if (referenceConfig == null) {
+                gateWayService = SERVICE_CACHE.get(key);
+                if (gateWayService == null) {
                     SERVICE_CACHE.putIfAbsent(key, createReference(serviceInfo));
                 }
             }
-            referenceConfig = SERVICE_CACHE.get(key);
+            gateWayService = SERVICE_CACHE.get(key);
         }
 
-        return referenceConfig.get();
+        return gateWayService;
     }
 
 
     public void destroy() {
-        SERVICE_CACHE.forEach((s, generic) -> generic.destroy());
+//        SERVICE_CACHE.forEach((s, generic) -> generic.destroy());
         SERVICE_CACHE.clear();
     }
 
@@ -66,7 +66,7 @@ public class GatewayServiceFactory {
      * <p>
      * parameters.put("reference.filter", "-genericimpl");
      */
-    private static CustomReferenceConfig<GateWayService> createReference(MetaServiceInfo serviceInfo) {
+    private static GateWayService createReference(MetaServiceInfo serviceInfo) {
 
         CustomReferenceConfig<GateWayService> referenceConfig = new CustomReferenceConfig<>();
 
@@ -97,6 +97,6 @@ public class GatewayServiceFactory {
         //设置其他参数,比如超时等
         referenceConfig.setTimeout(TIME_OUT);
 
-        return referenceConfig;
+        return referenceConfig.get();
     }
 }
