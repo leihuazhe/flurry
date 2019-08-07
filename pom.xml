@@ -37,6 +37,7 @@
     <modules>
         <module>gateway-core</module>
         <module>gateway-app</module>
+        <module>gateway-doc</module>
     </modules>
 
     <dependencyManagement>
