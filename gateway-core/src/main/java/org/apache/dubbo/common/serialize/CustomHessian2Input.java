@@ -294,12 +294,22 @@ public class CustomHessian2Input extends AbstractCustomHessian2Input {
                 }
                 return d6;
 
+            //Date 时间类型
             case BC_DATE:
-                //todo
-                return new Date(parseLong());
+                long ts = parseLong();
+                if (ifExist()) {
+                    jsonWriter.onNumber(ts);
+                }
+                return ts;
+//                return new Date(parseLong());
 
             case BC_DATE_MINUTE:
-                return new Date(parseInt() * 60000L);
+                long bCts = parseInt() * 60000L;
+                if (ifExist()) {
+                    jsonWriter.onNumber(bCts);
+                }
+                return bCts;
+//                return new Date(parseInt() * 60000L);
 
             case BC_STRING_CHUNK:
             case 'S': {
