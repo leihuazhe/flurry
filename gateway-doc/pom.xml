@@ -176,7 +176,6 @@
         </dependency>
 
 
-
         <dependency>
             <groupId>com.taobao.diamond</groupId>
             <artifactId>diamondx-client</artifactId>
@@ -225,58 +224,6 @@
                 <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
 
-            <plugin>
-                <artifactId>maven-antrun-plugin</artifactId>
-                <version>1.8</version>
-                <executions>
-                    <execution>
-                        <id>copy files</id>
-                        <phase>package</phase>
-                        <configuration>
-                            <!-- copy child's output files into target/docker -->
-                            <tasks>
-                                <copy file="${project.build.directory}/ROOT.war" todir="${basedir}/docker/apps">
-                                </copy>
-                            </tasks>
-                        </configuration>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>clean up the docker folder</id>
-                        <phase>clean</phase>
-                        <configuration>
-                            <!-- delete folder under docker -->
-                            <tasks>
-                                <delete dir="${basedir}/docker/apps"/>
-                            </tasks>
-                        </configuration>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <plugin>
-                <groupId>com.spotify</groupId>
-                <artifactId>docker-maven-plugin</artifactId>
-                <version>0.4.10</version>
-                <configuration>
-                    <imageName>harbor-al.yunjiweidian.info/accesslayer/yunji-api-doc:1.0</imageName>
-                    <dockerDirectory>${basedir}/docker</dockerDirectory>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>build-image</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>build</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
