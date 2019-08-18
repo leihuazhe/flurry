@@ -25,11 +25,6 @@ public interface GateConstants {
      * Gateway 自定义修改的 hessian2 协议
      */
     String SERIALIZATION_CUSTOM = "custom_hessian2";
-
-    /**
-     * Gateway 自定义修改的 hessian2 协议 id
-     */
-    byte CUSTOME_HESSIAN2_SERIALIZATION_ID = 50;
     /**
      * 默认获取元数据信息的方法
      */

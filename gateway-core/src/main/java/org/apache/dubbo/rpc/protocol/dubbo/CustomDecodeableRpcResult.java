@@ -24,7 +24,6 @@ import java.io.OutputStream;
 import java.lang.reflect.Type;
 import java.util.Map;
 
-import static com.yunji.gateway.util.GateConstants.CUSTOME_HESSIAN2_SERIALIZATION_ID;
 import static com.yunji.gateway.util.GateConstants.INTERFACE;
 import static com.yunji.gateway.util.GateConstants.METADATA_METHOD_NAME;
 
@@ -55,8 +54,7 @@ public class CustomDecodeableRpcResult extends AppResponse implements Codec, Dec
         this.response = response;
         this.inputStream = is;
         this.invocation = invocation;
-        this.serializationType = CUSTOME_HESSIAN2_SERIALIZATION_ID;
-//        this.serializationType = id;
+        this.serializationType = id;
     }
 
     @Override

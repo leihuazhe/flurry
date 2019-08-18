@@ -65,9 +65,9 @@ public class MetadataUtil {
                     logger.error("目标服务:{} 没有增强方法 getServiceMetadata,无法获取到服务元数据.", serviceName);
                     return null;
                 }
-                logger.error("ResolveServiceMetadata get error: " + tx.getMessage(), tx);
+                logger.error("[" + serviceName + "]: ResolveServiceMetadata get error: " + tx.getMessage(), tx);
             } catch (Exception e) {
-                logger.error("ResolveServiceMetadata get error: " + e.getMessage(), e);
+                logger.error("[" + serviceName + "]: ResolveServiceMetadata get error: " + e.getMessage(), e);
             }
             try {
                 Thread.sleep(1000);
