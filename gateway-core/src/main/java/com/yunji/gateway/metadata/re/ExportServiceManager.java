@@ -1,5 +1,6 @@
 package com.yunji.gateway.metadata.re;
 
+import com.google.common.collect.Sets;
 import com.yunji.gateway.core.ConfigListener;
 import com.yunji.gateway.core.RegistryMetadataClient;
 import com.yunji.gateway.metadata.OptimizedMetadata;
@@ -23,6 +24,10 @@ public class ExportServiceManager implements RegistryListener, ConfigListener {
      * Map of bean definition objects, keyed by bean name
      */
     private static final ConcurrentMap<String, OptimizedMetadata.OptimizedService> serviceMetadataMap = new ConcurrentHashMap<>(256);
+    /**
+     * 暂存最近一次的服务白名单信息.
+     */
+    private Set<String> lastRegistryServices = new HashSet<>();
 
     private RegistryMetadataClient registryMetadataClient;
 
@@ -58,7 +63,6 @@ public class ExportServiceManager implements RegistryListener, ConfigListener {
             synchronized (ExportServiceManager.class) {
                 if (INSTANCE == null) {
                     INSTANCE = new ExportServiceManager();
-//                    INSTANCE.init();
                 }
             }
         }
@@ -67,14 +71,14 @@ public class ExportServiceManager implements RegistryListener, ConfigListener {
 
 
     /**
-     * 通知回调
+     * 外部化配置 加 synchronized,这个接口调用较少
      *
      * @param properties 外部化配置文件
      */
     @Override
-    public void notify(Properties properties) {
+    public synchronized void notify(Properties properties) {
         //得到元数据服务接口全限定名信息.
-        List<String> referServiceList = MetadataUtil.getReferService(properties);
+        Set<String> referServiceList = MetadataUtil.getReferService(properties);
 
         for (String serviceName : referServiceList) {
             OptimizedMetadata.OptimizedService service = serviceMetadataMap.get(serviceName);
@@ -82,19 +86,26 @@ public class ExportServiceManager implements RegistryListener, ConfigListener {
                 synchronized (this) {
                     service = serviceMetadataMap.get(serviceName);
                     if (service == null) {
-                        try {
-                            List<URL> urls = registryMetadataClient.subscribe(serviceName, this);
-                            this.notify(serviceName, null, urls, ChangeType.REGISTRY_INIT_CALLBACK);
-                        } catch (Exception e) {
-                            //todo maybe retry or print detail log message.
-                            logger.error(e.getMessage(), e);
-                        }
+                        List<URL> urls = registryMetadataClient.subscribe(serviceName, this);
+                        this.notifyAsync(serviceName, urls);
+                    } else {
+                        logger.info("Target white list service: {} already cached.", serviceName);
                     }
                 }
             } else {//
                 logger.info("Config white service list,current service [{}]'s metadata  already cached.");
             }
         }
+
+        //处理变少的 RegistryServices
+        Sets.SetView<String> reduceService = Sets.difference(lastRegistryServices, referServiceList);
+        if (!reduceService.isEmpty()) {
+            for (String service : reduceService) {
+                registryMetadataClient.unsubscribe(service);
+            }
+        }
+        lastRegistryServices.clear();
+        lastRegistryServices.addAll(referServiceList);
     }
 
 
@@ -110,27 +121,36 @@ public class ExportServiceManager implements RegistryListener, ConfigListener {
             case REGISTRY_INIT_CALLBACK:
                 logger.info("First subscribe event, service: [{}], childrenUrls: {}", serviceName, childrenUrls);
                 break;
-            case SERVICE_LIST:
+            case RECOVER:
+                logger.info("Registry Recover notified event,service: [{}], path: [{}], childrenUrls: {}", serviceName, path, childrenUrls);
+                break;
             case REGISTRY_CALLBACK:
                 logger.info("Registry center notified event,service: [{}], path: [{}], childrenUrls: {}", serviceName, path, childrenUrls);
                 //need remove.
                 if (serviceMetadataMap.containsKey(serviceName) && childrenUrls.isEmpty()) {
                     serviceMetadataMap.remove(serviceName);
-                    logger.info("Remove service:{} metadata cache, because there is no provider alive." + serviceName);
+                    logger.info("Remove service:{} metadata cache, because there is no provider alive.", serviceName);
                     return;
                 }
                 break;
             default:
                 break;
         }
+        //providers
+        List<URL> providerURLs = childrenUrls.stream()
+                .filter(Objects::nonNull)
+                .filter(UrlUtils::isProvider)
+                .collect(Collectors.toList());
 
+//        refreshMetadata(path, providerURLs);
+        refreshMetadataAsync(path, providerURLs);
+
+
+    }
+
+
+    private void refreshMetadata(String path, List<URL> providerURLs) {
         try {
-            //providers
-            List<URL> providerURLs = childrenUrls.stream()
-                    .filter(Objects::nonNull)
-                    .filter(UrlUtils::isProvider)
-                    .collect(Collectors.toList());
-            // providers
             if (!providerURLs.isEmpty()) {
                 URL url = providerURLs.get(0);
                 String interfaceName = url.getServiceInterface();
@@ -153,6 +173,33 @@ public class ExportServiceManager implements RegistryListener, ConfigListener {
         }
 
         logServiceMetadataMap();
+    }
+
+    private void refreshMetadataAsync(String path, List<URL> providerURLs) {
+        if (!providerURLs.isEmpty()) {
+            URL url = providerURLs.get(0);
+            String interfaceName = url.getServiceInterface();
+            String group = url.getParameter(GROUP_KEY);
+            String version = url.getParameter(VERSION_KEY);
+
+            CompletableFuture<OptimizedMetadata.OptimizedService> resultFuture
+                    = MetadataUtil.callServiceMetadataAsync(interfaceName, version, group);
+
+            if (optimizedService == null) {
+                logger.warn("ExportServiceManager 获取服务 {} 元数据失败. ", interfaceName);
+                return;
+            }
+            serviceMetadataMap.put(interfaceName, optimizedService);
+        }
+    }
+
+    /**
+     * notify async
+     */
+    private void notifyAsync(String serviceName, List<URL> childrenUrls) {
+        CompletableFuture.runAsync(() -> {
+            notify(serviceName, null, childrenUrls, ChangeType.REGISTRY_INIT_CALLBACK);
+        });
     }
 
     /**

@@ -1,6 +1,7 @@
 package com.yunji.gateway.metadata.discovery;
 
 import com.yunji.gateway.core.RegistryMetadataClient;
+import com.yunji.gateway.metadata.OptimizedMetadata;
 import com.yunji.gateway.metadata.re.ChangeType;
 import com.yunji.gateway.metadata.re.RegistryListener;
 import org.apache.dubbo.common.URL;
@@ -13,6 +14,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import static org.apache.dubbo.common.constants.CommonConstants.*;
 import static org.apache.dubbo.common.constants.RegistryConstants.*;
@@ -30,6 +33,8 @@ public class CuratorMetadataClient implements RegistryMetadataClient {
     private static final String DEFAULT_ROOT = "dubbo";
 
     private Set<RegistryListener> listeners = new HashSet<>();
+
+    private static final ConcurrentMap<String, ChildListener> serviceRegistryListeners = new ConcurrentHashMap<>(256);
 
     public CuratorMetadataClient(URL url, ZookeeperTransporter zookeeperTransporter) {
         if (url.isAnyHost()) {
@@ -72,13 +77,20 @@ public class CuratorMetadataClient implements RegistryMetadataClient {
             }
         };
         List<String> childrenUrls = zkClient.addChildListener(subscribePath, childListener);
+        serviceRegistryListeners.putIfAbsent(serviceName, childListener);
 
         return toUrls(childrenUrls);
     }
 
     @Override
-    public List<URL> unsubscribe(String serviceName) {
-        return null;
+    public void unsubscribe(String serviceName) {
+        String subscribePath = toServicePath(serviceName) + PATH_SEPARATOR + PROVIDERS_CATEGORY;
+        ChildListener childListener = serviceRegistryListeners.remove(serviceName);
+
+        if (childListener != null) {
+            zkClient.removeChildListener(subscribePath, childListener);
+            logger.info("Unsubscribe service: {} ,subscribePath: {}", serviceName, subscribePath);
+        }
     }
 
     /**
@@ -86,24 +98,16 @@ public class CuratorMetadataClient implements RegistryMetadataClient {
      *
      * @throws Exception
      */
-    protected void recover(/*ConfigContext context*/) throws Exception {
-//        logger.info("recover the curator registry,root: {},context white list: {}",
-//                root, String.join(",", context.getWhiteServiceSet()));
-
-//        subscribeRootServices();
-//        // subscribe
-//        Map<String, RegistryDefinition> recoverSubscribed = new HashMap<>(getSubscribed());
-//        if (!recoverSubscribed.isEmpty()) {
-//            if (logger.isInfoEnabled()) {
-//                logger.info("\n Recover subscribe url {}. \n", recoverSubscribed.keySet());
-//            }
-//
-//            for (Map.Entry<String, RegistryDefinition> entry : recoverSubscribed.entrySet()) {
-//                String serviceKey = entry.getKey();
-//                RegistryDefinition definition = entry.getValue();
-//                subscribe(serviceKey, definition);
-//            }
-//        }
+    protected void recover() throws Exception {
+        serviceRegistryListeners.forEach((serviceName, childListener) -> {
+            String subscribePath = toServicePath(serviceName) + PATH_SEPARATOR + PROVIDERS_CATEGORY;
+            logger.info("Recover Subscribe  service interface: [{}], subscribePath: [{}]", serviceName, subscribePath);
+            List<String> urlString = zkClient.addChildListener(subscribePath, childListener);
+            List<URL> childrenUrls = toUrls(urlString);
+            for (RegistryListener listener : listeners) {
+                listener.notify(serviceName, subscribePath, childrenUrls, ChangeType.RECOVER);
+            }
+        });
     }
 
 
@@ -121,18 +125,7 @@ public class CuratorMetadataClient implements RegistryMetadataClient {
         return urls;
     }
 
-
-//    protected void unsubscribe(String childUrl) {
-//        RegistryDefinition definition = getSubscribed().remove(childUrl);
-//        if (definition != null) {
-//            logger.info("Unsubscribe childUrl {} ,fullPath: {}", childUrl, definition.getFullPath());
-//            zkClient.removeChildListener(childUrl, definition.getChildListener());
-//            metadataResolver.removeServiceMetadata(childUrl);
-//        }
-//    }
-
     private String toServicePath(String serviceName) {
-
         return toRootDir() + URL.encode(serviceName);
     }
 

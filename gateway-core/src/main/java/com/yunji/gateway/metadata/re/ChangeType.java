@@ -9,5 +9,6 @@ public enum ChangeType {
 
     REGISTRY_INIT_CALLBACK,
 
-    SERVICE_LIST
+    RECOVER
+
 }

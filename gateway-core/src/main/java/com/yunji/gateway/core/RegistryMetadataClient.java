@@ -13,5 +13,5 @@ public interface RegistryMetadataClient {
     List<URL> subscribe(String serviceName, RegistryListener registryListener);
 
 
-    List<URL> unsubscribe(String serviceName);
+    void unsubscribe(String serviceName);
 }

@@ -15,11 +15,8 @@ import org.slf4j.LoggerFactory;
 
 import javax.xml.bind.JAXB;
 import java.io.StringReader;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Properties;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
+import java.util.*;
+import java.util.concurrent.*;
 
 /**
  * @author Denim.leihz 2019-08-16 9:37 PM
@@ -27,6 +24,24 @@ import java.util.concurrent.TimeUnit;
 public class MetadataUtil {
     private static final Logger logger = LoggerFactory.getLogger(MetadataUtil.class);
 
+    private static ExecutorService executorService = Executors.newFixedThreadPool(5);
+
+
+    /**
+     * 支持重试的模式获取 OptimizedService
+     *
+     * @param serviceName 服务接口全限定名
+     * @param version     服务版本信息
+     * @param group       服务分组,一般为 null
+     * @return 服务元数据信息
+     */
+    public static CompletableFuture<OptimizedMetadata.OptimizedService> callServiceMetadataAsync(String serviceName, String version, String group) {
+        CompletableFuture<OptimizedMetadata.OptimizedService> completableFuture = CompletableFuture.supplyAsync(() -> {
+            return callServiceMetadata(serviceName, version, group);
+        }, executorService);
+
+        return completableFuture;
+    }
 
     /**
      * 支持重试的模式获取 OptimizedService
@@ -85,7 +100,7 @@ public class MetadataUtil {
      * @param properties 配置信息 WHITE_SERVICES_KEY
      * @return 需要引用的服务接口 list
      */
-    public static List<String> getReferService(Properties properties) {
+    public static Set<String> getReferService(Properties properties) {
         Assert.notNull(properties, "ConfigServer 获取到的外部化配置信息为空，请检查并配置相关信息.");
         String baseKey = GateConstants.WHITE_SERVICES_KEY;
         //todo properties NullPointException.
@@ -93,14 +108,14 @@ public class MetadataUtil {
         char ch = ',';
 
         if (StringUtils.isNotEmpty(whiteStr)) {
-            List<String> list = null;
+            Set<String> list = null;
             char c;
             int ix = 0, len = whiteStr.length();
             for (int i = 0; i < len; i++) {
                 c = whiteStr.charAt(i);
                 if (c == ch) {
                     if (list == null) {
-                        list = new ArrayList<>();
+                        list = new HashSet<>();
                     }
                     list.add(whiteStr.substring(ix, i));
                     ix = i + 1;
@@ -109,7 +124,7 @@ public class MetadataUtil {
             if (ix > 0) {
                 list.add(whiteStr.substring(ix));
             }
-            return list == null ? new ArrayList<>() : list;
+            return list == null ? new HashSet<>() : list;
         } else {
             throw new IllegalArgumentException("White list String is empty. Please specify the list string on config server.");
         }
