@@ -63,6 +63,6 @@ public interface GateConstants {
     String REFERENCE_TIME_OUT = "reference.service.time.out";
 
 
-    int DEFAULT_RETRY = 10;
+    int DEFAULT_RETRY = 3;
 }
 

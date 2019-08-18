@@ -36,11 +36,7 @@ public class MetadataUtil {
      * @return 服务元数据信息
      */
     public static CompletableFuture<OptimizedMetadata.OptimizedService> callServiceMetadataAsync(String serviceName, String version, String group) {
-        CompletableFuture<OptimizedMetadata.OptimizedService> completableFuture = CompletableFuture.supplyAsync(() -> {
-            return callServiceMetadata(serviceName, version, group);
-        }, executorService);
-
-        return completableFuture;
+        return CompletableFuture.supplyAsync(() -> callServiceMetadata(serviceName, version, group), executorService);
     }
 
     /**

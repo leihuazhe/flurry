@@ -142,10 +142,7 @@ public class ExportServiceManager implements RegistryListener, ConfigListener {
                 .filter(UrlUtils::isProvider)
                 .collect(Collectors.toList());
 
-//        refreshMetadata(path, providerURLs);
         refreshMetadataAsync(path, providerURLs);
-
-
     }
 
 
@@ -185,11 +182,20 @@ public class ExportServiceManager implements RegistryListener, ConfigListener {
             CompletableFuture<OptimizedMetadata.OptimizedService> resultFuture
                     = MetadataUtil.callServiceMetadataAsync(interfaceName, version, group);
 
-            if (optimizedService == null) {
-                logger.warn("ExportServiceManager 获取服务 {} 元数据失败. ", interfaceName);
-                return;
-            }
-            serviceMetadataMap.put(interfaceName, optimizedService);
+            resultFuture.whenComplete((optimizedService, e) -> {
+                if (e != null) {
+                    logger.error("ExportServiceManager notify error " + e.getMessage(), e);
+                } else {
+                    if (optimizedService == null) {
+                        logger.warn("ExportServiceManager 获取服务 {} 元数据失败. ", interfaceName);
+                        return;
+                    }
+                    serviceMetadataMap.put(interfaceName, optimizedService);
+                    logServiceMetadataMap();
+                }
+            });
+        } else {
+            logger.warn("No provider found for specified service: {}", path);
         }
     }
 
