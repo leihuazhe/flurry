@@ -1,13 +1,12 @@
 package org.apache.dubbo.common.serialize;
 
 import com.alibaba.com.caucho.hessian.io.Deserializer;
-import org.apache.dubbo.jsonserializer.json.JsonCallback;
+import com.yunji.gateway.jsonserializer.JsonCallback;
 
 import java.io.ByteArrayOutputStream;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Date;
 import java.util.List;
 
 /**

@@ -3,8 +3,8 @@ package com.yunji.gateway.doc.controller;
 import com.google.gson.Gson;
 //import com.yunji.api.doc.openapi.metadata.ServiceMetadataCache;
 import com.yunji.gateway.doc.dto.MetaDto;
-import org.apache.dubbo.metadata.OptimizedMetadata;
-import org.apache.dubbo.metadata.auto.ServiceMetadataRepository;
+import com.yunji.gateway.metadata.OptimizedMetadata;
+import com.yunji.gateway.metadata.auto.ServiceMetadataRepository;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 

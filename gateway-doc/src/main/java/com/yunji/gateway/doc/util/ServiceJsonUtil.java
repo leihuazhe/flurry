@@ -1,7 +1,7 @@
 package com.yunji.gateway.doc.util;
 
-import org.apache.dubbo.metadata.tag.Service;
-import org.apache.dubbo.metadata.tag.TEnum;
+import com.yunji.gateway.metadata.tag.Service;
+import com.yunji.gateway.metadata.tag.TEnum;
 
 import java.util.HashMap;
 import java.util.List;

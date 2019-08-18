@@ -17,7 +17,7 @@
 //
 //
 //    public void init() {
-//        String zkHost = PropertyUtils.getProperty(REGISTRY_URL_CONSTANT, DEFAULT_REGISTRY_URL);
+//        String zkHost = PropertyUtils.getProperty(REGISTRY_URL_KEY, DEFAULT_REGISTRY_URL);
 //        zookeeperClient = new ZookeeperClientDiscovery(zkHost);
 //        zookeeperClient.init(false);
 //    }

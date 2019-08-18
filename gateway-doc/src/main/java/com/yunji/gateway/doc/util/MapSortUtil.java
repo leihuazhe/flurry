@@ -1,7 +1,7 @@
 package com.yunji.gateway.doc.util;
 
 
-import org.apache.dubbo.metadata.tag.Service;
+import com.yunji.gateway.metadata.tag.Service;
 
 import java.util.Collection;
 import java.util.Map;

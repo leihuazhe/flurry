@@ -1,8 +1,8 @@
 package com.yunji.gateway.doc.repository;
 
 import com.yunji.api.doc.compatible.SoaCode;
-import org.apache.dubbo.gateway.core.DubboExecutedFacade;
-import org.apache.dubbo.metadata.OptimizedMetadata;
+import com.yunji.gateway.core.DubboExecutedFacade;
+import com.yunji.gateway.metadata.OptimizedMetadata;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;

@@ -11,7 +11,7 @@ import org.apache.dubbo.common.utils.ReflectUtils;
 import org.apache.dubbo.common.utils.StringUtils;
 
 
-import org.apache.dubbo.jsonserializer.json.JsonDuplexHandler;
+import com.yunji.gateway.jsonserializer.JsonDuplexHandler;
 import org.apache.dubbo.remoting.Channel;
 import org.apache.dubbo.remoting.exchange.Request;
 import org.apache.dubbo.remoting.exchange.Response;
@@ -20,18 +20,16 @@ import org.apache.dubbo.remoting.transport.CodecSupport;
 import org.apache.dubbo.rpc.Invocation;
 import org.apache.dubbo.rpc.Result;
 import org.apache.dubbo.rpc.RpcInvocation;
-import org.apache.dubbo.util.GatewayUtil;
+import com.yunji.gateway.util.MixUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
 
-import static org.apache.dubbo.common.constants.CommonConstants.PATH_KEY;
-import static org.apache.dubbo.common.constants.CommonConstants.VERSION_KEY;
+import static com.yunji.gateway.util.GateConstants.*;
+import static org.apache.dubbo.common.constants.CommonConstants.*;
+import static org.apache.dubbo.rpc.protocol.dubbo.Constants.*;
 import static org.apache.dubbo.remoting.Constants.DUBBO_VERSION_KEY;
 import static org.apache.dubbo.rpc.protocol.dubbo.CallbackServiceCodec.encodeInvocationArgument;
-import static org.apache.dubbo.rpc.protocol.dubbo.Constants.DECODE_IN_IO_THREAD_KEY;
-import static org.apache.dubbo.rpc.protocol.dubbo.Constants.DEFAULT_DECODE_IN_IO_THREAD;
-import static org.apache.dubbo.util.GateConstants.*;
 
 
 public class CustomDubboCodec extends ExchangeCodec {
@@ -166,10 +164,10 @@ public class CustomDubboCodec extends ExchangeCodec {
 
         out.writeUTF(inv.getMethodName());
 
-        //todo 这里进行自定义,请求参数传送过来的数据是 json 形式.
+        //Notice: 这里进行自定义,请求参数传送过来的数据是 json 形式.
         if (Boolean.valueOf(inv.getInvoker().getUrl().getParameter(GATEWAY_KEY))) {
             String parameterTypes = inv.getAttachment(PARAMETER_TYPE);
-            out.writeUTF(GatewayUtil.getDescOfString(parameterTypes));
+            out.writeUTF(MixUtils.getDescOfString(parameterTypes));
 
             Object[] args = inv.getArguments();
 

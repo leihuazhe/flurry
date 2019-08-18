@@ -70,6 +70,12 @@
             <artifactId>gateway-core</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>com.yunji.gateway</groupId>
+            <version>1.0.0</version>
+            <artifactId>dubbo-demo-api</artifactId>
+        </dependency>
+
 
     </dependencies>
 

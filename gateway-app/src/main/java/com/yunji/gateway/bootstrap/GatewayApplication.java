@@ -6,9 +6,6 @@ import com.yunji.gateway.util.GatewayException;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.util.concurrent.DefaultThreadFactory;
-import org.apache.dubbo.metadata.MetadataResolver;
-import org.apache.dubbo.metadata.util.MetadataUtil;
-import org.apache.dubbo.util.GatewayUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,9 +14,6 @@ import org.slf4j.LoggerFactory;
  */
 public class GatewayApplication {
     private static final Logger logger = LoggerFactory.getLogger(GatewayApplication.class);
-
-    private MetadataResolver metadataResolver;
-
     /**
      * Synchronization monitor for the "refresh" and "destroy"
      */
@@ -41,11 +35,6 @@ public class GatewayApplication {
     private String diamondId;
 
     private String banner;
-
-
-    {
-        metadataResolver = GatewayUtil.getSupportedExtension(MetadataResolver.class);
-    }
 
 
     public void setPort(int port) {
@@ -106,10 +95,4 @@ public class GatewayApplication {
             Runtime.getRuntime().addShutdownHook(this.shutdownHook);
         }
     }
-
-    public void initMetadata(String dataId) throws Exception {
-        MetadataUtil.initMetadata(dataId, registryUrl, metadataResolver);
-    }
-
-
 }

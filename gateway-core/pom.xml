@@ -19,6 +19,7 @@
             <artifactId>dubbo-registry-zookeeper</artifactId>
         </dependency>
 
+        <!--如果没有这个依赖,会出现莫名的 RegistryDirectory forbiden true 的问题-->
         <dependency>
             <groupId>org.apache.dubbo</groupId>
             <artifactId>dubbo-configcenter-zookeeper</artifactId>

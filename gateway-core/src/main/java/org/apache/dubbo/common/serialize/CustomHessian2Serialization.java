@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+import static com.yunji.gateway.util.GateConstants.CUSTOME_HESSIAN2_SERIALIZATION_ID;
 import static org.apache.dubbo.common.serialize.Constants.HESSIAN2_SERIALIZATION_ID;
 
 /**
@@ -15,7 +16,8 @@ public class CustomHessian2Serialization implements Serialization {
 
     @Override
     public byte getContentTypeId() {
-        return HESSIAN2_SERIALIZATION_ID;
+        return CUSTOME_HESSIAN2_SERIALIZATION_ID;
+//        return HESSIAN2_SERIALIZATION_ID;
     }
 
     @Override

@@ -4,7 +4,7 @@ import org.apache.dubbo.common.URL;
 import org.apache.dubbo.common.bytecode.Proxy;
 import org.apache.dubbo.common.bytecode.Wrapper;
 import org.apache.dubbo.common.utils.ReflectUtils;
-import org.apache.dubbo.gateway.GateWayService;
+import com.yunji.gateway.GateWayService;
 import org.apache.dubbo.rpc.Invoker;
 import org.apache.dubbo.rpc.RpcException;
 import org.apache.dubbo.rpc.proxy.AbstractProxyFactory;

@@ -4,7 +4,7 @@ import com.yunji.gateway.netty.http.request.RequestContext;
 import com.yunji.gateway.util.GateWayErrorCode;
 import com.yunji.gateway.util.GatewayException;
 import io.netty.channel.ChannelHandlerContext;
-import org.apache.dubbo.gateway.core.DubboExecutedFacade;
+import com.yunji.gateway.core.DubboExecutedFacade;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;

@@ -9,7 +9,7 @@ import org.apache.dubbo.common.utils.*;
 import org.apache.dubbo.config.annotation.Reference;
 import org.apache.dubbo.config.context.ConfigManager;
 import org.apache.dubbo.config.support.Parameter;
-import org.apache.dubbo.gateway.GateWayService;
+import com.yunji.gateway.GateWayService;
 import org.apache.dubbo.metadata.integration.MetadataReportService;
 import org.apache.dubbo.rpc.Invoker;
 import org.apache.dubbo.rpc.Protocol;
@@ -23,7 +23,7 @@ import org.apache.dubbo.rpc.model.ConsumerModel;
 import org.apache.dubbo.rpc.protocol.injvm.InjvmProtocol;
 import org.apache.dubbo.rpc.service.GenericService;
 import org.apache.dubbo.rpc.support.ProtocolUtils;
-import org.apache.dubbo.util.GatewayUtil;
+import com.yunji.gateway.util.MixUtils;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -204,7 +204,7 @@ public class CustomReferenceConfig<T> extends AbstractReferenceConfig {
         if (ProtocolUtils.isGeneric(getGeneric())) {
             interfaceClass = GenericService.class;
             //todo Customer 内容
-        } else if (GatewayUtil.isGateway(getGateway())) {
+        } else if (MixUtils.isGateway(getGateway())) {
             interfaceClass = GateWayService.class;
         } else {
             try {

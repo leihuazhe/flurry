@@ -3,8 +3,8 @@ package com.yunji.gateway.doc.util;
 import com.yunji.gateway.doc.dto.EventDto;
 import com.yunji.gateway.doc.dto.EventVo;
 import com.yunji.gateway.doc.properties.ServiceConstants;
-import org.apache.dubbo.metadata.tag.Method;
-import org.apache.dubbo.metadata.tag.Service;
+import com.yunji.gateway.metadata.tag.Method;
+import com.yunji.gateway.metadata.tag.Service;
 
 import java.util.*;
 import java.util.stream.Collectors;

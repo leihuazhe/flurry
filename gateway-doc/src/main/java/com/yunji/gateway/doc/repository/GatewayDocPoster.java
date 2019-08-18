@@ -7,9 +7,9 @@ import com.yunji.api.doc.compatible.ServiceInfo;
 import com.yunji.api.doc.compatible.SoaCode;
 import com.yunji.api.doc.openapi.cache.ZookeeperClient;
 import com.yunji.api.doc.openapi.post.Post;
-import org.apache.dubbo.metadata.OptimizedMetadata;
-import org.apache.dubbo.metadata.auto.ServiceMetadataRepository;
-import org.apache.dubbo.metadata.tag.*;
+import com.yunji.gateway.metadata.OptimizedMetadata;
+import com.yunji.gateway.metadata.auto.ServiceMetadataRepository;
+import com.yunji.gateway.metadata.tag.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
