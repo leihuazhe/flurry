@@ -1,8 +1,8 @@
 package com.yunji.gateway.doc.config;
 
-import com.yunji.api.doc.openapi.post.Post;
 import com.yunji.gateway.doc.repository.GatewayDocStreamPoster;
 import com.yunji.gateway.core.DubboExecutedFacade;
+import com.yunji.gateway.process.Post;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;

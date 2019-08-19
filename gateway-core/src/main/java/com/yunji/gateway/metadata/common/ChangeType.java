@@ -1,4 +1,4 @@
-package com.yunji.gateway.metadata.re;
+package com.yunji.gateway.metadata.common;
 
 /**
  * @author Denim.leihz 2019-08-16 9:29 PM

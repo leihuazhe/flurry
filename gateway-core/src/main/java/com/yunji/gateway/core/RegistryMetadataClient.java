@@ -1,6 +1,6 @@
 package com.yunji.gateway.core;
 
-import com.yunji.gateway.metadata.re.RegistryListener;
+import com.yunji.gateway.metadata.core.RegistryListener;
 import org.apache.dubbo.common.URL;
 
 import java.util.List;

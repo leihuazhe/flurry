@@ -1,22 +1,20 @@
 package com.yunji.gateway.jsonserializer;
 
-import com.yunji.gateway.metadata.OptimizedMetadata;
-import com.yunji.gateway.metadata.tag.Method;
+import com.yunji.gateway.metadata.OptimizedService;
+import com.yunji.gateway.metadata.OptimizedStruct;
 import org.apache.dubbo.common.serialize.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
 
 public class JsonSerializer implements BeanSerializer<String> {
 
-    private final OptimizedMetadata.OptimizedStruct optimizedStruct;
-    private final OptimizedMetadata.OptimizedService optimizedService;
+    private final OptimizedStruct optimizedStruct;
+    private final OptimizedService optimizedService;
 
 
-    JsonSerializer(OptimizedMetadata.OptimizedService optimizedService,
-                   OptimizedMetadata.OptimizedStruct optimizedStruct) {
+    JsonSerializer(OptimizedService optimizedService,
+                   OptimizedStruct optimizedStruct) {
 
         this.optimizedStruct = optimizedStruct;
         this.optimizedService = optimizedService;

@@ -1,13 +1,14 @@
-package com.yunji.gateway.metadata.re;
+package com.yunji.gateway.metadata.common;
 
 import com.yunji.gateway.GateWayService;
 import com.yunji.gateway.GatewayServiceFactory;
-import com.yunji.gateway.metadata.OptimizedMetadata;
-import com.yunji.gateway.metadata.discovery.RegistryConstants;
-import com.yunji.gateway.metadata.tag.Service;
+import com.yunji.gateway.metadata.OptimizedService;
 import com.yunji.gateway.util.GateConstants;
 import org.apache.dubbo.common.utils.Assert;
 import org.apache.dubbo.common.utils.StringUtils;
+import com.yunji.gateway.jsonserializer.TType;
+import com.yunji.gateway.metadata.tag.DataType;
+import com.yunji.gateway.metadata.tag.Service;
 import org.apache.dubbo.config.MetaServiceInfo;
 import org.apache.dubbo.rpc.RpcContext;
 import org.slf4j.Logger;
@@ -19,23 +20,22 @@ import java.util.*;
 import java.util.concurrent.*;
 
 /**
- * @author Denim.leihz 2019-08-16 9:37 PM
+ * @author Denim.leihz 2019-07-23 6:06 PM
  */
 public class MetadataUtil {
-    private static final Logger logger = LoggerFactory.getLogger(MetadataUtil.class);
+    private static Logger logger = LoggerFactory.getLogger(MetadataUtil.class);
 
     private static ExecutorService executorService = Executors.newFixedThreadPool(5);
-
 
     /**
      * 支持重试的模式获取 OptimizedService
      *
      * @param serviceName 服务接口全限定名
      * @param version     服务版本信息
-     * @param group       服务分组,一般为 null
+     * @param group       服务分组,一般为 nulls
      * @return 服务元数据信息
      */
-    public static CompletableFuture<OptimizedMetadata.OptimizedService> callServiceMetadataAsync(String serviceName, String version, String group) {
+    public static CompletableFuture<OptimizedService> callServiceMetadataAsync(String serviceName, String version, String group) {
         return CompletableFuture.supplyAsync(() -> callServiceMetadata(serviceName, version, group), executorService);
     }
 
@@ -47,7 +47,7 @@ public class MetadataUtil {
      * @param group       服务分组,一般为 null
      * @return 服务元数据信息
      */
-    public static OptimizedMetadata.OptimizedService callServiceMetadata(String serviceName, String version, String group) {
+    public static OptimizedService callServiceMetadata(String serviceName, String version, String group) {
         int retry = GateConstants.DEFAULT_RETRY;
         for (int i = 0; i < retry; i++) {
             try {
@@ -68,7 +68,7 @@ public class MetadataUtil {
 
                 try (StringReader reader = new StringReader(metaString)) {
                     Service service = JAXB.unmarshal(reader, Service.class);
-                    return new OptimizedMetadata.OptimizedService(service);
+                    return new OptimizedService(service);
                 }
             } catch (ExecutionException tx) {
                 String detailMsg = tx.getMessage();
@@ -99,7 +99,6 @@ public class MetadataUtil {
     public static Set<String> getReferService(Properties properties) {
         Assert.notNull(properties, "ConfigServer 获取到的外部化配置信息为空，请检查并配置相关信息.");
         String baseKey = GateConstants.WHITE_SERVICES_KEY;
-        //todo properties NullPointException.
         String whiteStr = properties.getProperty(baseKey);
         char ch = ',';
 
@@ -124,5 +123,122 @@ public class MetadataUtil {
         } else {
             throw new IllegalArgumentException("White list String is empty. Please specify the list string on config server.");
         }
+    }
+
+
+    public static byte dataType2Byte(DataType type) {
+        switch (type.kind) {
+            case BOOLEAN:
+                return TType.BOOL;
+
+            case BYTE:
+                return TType.BYTE;
+
+            case DOUBLE:
+                return TType.DOUBLE;
+
+            case SHORT:
+                return TType.I16;
+
+            case INTEGER:
+                return TType.I32;
+
+            case LONG:
+                return TType.I64;
+
+            case STRING:
+                return TType.STRING;
+
+            case STRUCT:
+                return TType.STRUCT;
+
+            case MAP:
+                return TType.MAP;
+
+            case SET:
+                return TType.SET;
+
+            case LIST:
+                return TType.LIST;
+
+            case ENUM:
+                return TType.I32;
+
+            case VOID:
+                return TType.VOID;
+
+            case DATE:
+                return TType.I64;
+
+            case BIGDECIMAL:
+                return TType.STRING;
+
+            case BINARY:
+                return TType.STRING;
+
+            default:
+                break;
+        }
+
+        return TType.STOP;
+    }
+
+    public static String getDataKindType(DataType dataType) {
+        String qualifiedName = dataType.qualifiedName;
+        if (qualifiedName != null) {
+            return qualifiedName;
+        }
+        DataType.KIND kind = dataType.kind;
+
+        switch (kind) {
+            case VOID:
+                return "java.lang.Void";
+            case BOOLEAN:
+                return "java.lang.Boolean";
+            case BYTE:
+                return "java.lang.Byte";
+            case SHORT:
+                return "java.lang.Short";
+            case INTEGER:
+                return "java.lang.Integer";
+            case LONG:
+                return "java.lang.Long";
+            case DOUBLE:
+                return "java.lang.Double";
+            case STRING:
+                return "java.lang.String";
+            case BINARY:
+                return null;
+            case MAP:
+                return "java.util.Map";
+            case LIST:
+                return "java.lang.List";
+            case SET:
+                return "java.lang.Set";
+            case ENUM:
+                return "java.lang.Enum";
+            case STRUCT:
+                return null;
+            case DATE:
+                return "java.util.Date";
+            case BIGDECIMAL:
+                return "java.math.BigDecimal";
+
+            default:
+                return null;
+        }
+    }
+
+
+    public static String getServiceKey(Service service) {
+        return getServiceKey(service.getName(), service.getMeta().version);
+    }
+
+    public static String getServiceFullNameKey(Service service) {
+        return getServiceKey(service.getNamespace() + "." + service.getName(), service.getMeta().version);
+    }
+
+    public static String getServiceKey(String name, String version) {
+        return name + ":" + version;
     }
 }

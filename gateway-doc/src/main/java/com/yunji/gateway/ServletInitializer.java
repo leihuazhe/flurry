@@ -1,6 +1,5 @@
-package com.yunji.gateway.doc;
+package com.yunji.gateway;
 
-import com.yunji.gateway.doc.ApiDocApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.support.SpringBootServletInitializer;
 

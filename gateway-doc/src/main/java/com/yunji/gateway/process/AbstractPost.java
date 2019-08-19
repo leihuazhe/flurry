@@ -1,4 +1,4 @@
-package com.yunji.gateway.doc.repository;
+package com.yunji.gateway.process;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
@@ -6,7 +6,6 @@ import com.alibaba.fastjson.JSONObject;
 import com.yunji.gateway.metadata.OptimizedService;
 import com.yunji.gateway.metadata.core.ExportServiceManager;
 import com.yunji.gateway.metadata.tag.*;
-import com.yunji.gateway.process.Post;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,21 +14,19 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-
-public abstract class GatewayDocPoster implements Post {
-
-    private static final AtomicInteger serviceGetCounter = new AtomicInteger();
-
-    protected final Logger logger = LoggerFactory.getLogger(getClass());
+/**
+ * @author Denim.leihz 2019-08-01 2:57 PM
+ */
+public abstract class AbstractPost implements Post {
+    protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
 
     protected String registryUrl;
 
     protected String diamondId;
 
-    public GatewayDocPoster(String registryUrl, String diamondId) {
+    public AbstractPost(String registryUrl, String diamondId) {
         this.registryUrl = registryUrl;
         this.diamondId = diamondId;
     }
@@ -47,12 +44,29 @@ public abstract class GatewayDocPoster implements Post {
                         String version,
                         String method,
                         String parameter) {
+
+//        String finalVersion;
+//        List<ServiceInfo> serviceInfos = ZookeeperClient.getServiceInfosByName(service);
+//        if (serviceInfos == null || serviceInfos.isEmpty()) {
+//            finalVersion = (version == null || version.isEmpty()) ? "1.0.0" : version;
+//        } else {
+//            //RouteRobin
+//            finalVersion = serviceInfos.get(serviceGetCounter.getAndIncrement() % serviceInfos.size()).versionName;
+//        }
+
         OptimizedService bizService = ExportServiceManager.getInstance().getMetadata(service, version);
 
-        if (bizService == null) {
-            logger.error("bizService not found[service:" + service + ", version:" + version + "]");
-            return String.format("{\"responseCode\":\"%s\", \"responseMsg\":\"%s\", \"success\":\"%s\", \"status\":0}", 500, "No matched service", "{}");
+        /*if (bizService == null) {
+            LOGGER.error("bizService not found[service:" + service + ", version:" + version + "]");
+            return String.format("{\"responseCode\":\"%s\", \"responseMsg\":\"%s\", \"success\":\"%s\", \"status\":0}", SoaCode.NoMatchedService.getCode(), SoaCode.NoMatchedService.getMsg(), "{}");
         }
+
+        URL serviceURL = ServiceMetadataCache.get().serviceRegistryUrls.get(service);
+        if (serviceURL == null) {
+            LOGGER.error("registryService not found[service:" + service + ", version:" + version + "]");
+            return String.format("{\"responseCode\":\"%s\", \"responseMsg\":\"%s\", \"success\":\"%s\", \"status\":0}", SoaCode.NoMatchedService.getCode(), SoaCode.NoMatchedService.getMsg(), "{}");
+        }*/
+
         return doPost(service, bizService, method, version, parameter);
     }
 
@@ -62,6 +76,12 @@ public abstract class GatewayDocPoster implements Post {
                                      String finalVersion,
                                      String parameter);
 
+
+    /**
+     * @param resp
+     * @param updatedResp
+     * @return
+     */
 
 
     /**
@@ -184,7 +204,7 @@ public abstract class GatewayDocPoster implements Post {
                 }
                 break;
             default:
-                logger.warn(" unsupported dataType: " + dataType.kind.name());
+                LOGGER.warn(" unsupported dataType: " + dataType.kind.name());
                 break;
         }
         return lParams;
@@ -246,7 +266,7 @@ public abstract class GatewayDocPoster implements Post {
                 }
                 break;
             default:
-                logger.warn(" unsupported dataType: " + dataType.kind.name());
+                LOGGER.warn(" unsupported dataType: " + dataType.kind.name());
                 break;
         }
         return params;
@@ -264,4 +284,3 @@ public abstract class GatewayDocPoster implements Post {
         });
     }
 }
-

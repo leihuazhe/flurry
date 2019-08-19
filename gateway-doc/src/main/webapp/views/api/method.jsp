@@ -15,7 +15,7 @@
         $(function () {
             var mAction = new api.MethodAction();
 
-            mAction.findMethod("${service.name}", "${service.meta.version}", "${method.name}",isModel=true);
+            mAction.findMethod("${service.namespace}.${service.name}", "${service.meta.version}", "${method.name}",isModel=true);
         });
     </script>
 </head>
@@ -29,7 +29,7 @@
         <ol class="breadcrumb">
             <li><a href="${basePath}/">首页</a></li>
             <li><a href="${basePath}/api/index.htm">API</a></li>
-            <li><a href="${basePath}/api/service/${service.name}/${service.meta.version}.htm">${service.name}</a></li>
+            <li><a href="${basePath}/api/service/${service.namespace}.${service.name}/${service.meta.version}.htm">${service.name}</a></li>
             <li><a class="active">${method.name}</a></li>
         </ol>
     </div>
@@ -38,7 +38,7 @@
             <div class="list-group">
                 <c:forEach var="m" items="${methods}">
                     <a class="list-group-item ${m == method ? 'active' : ''}"
-                       href="${basePath}/api/method/${service.name}/${service.meta.version}/${m.name}.htm">
+                       href="${basePath}/api/method/${service.namespace}.${service.name}/${service.meta.version}/${m.name}.htm">
                         <span class="glyphicon glyphicon-chevron-right"></span>
                         <c:out value="${m.name}"/>
                     </a>
@@ -49,7 +49,7 @@
             <div class="page-header mt5">
                 <h1 class="mt5">${method.name}</h1>
             </div>
-            <button type="button" class="btn btn-info" onclick="window.location.href = '${basePath}/api/test/${service.name}/${service.meta.version}/${method.name}.htm'">在线测试</button>
+            <button type="button" class="btn btn-info" onclick="window.location.href = '${basePath}/api/test/${service.namespace}.${service.name}/${service.meta.version}/${method.name}.htm'">在线测试</button>
             <p data-marked-id="marked">${method.doc}</p>
 
             <h3>坐标</h3>

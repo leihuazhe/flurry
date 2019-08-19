@@ -1,4 +1,4 @@
-package com.yunji.gateway.doc;
+package com.yunji.gateway;
 
 import com.yunji.gateway.doc.properties.ApiDocProperties;
 import org.springframework.boot.Banner;
@@ -21,10 +21,13 @@ import java.util.List;
  */
 @SpringBootApplication
 @EnableConfigurationProperties(ApiDocProperties.class)
-@ImportResource(locations={"classpath:spring.xml"})
+@ImportResource(locations = {"classpath:spring.xml"})
 public class ApiDocApplication /*implements CommandLineRunner*/ {
 
     public static void main(String[] args) {
+        System.setProperty("config_env", "local");
+        System.setProperty("Ddiamond_server_host", "tdiamond.yunjiweidian.com");
+
         new SpringApplicationBuilder()
                 .bannerMode(Banner.Mode.OFF)
                 .web(true)

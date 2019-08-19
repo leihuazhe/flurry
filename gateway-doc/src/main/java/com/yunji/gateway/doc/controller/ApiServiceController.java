@@ -4,8 +4,8 @@ import com.yunji.gateway.doc.dto.EventDto;
 import com.yunji.gateway.doc.dto.EventVo;
 import com.yunji.gateway.doc.util.ServiceAnnotationsUtil;
 import com.yunji.gateway.doc.util.ServiceJsonUtil;
-import com.yunji.gateway.metadata.OptimizedMetadata;
-import com.yunji.gateway.metadata.auto.ServiceMetadataRepository;
+import com.yunji.gateway.metadata.OptimizedService;
+import com.yunji.gateway.metadata.core.ExportServiceManager;
 import com.yunji.gateway.metadata.tag.Method;
 import com.yunji.gateway.metadata.tag.Service;
 import com.yunji.gateway.metadata.tag.Struct;
@@ -39,7 +39,9 @@ public class ApiServiceController {
 
     @RequestMapping(value = "index", method = RequestMethod.GET)
     public String api(HttpServletRequest request) {
-        List<Service> services = ServiceMetadataRepository.getRepository().getServices().values().stream().map(OptimizedMetadata.OptimizedService::getService).collect(Collectors.toList());
+        Map<String, OptimizedService> metaServices = ExportServiceManager.getInstance().getServiceMetadataMap();
+
+        List<Service> services = metaServices.values().stream().map(OptimizedService::getService).collect(Collectors.toList());
         Map<String, Collection<Service>> groupedServices = ServiceAnnotationsUtil.groupingServices(services);
         request.setAttribute("services", services);
         request.setAttribute("groupedServices", groupedServices);
@@ -49,15 +51,18 @@ public class ApiServiceController {
     @RequestMapping(value = "service/{serviceName}/{version}", method = RequestMethod.GET)
     @Transactional(rollbackFor = Exception.class)
     public String service(HttpServletRequest request, @PathVariable String serviceName, @PathVariable String version) {
-        Service service = ServiceMetadataRepository.getRepository().getService(serviceName, version).getService();
-        List<Service> services = ServiceMetadataRepository.getRepository().getServices().values().stream().map(x -> x.getService()).collect(Collectors.toList());
+        Map<String, OptimizedService> metaServices = ExportServiceManager.getInstance().getServiceMetadataMap();
+        OptimizedService metaService = ExportServiceManager.getInstance().getMetadata(serviceName, version);
+
+        Service service = metaService.getService();
+        List<Service> services = metaServices.values().stream().map(OptimizedService::getService).collect(Collectors.toList());
         List<EventVo> events = ServiceAnnotationsUtil.findEvents(service);
         request.setAttribute("events", events);
         request.setAttribute("service", ServiceAnnotationsUtil.excludeMethods(service));
         request.setAttribute("services", services);
         StringBuilder logBuilder = new StringBuilder();
 
-        ServiceMetadataRepository.getRepository().getServices().forEach((k, v) -> logBuilder.append(k + ",  "));
+        metaServices.forEach((k, v) -> logBuilder.append(k + ",  "));
         LOGGER.info("请求service列表展示，当前服务实例为 {}", logBuilder);
 
         return "api/service";
@@ -66,7 +71,7 @@ public class ApiServiceController {
     @RequestMapping(value = "method/{serviceName}/{version}/{methodName}", method = RequestMethod.GET)
     @Transactional(rollbackFor = Exception.class)
     public String method(HttpServletRequest request, @PathVariable String serviceName, @PathVariable String version, @PathVariable String methodName) {
-        OptimizedMetadata.OptimizedService optimizedService = ServiceMetadataRepository.getRepository().getService(serviceName, version);
+        OptimizedService optimizedService = ExportServiceManager.getInstance().getMetadata(serviceName, version);
         Method seleted = optimizedService.getMethodMap().get(methodName);
         List<Method> methods = optimizedService.getService().getMethods();
 
@@ -83,7 +88,7 @@ public class ApiServiceController {
     @RequestMapping(value = "findmethod/{serviceName}/{version}/{methodName}", method = RequestMethod.GET)
     @ResponseBody
     public Method findMethod(@PathVariable String serviceName, @PathVariable String version, @PathVariable String methodName) {
-        OptimizedMetadata.OptimizedService optimizedService = ServiceMetadataRepository.getRepository().getService(serviceName, version);
+        OptimizedService optimizedService = ExportServiceManager.getInstance().getMetadata(serviceName, version);
 
         return optimizedService.getMethodMap().get(methodName);
     }
@@ -91,7 +96,7 @@ public class ApiServiceController {
     @RequestMapping(value = "struct/{serviceName}/{version}/{ref}", method = RequestMethod.GET)
     @Transactional(rollbackFor = Exception.class)
     public String struct(HttpServletRequest request, @PathVariable String serviceName, @PathVariable String version, @PathVariable String ref) {
-        OptimizedMetadata.OptimizedService optimizedService = ServiceMetadataRepository.getRepository().getService(serviceName, version);
+        OptimizedService optimizedService = ExportServiceManager.getInstance().getMetadata(serviceName, version);
 
         request.setAttribute("struct", optimizedService.getOptimizedStructs().get(ref).getStruct());
         request.setAttribute("service", optimizedService.getService());
@@ -102,7 +107,7 @@ public class ApiServiceController {
     @RequestMapping(value = "findstruct/{serviceName}/{version}/{fullStructName}", method = RequestMethod.GET)
     @ResponseBody
     public Struct findStruct(@PathVariable String serviceName, @PathVariable String version, @PathVariable String fullStructName) {
-        OptimizedMetadata.OptimizedService optimizedService = ServiceMetadataRepository.getRepository().getService(serviceName, version);
+        OptimizedService optimizedService = ExportServiceManager.getInstance().getMetadata(serviceName, version);
 
         return optimizedService.getOptimizedStructs().get(fullStructName).getStruct();
     }
@@ -110,7 +115,7 @@ public class ApiServiceController {
     @RequestMapping(value = "findEnum/{serviceName}/{version}/{ref}", method = RequestMethod.GET)
     @ResponseBody
     public TEnum findEnum(@PathVariable String serviceName, @PathVariable String version, @PathVariable String ref) {
-        OptimizedMetadata.OptimizedService optimizedService = ServiceMetadataRepository.getRepository().getService(serviceName, version);
+        OptimizedService optimizedService = ExportServiceManager.getInstance().getMetadata(serviceName, version);
 
         return optimizedService.getEnumMap().get(ref);
     }
@@ -127,7 +132,7 @@ public class ApiServiceController {
     @RequestMapping(value = "enum/{serviceName}/{version}/{ref}", method = RequestMethod.GET)
     @Transactional(rollbackFor = Exception.class)
     public String anEnum(HttpServletRequest request, @PathVariable String serviceName, @PathVariable String version, @PathVariable String ref) {
-        OptimizedMetadata.OptimizedService optimizedService = ServiceMetadataRepository.getRepository().getService(serviceName, version);
+        OptimizedService optimizedService = ExportServiceManager.getInstance().getMetadata(serviceName, version);
 
         request.setAttribute("anEnum", optimizedService.getEnumMap().get(ref));
 
@@ -140,19 +145,19 @@ public class ApiServiceController {
     @RequestMapping(value = "test/{serviceName}/{version}/{methodName}", method = RequestMethod.GET)
     @Transactional(rollbackFor = Exception.class)
     public String goTest(HttpServletRequest request, @PathVariable String serviceName, @PathVariable String version, @PathVariable String methodName) {
-        OptimizedMetadata.OptimizedService optimizedService = ServiceMetadataRepository.getRepository().getService(serviceName, version);
+        OptimizedService optimizedService = ExportServiceManager.getInstance().getMetadata(serviceName, version);
 
         request.setAttribute("service", optimizedService.getService());
         request.setAttribute("method", optimizedService.getMethodMap().get(methodName));
-        request.setAttribute("services", ServiceMetadataRepository.getRepository().getServices().values()
-                .stream().map(x -> x.getService()).collect(Collectors.toList()));
+        request.setAttribute("services", ExportServiceManager.getInstance().getServiceMetadataMap().values()
+                .stream().map(OptimizedService::getService).collect(Collectors.toList()));
         return "api/test";
     }
 
     @RequestMapping(value = "findService/{serviceName}/{version}", method = RequestMethod.GET)
     @ResponseBody
     public Service findService(@PathVariable String serviceName, @PathVariable String version) {
-        return ServiceMetadataRepository.getRepository().getService(serviceName, version).getService();
+        return ExportServiceManager.getInstance().getMetadata(serviceName, version).getService();
     }
 
     @RequestMapping(value = "findServiceAfterRefresh/{serviceName}/{version}/{refresh}", method = RequestMethod.GET)
@@ -161,7 +166,7 @@ public class ApiServiceController {
         /*if (refresh) {
             serviceCache.reloadServices();
         }*/
-        return ServiceMetadataRepository.getRepository().getService(serviceName, version).getService();
+        return ExportServiceManager.getInstance().getMetadata(serviceName, version).getService();
     }
 
     /**
@@ -176,7 +181,7 @@ public class ApiServiceController {
     @Transactional(rollbackFor = Exception.class)
     @ResponseBody
     public Object getEnumJson(@PathVariable String serviceName, @PathVariable String version) {
-        Service service = ServiceMetadataRepository.getRepository().getService(serviceName, version).getService();
+        Service service = ExportServiceManager.getInstance().getMetadata(serviceName, version).getService();
         Map<String, Object> stringObjectMap = ServiceJsonUtil.executeJson(service);
         return stringObjectMap.get(ServiceJsonUtil.JSONOBJ);
 
@@ -186,7 +191,7 @@ public class ApiServiceController {
     @Transactional(rollbackFor = Exception.class)
     @ResponseBody
     public String getEnumJsonString(@PathVariable String serviceName, @PathVariable String version) {
-        Service service = ServiceMetadataRepository.getRepository().getService(serviceName, version).getService();
+        Service service = ExportServiceManager.getInstance().getMetadata(serviceName, version).getService();
         Map<String, Object> stringObjectMap = ServiceJsonUtil.executeJson(service);
 
         return (String) stringObjectMap.get(ServiceJsonUtil.JSONSTR);

@@ -1,10 +1,9 @@
 package com.yunji.gateway.doc.controller;
 
 import com.google.gson.Gson;
-//import com.yunji.api.doc.openapi.metadata.ServiceMetadataCache;
 import com.yunji.gateway.doc.dto.MetaDto;
-import com.yunji.gateway.metadata.OptimizedMetadata;
-import com.yunji.gateway.metadata.auto.ServiceMetadataRepository;
+import com.yunji.gateway.metadata.OptimizedService;
+import com.yunji.gateway.metadata.core.ExportServiceManager;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -25,7 +24,7 @@ public class MetadataController {
 
     @RequestMapping("/show")
     public String getMetadata() {
-        Map<String, OptimizedMetadata.OptimizedService> serviceMap = ServiceMetadataRepository.getRepository().getServices();
+        Map<String, OptimizedService> serviceMap = ExportServiceManager.getInstance().getServiceMetadataMap();
 
         List<MetaDto> metaDtoList = new ArrayList<>();
 

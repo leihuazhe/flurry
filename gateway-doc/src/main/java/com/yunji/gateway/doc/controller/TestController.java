@@ -1,10 +1,10 @@
 package com.yunji.gateway.doc.controller;
 
-import com.yunji.api.doc.openapi.post.Post;
 import com.yunji.gateway.doc.dto.TestTemplate;
 import com.yunji.gateway.doc.dto.TestTemplateVo;
 import com.yunji.gateway.doc.repository.TestTemplateRepository;
 import com.yunji.gateway.doc.util.DataConvertUtil;
+import com.yunji.gateway.process.Post;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -14,7 +14,7 @@
         $(function () {
             var sAction = new api.StructAction();
 
-            sAction.findStruct("${service.name}", "${service.meta.version}", "${struct.namespace}.${struct.name}");
+            sAction.findStruct("${service.namespace}.${service.name}", "${service.meta.version}", "${struct.namespace}.${struct.name}");
         });
     </script>
 </head>
@@ -28,7 +28,7 @@
         <ol class="breadcrumb">
             <li><a href="${basePath}/">首页</a></li>
             <li><a href="${basePath}/api/index.htm">API</a></li>
-            <li><a href="${basePath}/api/service/${service.name}/${service.meta.version}.htm">${service.name}</a></li>
+            <li><a href="${basePath}/api/service/${service.namespace}.${service.name}/${service.meta.version}.htm">${service.name}</a></li>
             <li><a class="active">${struct.name}</a></li>
         </ol>
     </div>
@@ -36,7 +36,7 @@
         <div class="col-sm-3 col-md-3">
             <div class="list-group">
                 <c:forEach var="s" items="${structs}">
-                    <a class="list-group-item ${s == struct ? 'active' : ''}" href="${basePath}/api/struct/${service.name}/${service.meta.version}/${s.namespace}.${s.name}.htm" style="overflow: hidden;
+                    <a class="list-group-item ${s == struct ? 'active' : ''}" href="${basePath}/api/struct/${service.namespace}.${service.name}/${service.meta.version}/${s.namespace}.${s.name}.htm" style="overflow: hidden;
     text-overflow: ellipsis;">
                         <span class="glyphicon glyphicon-chevron-right"></span>
                         <c:out value="${s.name}"/>

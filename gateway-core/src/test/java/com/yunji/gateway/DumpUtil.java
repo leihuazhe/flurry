@@ -1,4 +1,4 @@
-package com.yunji.gateway.util;
+package com.yunji.gateway;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;

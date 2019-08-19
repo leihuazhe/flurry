@@ -1,20 +1,15 @@
 package com.yunji.gateway.util;
 
 
-import com.alibaba.com.caucho.hessian.io.Hessian2Output;
-import org.apache.dubbo.common.extension.ExtensionLoader;
 import org.apache.dubbo.common.io.UnsafeStringWriter;
-import org.apache.dubbo.common.serialize.ObjectOutput;
-import org.apache.dubbo.common.serialize.hessian2.Hessian2ObjectOutput;
 import org.apache.dubbo.common.utils.ClassUtils;
+import org.apache.dubbo.config.ApplicationConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.PrintWriter;
-import java.lang.reflect.Field;
 import java.util.Iterator;
 import java.util.ServiceLoader;
-import java.util.Set;
 
 import static org.apache.dubbo.rpc.Constants.*;
 
@@ -109,31 +104,19 @@ public class MixUtils {
 
 
     //========================================
-    // URL 注册模型相关
+    // DUBBO Application 相关
     //========================================
+    private static ApplicationConfig application;
 
-//    public
-
-
-
-
-    /*public static byte[] getHessian2Byte(ObjectOutput output) {
-        try {
-            Hessian2ObjectOutput out = (Hessian2ObjectOutput) output;
-            Field field = out.getClass().getDeclaredField("mH2o");
-            field.setAccessible(true);
-            Hessian2Output hessian2Output = (Hessian2Output) field.get(out);
-            Field buffer = hessian2Output.getClass().getDeclaredField("_buffer");
-            buffer.setAccessible(true);
-            return (byte[]) buffer.get(hessian2Output);
-        } catch (Exception ignored) {
-        }
-        return null;
+    public static void setApplication(ApplicationConfig application) {
+        MixUtils.application = application;
     }
 
-    public static <T> T getSupportedExtension(Class<T> parameterTypes) {
-        ExtensionLoader<T> extensionLoader = ExtensionLoader.getExtensionLoader(parameterTypes);
-        Set<String> supportedExtensions = extensionLoader.getSupportedExtensions();
-        return extensionLoader.getExtension(supportedExtensions.iterator().next());
-    }*/
+    public static ApplicationConfig getApplication() {
+        return application;
+    }
+
+    //========================================
+    // URL 注册模型相关
+    //========================================
 }

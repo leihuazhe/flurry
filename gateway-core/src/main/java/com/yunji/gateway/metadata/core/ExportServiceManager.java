@@ -1,14 +1,21 @@
-package com.yunji.gateway.metadata.re;
+package com.yunji.gateway.metadata.core;
 
 import com.google.common.collect.Sets;
 import com.yunji.gateway.core.ConfigListener;
 import com.yunji.gateway.core.RegistryMetadataClient;
-import com.yunji.gateway.metadata.OptimizedMetadata;
+import com.yunji.gateway.metadata.OptimizedService;
+import com.yunji.gateway.metadata.jmx.JmxCache;
+import com.yunji.gateway.metadata.common.ChangeType;
+import com.yunji.gateway.metadata.common.MetadataUtil;
 import org.apache.dubbo.common.URL;
+import org.apache.dubbo.common.utils.StringUtils;
 import org.apache.dubbo.common.utils.UrlUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.management.MBeanServer;
+import javax.management.ObjectName;
+import java.lang.management.ManagementFactory;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
@@ -16,6 +23,8 @@ import java.util.stream.Collectors;
 import static org.apache.dubbo.common.constants.CommonConstants.*;
 
 /**
+ * 网关暴露的服务 manager, 需要从外界调用网关，网关暴露的服务 list 需要通过外部化配置文件进行配置
+ *
  * @author Denim.leihz 2019-08-16 9:11 PM
  */
 public class ExportServiceManager implements RegistryListener, ConfigListener {
@@ -23,7 +32,7 @@ public class ExportServiceManager implements RegistryListener, ConfigListener {
     /**
      * Map of bean definition objects, keyed by bean name
      */
-    private static final ConcurrentMap<String, OptimizedMetadata.OptimizedService> serviceMetadataMap = new ConcurrentHashMap<>(256);
+    private static final ConcurrentMap<String, OptimizedService> serviceMetadataMap = new ConcurrentHashMap<>(256);
     /**
      * 暂存最近一次的服务白名单信息.
      */
@@ -34,18 +43,24 @@ public class ExportServiceManager implements RegistryListener, ConfigListener {
     private static volatile ExportServiceManager INSTANCE = null;
 
     private ExportServiceManager() {
+        registerJmx();
     }
+
 
     public void setRegistryMetadataClient(RegistryMetadataClient registryMetadataClient) {
         this.registryMetadataClient = registryMetadataClient;
     }
 
-    public OptimizedMetadata.OptimizedService getMetadata(String interfaceName, String version) {
+    public OptimizedService getMetadata(String interfaceName, String version) {
         return getMetadata(interfaceName);
     }
 
-    public OptimizedMetadata.OptimizedService getMetadata(String interfaceName) {
+    public OptimizedService getMetadata(String interfaceName) {
         return serviceMetadataMap.get(interfaceName);
+    }
+
+    public Map<String, OptimizedService> getServiceMetadataMap() {
+        return Collections.unmodifiableMap(serviceMetadataMap);
     }
 
     public void clear() {
@@ -81,19 +96,22 @@ public class ExportServiceManager implements RegistryListener, ConfigListener {
         Set<String> referServiceList = MetadataUtil.getReferService(properties);
 
         for (String serviceName : referServiceList) {
-            OptimizedMetadata.OptimizedService service = serviceMetadataMap.get(serviceName);
-            if (service == null) {
-                synchronized (this) {
-                    service = serviceMetadataMap.get(serviceName);
-                    if (service == null) {
-                        List<URL> urls = registryMetadataClient.subscribe(serviceName, this);
-                        this.notifyAsync(serviceName, urls);
-                    } else {
-                        logger.info("Target white list service: {} already cached.", serviceName);
+
+            if (StringUtils.isNotEmpty(serviceName)) {
+                OptimizedService service = serviceMetadataMap.get(serviceName);
+                if (service == null) {
+                    synchronized (this) {
+                        service = serviceMetadataMap.get(serviceName);
+                        if (service == null) {
+                            List<URL> urls = registryMetadataClient.subscribe(serviceName, this);
+                            this.notifyAsync(serviceName, urls);
+                        } else {
+                            logger.info("Target white list service: {} already cached.", serviceName);
+                        }
                     }
+                } else {//
+                    logger.info("Config white service list,current service [{}]'s metadata  already cached.", serviceName);
                 }
-            } else {//
-                logger.info("Config white service list,current service [{}]'s metadata  already cached.");
             }
         }
 
@@ -101,6 +119,7 @@ public class ExportServiceManager implements RegistryListener, ConfigListener {
         Sets.SetView<String> reduceService = Sets.difference(lastRegistryServices, referServiceList);
         if (!reduceService.isEmpty()) {
             for (String service : reduceService) {
+                serviceMetadataMap.remove(service);
                 registryMetadataClient.unsubscribe(service);
             }
         }
@@ -154,7 +173,7 @@ public class ExportServiceManager implements RegistryListener, ConfigListener {
                 String group = url.getParameter(GROUP_KEY);
                 String version = url.getParameter(VERSION_KEY);
 
-                OptimizedMetadata.OptimizedService optimizedService = MetadataUtil
+                OptimizedService optimizedService = MetadataUtil
                         .callServiceMetadata(interfaceName, version, group);
 
                 if (optimizedService == null) {
@@ -172,14 +191,14 @@ public class ExportServiceManager implements RegistryListener, ConfigListener {
         logServiceMetadataMap();
     }
 
-    private void refreshMetadataAsync(String path, List<URL> providerURLs) {
+    protected void refreshMetadataAsync(String path, List<URL> providerURLs) {
         if (!providerURLs.isEmpty()) {
             URL url = providerURLs.get(0);
             String interfaceName = url.getServiceInterface();
             String group = url.getParameter(GROUP_KEY);
             String version = url.getParameter(VERSION_KEY);
 
-            CompletableFuture<OptimizedMetadata.OptimizedService> resultFuture
+            CompletableFuture<OptimizedService> resultFuture
                     = MetadataUtil.callServiceMetadataAsync(interfaceName, version, group);
 
             resultFuture.whenComplete((optimizedService, e) -> {
@@ -190,6 +209,7 @@ public class ExportServiceManager implements RegistryListener, ConfigListener {
                         logger.warn("ExportServiceManager 获取服务 {} 元数据失败. ", interfaceName);
                         return;
                     }
+
                     serviceMetadataMap.put(interfaceName, optimizedService);
                     logServiceMetadataMap();
                 }
@@ -209,12 +229,26 @@ public class ExportServiceManager implements RegistryListener, ConfigListener {
     }
 
     /**
+     * 注册 Jmx 信息
+     */
+    private void registerJmx() {
+        MBeanServer mBeanServer = ManagementFactory.getPlatformMBeanServer();
+        try {
+            ObjectName jmxName = new ObjectName(this.getClass().getName() + ":name=metadataMap");
+            final JmxCache jmxCache = new JmxCache(serviceMetadataMap);
+            mBeanServer.registerMBean(jmxCache, jmxName);
+        } catch (Exception e) {
+            logger.error("registerJMX error.....", e);
+        }
+    }
+
+    /**
      * 日志展示已缓存的服务元数据信息.
      */
     private void logServiceMetadataMap() {
         StringBuilder sb = new StringBuilder();
         sb.append("[已引用和缓存元数据的duubo服务展示]").append("\n");
-        for (OptimizedMetadata.OptimizedService service : serviceMetadataMap.values()) {
+        for (OptimizedService service : serviceMetadataMap.values()) {
             sb.append(service.service.namespace).append(".").append(service.service.name).append("\n");
         }
         sb.append("\n");

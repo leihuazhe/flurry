@@ -1,5 +1,6 @@
-package com.yunji.gateway.metadata.re;
+package com.yunji.gateway.metadata.core;
 
+import com.yunji.gateway.metadata.common.ChangeType;
 import org.apache.dubbo.common.URL;
 
 import java.util.List;

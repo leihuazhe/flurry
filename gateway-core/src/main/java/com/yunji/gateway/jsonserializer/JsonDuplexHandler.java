@@ -1,9 +1,10 @@
 package com.yunji.gateway.jsonserializer;
 
-import com.yunji.gateway.metadata.re.ExportServiceManager;
+import com.yunji.gateway.metadata.OptimizedService;
+import com.yunji.gateway.metadata.OptimizedStruct;
+import com.yunji.gateway.metadata.core.ExportServiceManager;
 import org.apache.dubbo.common.serialize.CustomHessian2Input;
 import org.apache.dubbo.common.serialize.CustomHessian2ObjectInput;
-import com.yunji.gateway.metadata.OptimizedMetadata;
 import com.yunji.gateway.metadata.tag.Method;
 import org.apache.dubbo.common.serialize.ObjectInput;
 import org.apache.dubbo.common.serialize.ObjectOutput;
@@ -26,16 +27,16 @@ public class JsonDuplexHandler {
     private static ExportServiceManager serviceManager = ExportServiceManager.getInstance();
 
     public static void writeObject(String service, String version, String method, Object object, ObjectOutput out) throws IOException {
-        OptimizedMetadata.OptimizedService bizService = getServiceMetadata(service, version);
+        OptimizedService bizService = getServiceMetadata(service, version);
         writeObject(method, version, object, bizService, out);
     }
 
 
     public static String readObject(String service, String methodName, ObjectInput in) {
-        OptimizedMetadata.OptimizedService bizService;
+        OptimizedService bizService;
         try {
             //todo version 版本
-            bizService = getServiceMetadata(service, "1.0.0");
+            bizService = getServiceMetadata(service, null);
             return readObject(bizService, methodName, in);
         } catch (IOException e) {
             LOGGER.error(e.getMessage(), e);
@@ -47,22 +48,22 @@ public class JsonDuplexHandler {
     /**
      * 利用 hessian2 writeObject object
      */
-    private static void writeObject(String methodName, String version, Object object, OptimizedMetadata.OptimizedService optimizedService, ObjectOutput out) throws IOException {
+    private static void writeObject(String methodName, String version, Object object, OptimizedService optimizedService, ObjectOutput out) throws IOException {
         Method method = optimizedService.getMethodMap().get(methodName);
         if (method == null) {
             throw new IOException(String.format("Specific method %s's metadata info does not found", methodName));
         }
 
-        OptimizedMetadata.OptimizedStruct req = optimizedService.getOptimizedStructs().get(method.request.namespace + "." + method.request.name);
+        OptimizedStruct req = optimizedService.getOptimizedStructs().get(method.request.namespace + "." + method.request.name);
         JsonSerializer jsonEncoder = new JsonSerializer(optimizedService, req);
 
         jsonEncoder.write((String) object, out);
     }
 
-    private static String readObject(OptimizedMetadata.OptimizedService bizService, String methodName, ObjectInput in) throws IOException {
+    private static String readObject(OptimizedService bizService, String methodName, ObjectInput in) throws IOException {
         Method method = bizService.getMethodMap().get(methodName);
 
-        OptimizedMetadata.OptimizedStruct resp = bizService.getOptimizedStructs().get(method.response.namespace + "." + method.response.name);
+        OptimizedStruct resp = bizService.getOptimizedStructs().get(method.response.namespace + "." + method.response.name);
 
         JsonSerializer jsonDecoder = new JsonSerializer(bizService, resp);
 
@@ -70,8 +71,8 @@ public class JsonDuplexHandler {
     }
 
 
-    private static OptimizedMetadata.OptimizedService getServiceMetadata(String service, String version) throws IOException {
-        OptimizedMetadata.OptimizedService bizService = serviceManager.getMetadata(service);
+    private static OptimizedService getServiceMetadata(String service, String version) throws IOException {
+        OptimizedService bizService = serviceManager.getMetadata(service);
         if (bizService == null) {
             throw new IOException(String.format("Specific service %s's metadata info does not found", service));
         }

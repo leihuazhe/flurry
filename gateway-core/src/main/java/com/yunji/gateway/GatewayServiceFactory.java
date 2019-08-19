@@ -1,7 +1,7 @@
 package com.yunji.gateway;
 
-import com.yunji.gateway.core.ApplicationConfigHolder;
 import com.yunji.gateway.util.GateConstants;
+import com.yunji.gateway.util.MixUtils;
 import org.apache.dubbo.config.*;
 import org.apache.dubbo.remoting.Constants;
 
@@ -82,7 +82,7 @@ public class GatewayServiceFactory {
         referenceConfig.setAsync(true);
         referenceConfig.setGateway(true);
 
-        ApplicationConfig application = ApplicationConfigHolder.getApplication();
+        ApplicationConfig application = MixUtils.getApplication();
 
         referenceConfig.setApplication(application);
         referenceConfig.setInterface(serviceInfo.getServiceName());

@@ -1,6 +1,6 @@
 package com.yunji.gateway.doc.controller;
 
-import com.yunji.api.doc.openapi.post.Post;
+import com.yunji.gateway.process.Post;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 

@@ -1,7 +1,7 @@
-package com.yunji.gateway.metadata.auto;
+package com.yunji.backup;
 
-import com.yunji.gateway.metadata.util.MetadataUtil;
-import com.yunji.gateway.metadata.OptimizedMetadata;
+import com.yunji.gateway.metadata.OptimizedService;
+import com.yunji.gateway.metadata.common.MetadataUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,11 +15,11 @@ public class ServiceMetadataRepository {
     /**
      * 以服务的SimpleName和version拼接作为key，保存服务元数据的map,etc. AdminSkuPriceService:1.0.0 -> 元信息
      */
-    private Map<String, OptimizedMetadata.OptimizedService> services = Collections.synchronizedMap(new TreeMap<>());
+    private Map<String, OptimizedService> services = Collections.synchronizedMap(new TreeMap<>());
     /**
      * 以服务的全限定名和version拼接作为key，保存服务元数据的map,etc. AdminSkuPriceService:1.0.0 -> 元信息
      */
-    private Map<String, OptimizedMetadata.OptimizedService> fullNameService = Collections.synchronizedMap(new TreeMap<>());
+    private Map<String, OptimizedService> fullNameService = Collections.synchronizedMap(new TreeMap<>());
 
 
     private Map<String, String> pathServiceMapping = Collections.synchronizedMap(new HashMap<>());
@@ -39,21 +39,21 @@ public class ServiceMetadataRepository {
     }
 
 
-    public void putService(String serviceKey, String serviceInterface, OptimizedMetadata.OptimizedService service) {
+    public void putService(String serviceKey, String serviceInterface, OptimizedService service) {
         this.services.put(serviceKey, service);
         this.pathServiceMapping.put(serviceInterface, serviceKey);
     }
 
-    public void putFullService(String fullServiceKey, String serviceInterface, OptimizedMetadata.OptimizedService service) {
+    public void putFullService(String fullServiceKey, String serviceInterface, OptimizedService service) {
         this.fullNameService.put(fullServiceKey, service);
         this.fullPathServiceMapping.put(serviceInterface, fullServiceKey);
     }
 
-    public Map<String, OptimizedMetadata.OptimizedService> getServices() {
+    public Map<String, OptimizedService> getServices() {
         return Collections.unmodifiableMap(services);
     }
 
-    public OptimizedMetadata.OptimizedService getService(String service, String version) {
+    public OptimizedService getService(String service, String version) {
         //todo version question
         if (version == null) version = "1.0.0";
         if (service.contains(".")) {

@@ -4,24 +4,32 @@ import com.yunji.gateway.GateWayService;
 import com.yunji.gateway.GatewayServiceFactory;
 import com.yunji.gateway.config.DiamondBean;
 import com.yunji.gateway.config.DiamondConfigService;
-import com.yunji.gateway.metadata.discovery.CuratorMetadataClient;
-import com.yunji.gateway.metadata.re.ExportServiceManager;
+import com.yunji.gateway.metadata.OptimizedService;
+import com.yunji.gateway.metadata.core.CuratorMetadataClient;
+import com.yunji.gateway.metadata.core.ExportServiceManager;
+import com.yunji.gateway.metadata.common.MetadataUtil;
 import com.yunji.gateway.util.GateConstants;
 import org.apache.dubbo.common.URL;
+import org.apache.dubbo.common.Version;
+import org.apache.dubbo.common.constants.CommonConstants;
 import org.apache.dubbo.common.extension.ExtensionLoader;
 import org.apache.dubbo.common.utils.Assert;
+import org.apache.dubbo.common.utils.ConfigUtils;
+import org.apache.dubbo.common.utils.UrlUtils;
 import org.apache.dubbo.config.ApplicationConfig;
 import org.apache.dubbo.config.RegistryConfig;
 import org.apache.dubbo.config.RpcRequest;
-import com.yunji.gateway.metadata.OptimizedMetadata;
-import com.yunji.gateway.metadata.tag.DataType;
 import com.yunji.gateway.metadata.tag.Field;
 import org.apache.dubbo.config.context.ConfigManager;
+import org.apache.dubbo.registry.RegistryFactory;
+import org.apache.dubbo.registry.RegistryService;
 import org.apache.dubbo.remoting.zookeeper.ZookeeperTransporter;
 import org.apache.dubbo.rpc.RpcContext;
 import com.yunji.gateway.util.MixUtils;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.CompletableFuture;
 
@@ -31,26 +39,24 @@ import java.util.concurrent.CompletableFuture;
  */
 public class DubboExecutedFacade {
 
-    private ZookeeperTransporter zookeeperTransporter = ExtensionLoader
-            .getExtensionLoader(ZookeeperTransporter.class)
-            .getAdaptiveExtension();
-
     private final String registryUrl;
 
     private final String dataId;
-
-    //    private final MetadataResolver metadataResolver;
     //Application 名称
     private final String applicationName;
 
     //外部化配置
     private ConfigService configService;
 
-    //可暴露服务监听器
+    //可暴露服务管理类
     private ExportServiceManager exportServiceManager;
 
     //zookeeper client
     private RegistryMetadataClient registryMetadataClient;
+
+    private ZookeeperTransporter zookeeperTransporter = ExtensionLoader
+            .getExtensionLoader(ZookeeperTransporter.class)
+            .getAdaptiveExtension();
 
 
     public DubboExecutedFacade(String registryUrl, String dataId) {
@@ -68,7 +74,6 @@ public class DubboExecutedFacade {
     public DubboExecutedFacade(String registryUrl, String dataId, String applicationName, boolean needInitMetadata) {
         this.registryUrl = registryUrl;
         this.dataId = dataId;
-//        this.metadataResolver = MixUtils.getSupportedExtension(MetadataResolver.class);
         this.applicationName = applicationName;
         init(needInitMetadata);
     }
@@ -89,19 +94,19 @@ public class DubboExecutedFacade {
 
 
     public CompletableFuture<String> execute(String interfaceName, String methodName, String version, String requestJson) {
-        OptimizedMetadata.OptimizedService optimizedService = exportServiceManager.getMetadata(interfaceName, version);
+        OptimizedService optimizedService = exportServiceManager.getMetadata(interfaceName, version);
 
         return execute(interfaceName, methodName, version, requestJson, optimizedService);
     }
 
     public CompletableFuture<String> execute(String interfaceName, String methodName, String version,
-                                             String requestJson, OptimizedMetadata.OptimizedService optimizedService) {
+                                             String requestJson, OptimizedService optimizedService) {
         if (optimizedService != null) {
             List<Field> requestFields = optimizedService.getMethodMap().get(methodName).request.fields;
 
             String[] parameterTypes = new String[requestFields.size()];
             for (int i = 0; i < requestFields.size(); i++) {
-                parameterTypes[i] = getDataKindType(requestFields.get(i).dataType);
+                parameterTypes[i] = MetadataUtil.getDataKindType(requestFields.get(i).dataType);
             }
 
             RpcRequest rpcRequest = RpcRequest.builder()
@@ -136,7 +141,7 @@ public class DubboExecutedFacade {
             application.setRegistry(registryConfig);
         }
 
-        ApplicationConfigHolder.setApplication(application);
+        MixUtils.setApplication(application);
     }
 
     /**
@@ -159,10 +164,35 @@ public class DubboExecutedFacade {
      */
     private void intZookeeperClient() {
         Assert.notNull(registryUrl, "RegistryUrl == null");
-        String urlStr = "zookeeper://" + registryUrl + "/org.apache.services.registry.RegistryService?services=2.0.2&interface=org.apache.services.registry.RegistryService";
-        URL url = URL.valueOf(urlStr);
 
-        registryMetadataClient = new CuratorMetadataClient(url, zookeeperTransporter);
+        String address;
+        if (registryUrl.contains("zookeeper")) {
+            address = registryUrl;
+        } else {
+            address = "zookeeper://" + registryUrl;
+        }
+
+        if (address.length() > 0 && !RegistryConfig.NO_AVAILABLE.equalsIgnoreCase(address)) {
+            Map<String, String> map = new HashMap<>();
+            map.put("path", RegistryService.class.getName());
+            map.put("interface", RegistryService.class.getName());
+            map.put("dubbo", Version.getProtocolVersion());
+            map.put(CommonConstants.TIMESTAMP_KEY, String.valueOf(System.currentTimeMillis()));
+            if (ConfigUtils.getPid() > 0) {
+                map.put(CommonConstants.PID_KEY, String.valueOf(ConfigUtils.getPid()));
+            }
+            if (!map.containsKey("protocol")) {
+                if (ExtensionLoader.getExtensionLoader(RegistryFactory.class).hasExtension("remote")) {
+                    map.put("protocol", "remote");
+                } else {
+                    map.put("protocol", "dubbo");
+                }
+            }
+            URL url = UrlUtils.parseURL(address, map);
+            registryMetadataClient = new CuratorMetadataClient(url, zookeeperTransporter);
+        } else {
+            throw new IllegalArgumentException("Specify registry address is illegal.");
+        }
     }
 
     /**
@@ -183,52 +213,5 @@ public class DubboExecutedFacade {
         gateWayService.invoke(request.getMethod(), request.getParamsType(), request.getParamsValue());
 
         return RpcContext.getContext().getCompletableFuture();
-    }
-
-
-    private static String getDataKindType(DataType dataType) {
-        String qualifiedName = dataType.qualifiedName;
-        if (qualifiedName != null) {
-            return qualifiedName;
-        }
-        DataType.KIND kind = dataType.kind;
-
-        switch (kind) {
-            case VOID:
-                return "java.lang.Void";
-            case BOOLEAN:
-                return "java.lang.Boolean";
-            case BYTE:
-                return "java.lang.Byte";
-            case SHORT:
-                return "java.lang.Short";
-            case INTEGER:
-                return "java.lang.Integer";
-            case LONG:
-                return "java.lang.Long";
-            case DOUBLE:
-                return "java.lang.Double";
-            case STRING:
-                return "java.lang.String";
-            case BINARY:
-                return null;
-            case MAP:
-                return "java.util.Map";
-            case LIST:
-                return "java.lang.List";
-            case SET:
-                return "java.lang.Set";
-            case ENUM:
-                return "java.lang.Enum";
-            case STRUCT:
-                return null;
-            case DATE:
-                return "java.util.Date";
-            case BIGDECIMAL:
-                return "java.math.BigDecimal";
-
-            default:
-                return null;
-        }
     }
 }

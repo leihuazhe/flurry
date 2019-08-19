@@ -1,4 +1,4 @@
-package com.yunji.gateway.metadata.discovery;
+package com.yunji.gateway.metadata.common;
 
 /**
  * @author Denim.leihz 2019-07-23 2:23 PM

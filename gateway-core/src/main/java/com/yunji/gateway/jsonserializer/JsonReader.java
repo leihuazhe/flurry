@@ -1,7 +1,8 @@
 package com.yunji.gateway.jsonserializer;
 
-import com.yunji.gateway.metadata.util.MetadataUtil;
-import com.yunji.gateway.metadata.OptimizedMetadata;
+import com.yunji.gateway.metadata.OptimizedService;
+import com.yunji.gateway.metadata.OptimizedStruct;
+import com.yunji.gateway.metadata.common.MetadataUtil;
 import com.yunji.gateway.metadata.tag.DataType;
 import com.yunji.gateway.metadata.tag.Field;
 import com.yunji.gateway.metadata.tag.Struct;
@@ -24,8 +25,8 @@ import static com.yunji.gateway.jsonserializer.JsonSerializationUtil.*;
 public class JsonReader implements JsonCallback {
     private final Logger logger = LoggerFactory.getLogger(JsonReader.class);
 
-    private final OptimizedMetadata.OptimizedStruct optimizedStruct;
-    private final OptimizedMetadata.OptimizedService optimizedService;
+    private final OptimizedStruct optimizedStruct;
+    private final OptimizedService optimizedService;
 
     /**
      * Hessian2 Custom output
@@ -158,7 +159,7 @@ public class JsonReader implements JsonCallback {
     private List<StackNode> nodePool = new ArrayList<>(64);
 
 
-    JsonReader(OptimizedMetadata.OptimizedStruct optimizedStruct, OptimizedMetadata.OptimizedService optimizedService,
+    JsonReader(OptimizedStruct optimizedStruct, OptimizedService optimizedService,
                CustomHessian2ObjectOutput out) {
         this.optimizedStruct = optimizedStruct;
         this.optimizedService = optimizedService;
@@ -368,7 +369,7 @@ public class JsonReader implements JsonCallback {
         assert isCollectionKind(current.dataType.kind);
 
         DataType next = current.dataType.valueType;
-        OptimizedMetadata.OptimizedStruct nextStruct = (next.kind == DataType.KIND.STRUCT) ?
+        OptimizedStruct nextStruct = (next.kind == DataType.KIND.STRUCT) ?
                 optimizedService.optimizedStructs.get(next.qualifiedName) : null;
 
         push(current.dataType.valueType, -1, nextStruct, null);
@@ -557,7 +558,7 @@ public class JsonReader implements JsonCallback {
 
     // only used in startField
     private void push(final DataType dataType, final int tFieldPos,
-                      final OptimizedMetadata.OptimizedStruct optimizedStruct, String fieldName) {
+                      final OptimizedStruct optimizedStruct, String fieldName) {
         StackNode node;
 
         if (nodePool.size() > 0) {
@@ -606,7 +607,7 @@ public class JsonReader implements JsonCallback {
         /**
          * 不在该Struct必填字段列表的字段列表
          */
-        OptimizedMetadata.OptimizedStruct struct = current.optimizedStruct;
+        OptimizedStruct struct = current.optimizedStruct;
         List<Field> fields = struct.struct.fields;
 
         // iterator need more allocation
@@ -746,7 +747,7 @@ public class JsonReader implements JsonCallback {
         /**
          * optimizedStruct if dataType.kind==STRUCT
          */
-        private OptimizedMetadata.OptimizedStruct optimizedStruct;
+        private OptimizedStruct optimizedStruct;
 
         /**
          * the field name
@@ -769,7 +770,7 @@ public class JsonReader implements JsonCallback {
         }
 
         public StackNode init(final DataType dataType, int tFieldPosition,
-                              final OptimizedMetadata.OptimizedStruct optimizedStruct, String fieldName) {
+                              final OptimizedStruct optimizedStruct, String fieldName) {
             this.dataType = dataType;
             this.tFieldPosition = tFieldPosition;
             this.optimizedStruct = optimizedStruct;
@@ -794,7 +795,7 @@ public class JsonReader implements JsonCallback {
         }
 
 
-        public OptimizedMetadata.OptimizedStruct getOptimizedStruct() {
+        public OptimizedStruct getOptimizedStruct() {
             return optimizedStruct;
         }
 
