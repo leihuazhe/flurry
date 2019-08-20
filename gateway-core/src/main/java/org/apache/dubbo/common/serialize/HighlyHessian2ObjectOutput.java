@@ -8,12 +8,12 @@ import java.io.OutputStream;
 /**
  * @author Denim.leihz 2019-07-10 6:21 PM
  */
-public class CustomHessian2ObjectOutput implements ObjectOutput {
+public class HighlyHessian2ObjectOutput implements ObjectOutput {
 
-    private final CustomHessian2Output cmH2o;
+    private final HighlyHessian2Output cmH2o;
 
-    public CustomHessian2ObjectOutput(OutputStream os) {
-        cmH2o = new CustomHessian2Output(os);
+    public HighlyHessian2ObjectOutput(OutputStream os) {
+        cmH2o = new HighlyHessian2Output(os);
         cmH2o.setSerializerFactory(Hessian2SerializerFactory.SERIALIZER_FACTORY);
     }
 
@@ -88,7 +88,7 @@ public class CustomHessian2ObjectOutput implements ObjectOutput {
         cmH2o.reWriteIndex(offset, length);
     }
 
-    public CustomHessian2Output getCmH2o() {
+    public HighlyHessian2Output getCmH2o() {
         return cmH2o;
     }
 }

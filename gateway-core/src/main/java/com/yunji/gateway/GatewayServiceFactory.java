@@ -74,7 +74,7 @@ public class GatewayServiceFactory {
         parameters.put(GateConstants.PROTOCOL_CLIENT, GateConstants.PROTOCOL_CLIENT_CUSTOM);
         //自定义 proxy -> custom_javassist
         parameters.put(GateConstants.PROXY, GateConstants.PROXY_CUSTOM);
-        //自定义 serialization -> custom_hessian2
+        //自定义 serialization -> highly_hessian2
         parameters.put(Constants.SERIALIZATION_KEY, GateConstants.SERIALIZATION_CUSTOM);
         referenceConfig.setParameters(parameters);
         //不能泛化

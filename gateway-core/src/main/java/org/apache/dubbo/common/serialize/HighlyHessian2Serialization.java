@@ -15,7 +15,7 @@ import static org.apache.dubbo.remoting.Constants.SERIALIZATION_KEY;
 /**
  * @author Denim.leihz 2019-07-10 6:20 PM
  */
-public class CustomHessian2Serialization implements Serialization {
+public class HighlyHessian2Serialization implements Serialization {
 
     @Override
     public byte getContentTypeId() {
@@ -30,7 +30,7 @@ public class CustomHessian2Serialization implements Serialization {
     @Override
     public ObjectOutput serialize(URL url, OutputStream out) throws IOException {
         if (SERIALIZATION_CUSTOM.equals(url.getParameter(SERIALIZATION_KEY))) {
-            return new CustomHessian2ObjectOutput(out);
+            return new HighlyHessian2ObjectOutput(out);
         }
         return new Hessian2ObjectOutput(out);
     }
@@ -38,7 +38,7 @@ public class CustomHessian2Serialization implements Serialization {
     @Override
     public ObjectInput deserialize(URL url, InputStream is) throws IOException {
         if (SERIALIZATION_CUSTOM.equals(url.getParameter(SERIALIZATION_KEY))) {
-            return new CustomHessian2ObjectInput(is);
+            return new HighlyHessian2ObjectInput(is);
         }
         return new Hessian2ObjectInput(is);
     }

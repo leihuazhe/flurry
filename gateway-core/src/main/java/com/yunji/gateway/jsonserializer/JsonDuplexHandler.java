@@ -3,8 +3,8 @@ package com.yunji.gateway.jsonserializer;
 import com.yunji.gateway.metadata.OptimizedService;
 import com.yunji.gateway.metadata.OptimizedStruct;
 import com.yunji.gateway.metadata.core.ExportServiceManager;
-import org.apache.dubbo.common.serialize.CustomHessian2Input;
-import org.apache.dubbo.common.serialize.CustomHessian2ObjectInput;
+import org.apache.dubbo.common.serialize.HighlyHessian2Input;
+import org.apache.dubbo.common.serialize.HighlyHessian2ObjectInput;
 import com.yunji.gateway.metadata.tag.Method;
 import org.apache.dubbo.common.serialize.ObjectInput;
 import org.apache.dubbo.common.serialize.ObjectOutput;
@@ -80,8 +80,8 @@ public class JsonDuplexHandler {
     }
 
     public static Object readMetadata(ObjectInput in) {
-        CustomHessian2ObjectInput cmh2 = (CustomHessian2ObjectInput) in;
-        CustomHessian2Input cmH2i = cmh2.getCmH2i();
+        HighlyHessian2ObjectInput cmh2 = (HighlyHessian2ObjectInput) in;
+        HighlyHessian2Input cmH2i = cmh2.getCmH2i();
         try {
             return cmH2i.readObject((List<Class<?>>) null);
         } catch (IOException e) {

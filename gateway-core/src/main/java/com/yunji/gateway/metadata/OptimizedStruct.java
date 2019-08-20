@@ -68,4 +68,16 @@ public class OptimizedStruct {
             return fieldArrayByTag[tag - tagBase];
         else return fieldMapByTag.get(tag);
     }
+
+    //加入对 hessian2 的序列化模式的优化.
+//    private Field[] orderFields = new Field[fieldMap.size()];
+//    private int fieldPos = 0;
+//
+//    public void setOrderField(Field orderField) {
+//        this.orderFields[fieldPos++] = orderField;
+//    }
+//
+//    public Map<String, Field> getFieldMap() {
+//        return fieldMap;
+//    }
 }

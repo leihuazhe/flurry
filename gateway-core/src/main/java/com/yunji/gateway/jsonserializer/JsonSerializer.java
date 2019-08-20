@@ -26,7 +26,7 @@ public class JsonSerializer implements BeanSerializer<String> {
     @Override
     public String read(ObjectInput in) throws IOException {
         JsonWriter writer = new JsonWriter();
-        read((CustomHessian2ObjectInput) in, writer);
+        read((HighlyHessian2ObjectInput) in, writer);
         return writer.toString();
     }
 
@@ -37,7 +37,7 @@ public class JsonSerializer implements BeanSerializer<String> {
     @Override
     public void write(String input, ObjectOutput oproto) throws IOException {
         JsonReader jsonReader;
-        jsonReader = new JsonReader(optimizedStruct, optimizedService, (CustomHessian2ObjectOutput) oproto);
+        jsonReader = new JsonReader(optimizedStruct, optimizedService, (HighlyHessian2ObjectOutput) oproto);
 
         new JsonParser(input, jsonReader).parseJsValue();
     }
@@ -53,8 +53,8 @@ public class JsonSerializer implements BeanSerializer<String> {
     }
 
 
-    private void read(CustomHessian2ObjectInput output, JsonCallback writer) throws IOException {
-        CustomHessian2Input cmH2i = output.getCmH2i();
+    private void read(HighlyHessian2ObjectInput output, JsonCallback writer) throws IOException {
+        HighlyHessian2Input cmH2i = output.getCmH2i();
         cmH2i.setJsonCallback(writer);
         cmH2i.readObject();
     }

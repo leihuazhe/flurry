@@ -6,16 +6,13 @@ import com.yunji.gateway.metadata.common.MetadataUtil;
 import com.yunji.gateway.metadata.tag.DataType;
 import com.yunji.gateway.metadata.tag.Field;
 import com.yunji.gateway.metadata.tag.Struct;
-import org.apache.dubbo.common.serialize.CustomHessian2ObjectOutput;
-import org.apache.dubbo.common.serialize.CustomHessian2Output;
+import org.apache.dubbo.common.serialize.HighlyHessian2ObjectOutput;
+import org.apache.dubbo.common.serialize.HighlyHessian2Output;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.BitSet;
-import java.util.List;
-import java.util.Stack;
+import java.util.*;
 
 import static com.yunji.gateway.jsonserializer.JsonSerializationUtil.*;
 
@@ -31,13 +28,18 @@ public class JsonReader implements JsonCallback {
     /**
      * Hessian2 Custom output
      */
-    private final CustomHessian2Output cmH2o;
+    private final HighlyHessian2Output cmH2o;
 
 
     /**
      * 当前处理数据节点
      */
-    StackNode current;
+    private StackNode current;
+
+    /**
+     * 当前的 ObjectNode
+     */
+    private ObjectNode objCurrent;
 
     /**
      * incr: startObject/startArray
@@ -158,9 +160,14 @@ public class JsonReader implements JsonCallback {
      */
     private List<StackNode> nodePool = new ArrayList<>(64);
 
+    /**
+     * Linked List
+     */
+//    private List<StackNode> order = new ArrayList<>(64);
+
 
     JsonReader(OptimizedStruct optimizedStruct, OptimizedService optimizedService,
-               CustomHessian2ObjectOutput out) {
+               HighlyHessian2ObjectOutput out) {
         this.optimizedStruct = optimizedStruct;
         this.optimizedService = optimizedService;
         this.cmH2o = out.getCmH2o();
@@ -186,6 +193,7 @@ public class JsonReader implements JsonCallback {
             return;
         }
 
+
         assert current.dataType.kind == DataType.KIND.STRUCT || current.dataType.kind == DataType.KIND.MAP;
 
         StackNode peek = peek();
@@ -204,11 +212,17 @@ public class JsonReader implements JsonCallback {
                     //缓存操作，第二次不会再去写这个类的 Definition.
                     int ref = cmH2o.writeObjectBegin(struct.namespace + "." + struct.name);
 
+
                     if (ref < -1) {
                         //todo writeObject10 问题
                     } else {
                         if (ref == -1) {
                             cmH2o.writeClassFieldLength(struct.fields.size());
+
+                            //hessian2 buffer 回溯.
+                            if (objCurrent == null) {
+                                objPush(current.optimizedStruct, struct.name, cmH2o.markIndex());
+                            }
 
                             for (int i = 0; i < struct.fields.size(); i++) {
                                 Field field = struct.fields.get(i);
@@ -243,7 +257,37 @@ public class JsonReader implements JsonCallback {
 
         switch (current.dataType.kind) {
             case STRUCT:
-                validateStruct(current);
+                //重新计算定义
+                ObjectNode objNode = objPop();
+
+                if (objNode != null) {
+                    int definitionPos = objNode.getDefinitionPos();
+                    Field[] orderFields = objNode.getOrderFields();
+                    //fixme 这里不能够remove 原始的数据
+                    Map<String, Field> fieldMap = new HashMap<>(objNode.optimizedStruct.fieldMap);
+
+                    int _back = cmH2o.setIndex(definitionPos);
+
+                    for (Field field : orderFields) {
+                        if (field != null) {
+                            fieldMap.remove(field.name);
+                            cmH2o.writeString(field.getName());
+                        }
+                    }
+                    if (fieldMap.size() > 0) {
+                        for (Field fie : fieldMap.values()) {
+                            cmH2o.writeString(fie.getName());
+                        }
+                        cmH2o.resetIndex(_back);
+                        for (Field ignored : fieldMap.values()) {
+                            cmH2o.writeNull();
+                        }
+                    } else {
+                        cmH2o.resetIndex(_back);
+                    }
+                }
+                //todo
+//                validateStruct(current);
                 break;
             case MAP:
                 cmH2o.writeMapEnd();
@@ -350,11 +394,20 @@ public class JsonReader implements JsonCallback {
                 } else {
                     skip = false;
                 }
+                //设置进去
+                ObjectNode objNode = objPeek();
+                if (objNode != null) {
+                    objNode.setOrderField(field);
+                }
+
                 int tFieldPos = cmH2o.markIndex();
                 push(field.dataType,
                         tFieldPos,
                         optimizedService.optimizedStructs.get(field.dataType.qualifiedName),
                         name);
+
+//                objPeek().setOrderField(field);
+
             } else {
                 logAndThrowTException("field " + name + " type " + toString(current.dataType) + " not compatible with json object");
             }
@@ -487,7 +540,8 @@ public class JsonReader implements JsonCallback {
         if (skip) {
             return;
         }
-        current.isNull = true;
+//        current.isNull = true;
+        cmH2o.writeNull();
     }
 
     @Override
@@ -706,31 +760,6 @@ public class JsonReader implements JsonCallback {
 //                customOut.writeI32(tValue);
 
         optimizedService.getEnumMap().get(current.dataType.qualifiedName);
-
-
-
-       /* String name = null;
-        try {
-            name = (String) _name.invoke(obj, (Object[]) null);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-
-        int ref = out.writeObjectBegin(cl.getName());
-
-        if (ref < -1) {
-            out.writeString("name");
-            out.writeString(name);
-            out.writeMapEnd();
-        } else {
-            if (ref == -1) {
-                out.writeClassFieldLength(1);
-                out.writeString("name");
-                out.writeObjectBegin(cl.getName());
-            }
-
-            out.writeString(name);
-        }*/
     }
 
     /**
@@ -807,5 +836,98 @@ public class JsonReader implements JsonCallback {
             return fields4Struct;
         }
 
+    }
+
+
+    static class ObjectNode {
+        /**
+         * optimizedStruct if dataType.kind==STRUCT
+         */
+        private OptimizedStruct optimizedStruct;
+        /**
+         * the field name
+         */
+        private String fieldName;
+        /**
+         * fieldName order
+         */
+        private Field[] orderFields;
+
+        private int count = 0;
+
+        private int definitionPos = 0;
+
+        boolean isNull = false;
+
+        ObjectNode() {
+        }
+
+        public ObjectNode init(OptimizedStruct optimizedStruct, String fieldName, int definitionPos) {
+            this.fieldName = fieldName;
+            this.optimizedStruct = optimizedStruct;
+            this.definitionPos = definitionPos;
+            this.orderFields = new Field[optimizedStruct.fieldMap.size()];
+            this.isNull = false;
+            return this;
+        }
+
+
+        public OptimizedStruct getOptimizedStruct() {
+            return optimizedStruct;
+        }
+
+        public String getFieldName() {
+            return fieldName;
+        }
+
+        public Field[] getOrderFields() {
+            return orderFields;
+        }
+
+        public int getDefinitionPos() {
+            return definitionPos;
+        }
+
+        public void setOrderField(Field orderField) {
+            this.orderFields[count] = orderField;
+            count++;
+        }
+    }
+
+
+    /**
+     * keep a minimum StackNode Pool
+     */
+    private List<ObjectNode> objNodePool = new ArrayList<>(64);
+
+    private Stack<ObjectNode> objHistory = new Stack<>();
+
+    private void objPush(OptimizedStruct optimizedStruct, String fieldName, int definitionPos) {
+        ObjectNode node;
+
+        if (objNodePool.size() > 0) {
+            node = objNodePool.remove(objNodePool.size() - 1);
+        } else {
+            node = new ObjectNode();
+        }
+        node.init(optimizedStruct, fieldName, definitionPos);
+        objHistory.push(node);
+        this.objCurrent = node;
+    }
+
+    // only used in endField
+    private ObjectNode objPop() {
+        if (objHistory.empty()) {
+            return null;
+        }
+        ObjectNode old = objHistory.pop();
+        objNodePool.add(old);
+
+        return this.objCurrent = old;
+//        return this.objCurrent = (objHistory.size() > 0) ? objHistory.peek() : null;
+    }
+
+    private ObjectNode objPeek() {
+        return objHistory.size() == 0 ? null : objHistory.get(objHistory.size() - 1);
     }
 }

@@ -2,6 +2,7 @@ package org.apache.dubbo.common.serialize;
 
 import com.alibaba.com.caucho.hessian.io.Deserializer;
 import com.yunji.gateway.jsonserializer.JsonCallback;
+import org.apache.dubbo.common.serialize.compatible.CodecContext;
 
 import java.io.ByteArrayOutputStream;
 import java.io.EOFException;
@@ -12,7 +13,7 @@ import java.util.List;
 /**
  * @author Denim.leihz 2019-07-11 9:17 AM
  */
-public class CustomHessian2Input extends AbstractCustomHessian2Input {
+public class HighlyHessian2Input extends HiglyHessian2InputCompatible {
 
     private JsonCallback jsonWriter;
 
@@ -20,12 +21,33 @@ public class CustomHessian2Input extends AbstractCustomHessian2Input {
         this.jsonWriter = jsonWriter;
     }
 
-    public CustomHessian2Input(InputStream is) {
+    public HighlyHessian2Input(InputStream is) {
         super(is);
     }
 
     @Override
     public Object readObject(List<Class<?>> expectedTypes) throws IOException {
+        if (CodecContext.getContext().isUseJsonDecoder()) {
+            return readObject0(expectedTypes);
+        }
+        return super.readObject(expectedTypes);
+    }
+
+
+    @Override
+    protected Object readObjectInstance(Class cl, ObjectDefinition def)
+            throws IOException {
+        if (CodecContext.getContext().isUseJsonDecoder()) {
+            return readObjectInstance0(cl, def);
+        }
+        return super.readObjectInstance(cl, def);
+    }
+
+
+    // =======================================================
+    // Json 自定义需要修改的一些逻辑
+    //========================================================
+    private Object readObject0(List<Class<?>> expectedTypes) throws IOException {
         int tag = _offset < _length ? (_buffer[_offset++] & 0xff) : read();
 
         switch (tag) {
@@ -584,9 +606,7 @@ public class CustomHessian2Input extends AbstractCustomHessian2Input {
         }
     }
 
-
-    @Override
-    protected Object readObjectInstance(Class cl, ObjectDefinition def)
+    private Object readObjectInstance0(Class cl, ObjectDefinition def)
             throws IOException {
         if (ifExist()) {
             jsonWriter.onStartObject();
@@ -608,6 +628,7 @@ public class CustomHessian2Input extends AbstractCustomHessian2Input {
         }
         return null;
     }
+
 
     private boolean ifExist() {
         return jsonWriter != null;

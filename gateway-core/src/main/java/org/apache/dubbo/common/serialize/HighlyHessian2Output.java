@@ -12,7 +12,7 @@ import java.util.HashMap;
 /**
  * @author Denim.leihz 2019-07-10 4:24 PM
  */
-public class CustomHessian2Output
+public class HighlyHessian2Output
         extends AbstractHessianOutput
         implements Hessian2Constants {
 
@@ -37,7 +37,7 @@ public class CustomHessian2Output
      *
      * @param os the underlying output stream.
      */
-    public CustomHessian2Output(OutputStream os) {
+    public HighlyHessian2Output(OutputStream os) {
         _os = os;
     }
 
@@ -49,10 +49,6 @@ public class CustomHessian2Output
         _isCloseStreamOnClose = isClose;
     }
 
-
-    public int markIndex() throws IOException {
-        return _offset;
-    }
 
     public void reWriteIndex(int offset, int length) throws IOException {
         writeInt(offset, length);
@@ -1103,5 +1099,25 @@ public class CustomHessian2Output
 
             flush();
         }
+    }
+
+
+    //==========
+    //
+    // 自定义新加入的方法
+    // =========
+    public int markIndex() throws IOException {
+        return _offset;
+    }
+
+    public int setIndex(int offset) throws IOException {
+        int _back = _offset;
+        _offset = offset;
+
+        return _back;
+    }
+
+    public void resetIndex(int offset) throws IOException {
+        _offset = offset;
     }
 }

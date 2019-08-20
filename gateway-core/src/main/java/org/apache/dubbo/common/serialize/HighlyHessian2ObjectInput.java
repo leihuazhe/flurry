@@ -9,11 +9,11 @@ import java.lang.reflect.Type;
 /**
  * @author Denim.leihz 2019-07-10 9:07 PM
  */
-public class CustomHessian2ObjectInput implements ObjectInput {
-    private final CustomHessian2Input cmH2i;
+public class HighlyHessian2ObjectInput implements ObjectInput {
+    private final HighlyHessian2Input cmH2i;
 
-    public CustomHessian2ObjectInput(InputStream is) {
-        cmH2i = new CustomHessian2Input(is);
+    public HighlyHessian2ObjectInput(InputStream is) {
+        cmH2i = new HighlyHessian2Input(is);
         cmH2i.setSerializerFactory(Hessian2SerializerFactory.SERIALIZER_FACTORY);
     }
 
@@ -79,7 +79,7 @@ public class CustomHessian2ObjectInput implements ObjectInput {
         return readObject(cls);
     }
 
-    public CustomHessian2Input getCmH2i() {
+    public HighlyHessian2Input getCmH2i() {
         return cmH2i;
     }
 }

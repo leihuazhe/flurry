@@ -22,9 +22,9 @@ public interface GateConstants {
      */
     String PROXY_CUSTOM = "custom_javassist";
     /**
-     * Gateway 自定义修改的 hessian2 协议
+     * Gateway 自定义修改的 hessian2 协议,排序超过 hessian2 本身,这样才会被 ignore.
      */
-    String SERIALIZATION_CUSTOM = "custom_hessian2";
+    String SERIALIZATION_CUSTOM = "a_highly_hessian2";
     /**
      * 默认获取元数据信息的方法
      */

@@ -46,6 +46,11 @@
         </dependency>
 
         <dependency>
+            <groupId>org.apache.dubbo</groupId>
+            <artifactId>dubbo-compatible</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>com.taobao.diamond</groupId>
             <artifactId>diamondx-client</artifactId>
         </dependency>
