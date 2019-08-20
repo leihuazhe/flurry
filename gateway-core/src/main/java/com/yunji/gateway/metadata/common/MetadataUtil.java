@@ -103,23 +103,21 @@ public class MetadataUtil {
         char ch = ',';
 
         if (StringUtils.isNotEmpty(whiteStr)) {
-            Set<String> list = null;
+            Set<String> list = new HashSet<>();
             char c;
             int ix = 0, len = whiteStr.length();
             for (int i = 0; i < len; i++) {
                 c = whiteStr.charAt(i);
                 if (c == ch) {
-                    if (list == null) {
-                        list = new HashSet<>();
-                    }
                     list.add(whiteStr.substring(ix, i));
                     ix = i + 1;
                 }
             }
-            if (ix > 0) {
+
+            if (ix >= 0) {
                 list.add(whiteStr.substring(ix));
             }
-            return list == null ? new HashSet<>() : list;
+            return list;
         } else {
             throw new IllegalArgumentException("White list String is empty. Please specify the list string on config server.");
         }
