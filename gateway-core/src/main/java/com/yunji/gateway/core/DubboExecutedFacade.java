@@ -2,7 +2,6 @@ package com.yunji.gateway.core;
 
 import com.yunji.gateway.GateWayService;
 import com.yunji.gateway.GatewayServiceFactory;
-import com.yunji.gateway.config.DiamondBean;
 import com.yunji.gateway.config.DiamondConfigService;
 import com.yunji.gateway.metadata.OptimizedService;
 import com.yunji.gateway.metadata.core.CuratorMetadataClient;
@@ -40,8 +39,10 @@ import java.util.concurrent.CompletableFuture;
 public class DubboExecutedFacade {
 
     private final String registryUrl;
-
-    private final String dataId;
+    /**
+     * uniqueId,如果外部化配置是 diamondClient，则 uniqueId 指 dataId.
+     */
+    private final String uniqueId;
     //Application 名称
     private final String applicationName;
 
@@ -73,15 +74,15 @@ public class DubboExecutedFacade {
 
     public DubboExecutedFacade(String registryUrl, String dataId, String applicationName, boolean needInitMetadata) {
         this.registryUrl = registryUrl;
-        this.dataId = dataId;
+        this.uniqueId = dataId;
         this.applicationName = applicationName;
-        init(needInitMetadata);
+        init();
     }
 
     /**
-     * @param needInitMetadata 是否需要初始化元数据搜集信息
+     * 初始化程序
      */
-    public void init(boolean needInitMetadata) {
+    private void init() {
         //初始化 Application config.
         initApplicationIfAbsent();
         //初始化外部化配置 ConfigService.
@@ -153,10 +154,8 @@ public class DubboExecutedFacade {
 
         if (configService == null) {
             configService = new DiamondConfigService();
-            DiamondBean diamondBean = new DiamondBean();
-            diamondBean.setDataId(dataId);
-            configService.start(diamondBean);
         }
+        configService.start(uniqueId);
     }
 
     /**

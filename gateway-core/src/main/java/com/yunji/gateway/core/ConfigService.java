@@ -12,9 +12,9 @@ import java.util.Properties;
 public interface ConfigService {
 
     /**
-     * 启动配置
+     * 启动配置,如果是 diamond，uniqueId对应 diamodId，如果是其他实现，请自行解析.
      */
-    void start(DiamondBean diamondBean);
+    void start(String uniqueId);
 
 
     /**

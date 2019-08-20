@@ -161,7 +161,7 @@
             <div class="list-group">
                 <c:forEach var="s" items="${services}">
                     <a class="list-group-item ${s == service ? 'active' : ''}"
-                       href="${basePath}/api/service/${s.name}/${s.meta.version}.htm">
+                       href="${basePath}/api/service/${s.namespace}.${s.name}/${s.meta.version}.htm">
                         <span class="glyphicon glyphicon-chevron-right"></span>
                         <c:choose>
                             <c:when test="${empty s.doc}">

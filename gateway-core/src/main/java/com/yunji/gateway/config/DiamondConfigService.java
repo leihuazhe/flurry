@@ -21,8 +21,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class DiamondConfigService implements ConfigService {
     private static final Logger logger = LoggerFactory.getLogger(DiamondConfigService.class);
 
-    private static DiamondConfigService diamondConfigService = new DiamondConfigService();
-
     private DiamondClient diamondClient = new DiamondClient();
     private SharedManagerListener sharedManagerListener = new SharedManagerListener();
     private AtomicBoolean start = new AtomicBoolean(false);
@@ -30,20 +28,16 @@ public class DiamondConfigService implements ConfigService {
     private Properties properties;
     private Set<ConfigListener> callback = new HashSet<>();
 
-
-    public static DiamondConfigService getInstance() {
-        return diamondConfigService;
-    }
-
-
     /**
      * 启动 diamond 动态配置 client
      */
     @Override
-    public void start(DiamondBean diamondBean) {
+    public void start(String uniqueId) {
         if (!start.get()) {
             synchronized (this) {
                 if (!start.get()) {
+                    DiamondBean diamondBean = new DiamondBean();
+                    diamondBean.setDataId(uniqueId);
                     diamondClient.setDataId(diamondBean.getDataId());
                     diamondClient.setPollingIntervalTime(diamondBean.getPollingIntervalTime());
                     diamondClient.setTimeout(diamondBean.getTimeout());
@@ -57,8 +51,8 @@ public class DiamondConfigService implements ConfigService {
             }
 
         }
-        if (!diamondBean.getDataId().equals(diamondClient.getDataId())) {
-            throw new IllegalArgumentException("diamondClient dataId:" + diamondClient.getDataId() + ",diamondBean dataId:" + diamondBean.getDataId() + " not equals!!!");
+        if (!uniqueId.equals(diamondClient.getDataId())) {
+            throw new IllegalArgumentException("diamondClient dataId:" + diamondClient.getDataId() + ",diamondBean dataId:" + uniqueId + " not equals!!!");
         }
     }
 
