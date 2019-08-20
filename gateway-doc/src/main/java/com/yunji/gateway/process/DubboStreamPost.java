@@ -16,7 +16,7 @@ public class DubboStreamPost extends AbstractPost implements Post {
 
     public DubboStreamPost(String registryUrl, String diamondId) {
         super(registryUrl, diamondId);
-        executedFacade = new DubboExecutedFacade(registryUrl, diamondId, false);
+        executedFacade = new DubboExecutedFacade(registryUrl, diamondId);
     }
 
 

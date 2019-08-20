@@ -18,7 +18,7 @@ public class GatewayAsyncSender {
     };
 
     public GatewayAsyncSender(String registryUrl, String diamondId) {
-        executedFacade = new DubboExecutedFacade(registryUrl, diamondId, true);
+        executedFacade = new DubboExecutedFacade(registryUrl, diamondId);
     }
 
     public CompletableFuture<String> sendAsync(RequestContext context, ChannelHandlerContext ctx) {

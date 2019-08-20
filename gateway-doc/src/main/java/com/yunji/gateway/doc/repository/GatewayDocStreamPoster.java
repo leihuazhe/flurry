@@ -15,7 +15,7 @@ public class GatewayDocStreamPoster extends GatewayDocPoster {
 
     public GatewayDocStreamPoster(String registryUrl, String diamondId) {
         super(registryUrl, diamondId);
-        executedFacade = new DubboExecutedFacade(registryUrl, diamondId, false);
+        executedFacade = new DubboExecutedFacade(registryUrl, diamondId);
     }
 
     @Override

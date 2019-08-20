@@ -60,21 +60,22 @@ public class DubboExecutedFacade {
             .getAdaptiveExtension();
 
 
-    public DubboExecutedFacade(String registryUrl, String dataId) {
-        this(registryUrl, dataId, GateConstants.DEFAULT_APPLICATION_NAME);
+    /**
+     * @param registryUrl 注册中心 url
+     * @param uniqueId    默认没有其他外部化配置组件，则为 dataId.
+     */
+    public DubboExecutedFacade(String registryUrl, String uniqueId) {
+        this(registryUrl, uniqueId, GateConstants.DEFAULT_APPLICATION_NAME);
     }
 
-    public DubboExecutedFacade(String registryUrl, String dataId, String applicationName) {
-        this(registryUrl, dataId, applicationName, true);
-    }
-
-    public DubboExecutedFacade(String registryUrl, String dataId, boolean needInitMetadata) {
-        this(registryUrl, dataId, GateConstants.DEFAULT_APPLICATION_NAME, needInitMetadata);
-    }
-
-    public DubboExecutedFacade(String registryUrl, String dataId, String applicationName, boolean needInitMetadata) {
+    /**
+     * @param registryUrl     注册中心 url
+     * @param uniqueId        默认没有其他外部化配置组件，则为 dataId.
+     * @param applicationName Dubbo application name
+     */
+    public DubboExecutedFacade(String registryUrl, String uniqueId, String applicationName) {
         this.registryUrl = registryUrl;
-        this.uniqueId = dataId;
+        this.uniqueId = uniqueId;
         this.applicationName = applicationName;
         init();
     }
