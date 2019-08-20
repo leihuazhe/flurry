@@ -79,19 +79,16 @@ public class HttpHandlerUtil {
      * @return
      */
     public static String wrapCode(String url, GateWayErrorCode code) {
-        String resp = String.format("{\"responseCode\":\"%s\", \"responseMsg\":\"%s\", \"success\":\"%s\", \"status\":0}", code.getCode(), code.getMsg(), "{}");
+        String resp = String.format("{\"data\":%s,\"code\":%s, \"errorMessage\":\"%s\"}", "{}", code.getCode(), code.getMsg());
         logger.info("mesh-response: url: {}, info: {}", url, resp);
         return resp;
     }
 
     /**
      * wrap message response for json format.
-     *
-     * @param ex
-     * @return
      */
     public static String wrapExCodeResponse(String url, GatewayException ex) {
-        String resp = String.format("{\"responseCode\":\"%s\", \"responseMsg\":\"%s\", \"success\":\"%s\", \"status\":0}", ex.getCode(), ex.getMsg(), "{}");
+        String resp = String.format("{\"data\":%s,\"code\":%s, \"errorMessage\":\"%s\"}", "{}", ex.getCode(), ex.getMsg());
         logger.info("mesh-response: url: {}, info: {}", url, resp);
         return resp;
     }
@@ -100,8 +97,8 @@ public class HttpHandlerUtil {
      * wrap message response for json format.
      */
     public static String wrapSuccess(String url, Object msg) {
-        String resp = String.format("{\"responseCode\":\"%s\", \"responseMsg\":%s, \"success\":\"%s\", \"status\":1}", "0000", msg, "{}");
-        logger.debug("mesh-response: url: {}, info: {}", url, resp);
+        String resp = String.format("{\"data\":%s,\"code\":%s, \"errorMessage\":\"%s\"}", msg, 0, "");
+        logger.debug("gateway-response: url: {}, info: {}", url, resp);
         return resp;
     }
 

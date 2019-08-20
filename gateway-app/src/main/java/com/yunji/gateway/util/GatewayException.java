@@ -2,12 +2,12 @@ package com.yunji.gateway.util;
 
 public class GatewayException extends RuntimeException {
 
-    private String code;
+    private int code;
     private String msg;
 
     public GatewayException(Exception err) {
         super(err);
-        this.code = GateWayErrorCode.MeshUnknownError.getCode();
+        this.code = GateWayErrorCode.SUCCESS.getCode();
         this.msg = err.getMessage();
     }
 
@@ -15,14 +15,14 @@ public class GatewayException extends RuntimeException {
         this.msg = msg;
     }
 
-    public GatewayException(String code, String msg) {
+    public GatewayException(int code, String msg) {
         super(code + ":" + msg);
 
         this.code = code;
         this.msg = msg;
     }
 
-    public GatewayException(String code, String msg, Throwable cause) {
+    public GatewayException(int code, String msg, Throwable cause) {
         super(cause);
         this.code = code;
         this.msg = msg;
@@ -32,11 +32,11 @@ public class GatewayException extends RuntimeException {
         this(errorCode.getCode(), errorCode.getMsg());
     }
 
-    public String getCode() {
+    public int getCode() {
         return code;
     }
 
-    public void setCode(String code) {
+    public void setCode(int code) {
         this.code = code;
     }
 
