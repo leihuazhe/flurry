@@ -160,12 +160,6 @@ public class JsonReader implements JsonCallback {
      */
     private List<StackNode> nodePool = new ArrayList<>(64);
 
-    /**
-     * Linked List
-     */
-//    private List<StackNode> order = new ArrayList<>(64);
-
-
     JsonReader(OptimizedStruct optimizedStruct, OptimizedService optimizedService,
                HighlyHessian2ObjectOutput out) {
         this.optimizedStruct = optimizedStruct;
@@ -177,8 +171,8 @@ public class JsonReader implements JsonCallback {
     @Override
     public void onStartObject() throws IOException {
         level++;
-        // it's the outside { body: ... } object
-        if (level == 0) return;
+        if (level == 0)
+            return;
 
         if (skip) {
             skipDepth++;
@@ -190,9 +184,12 @@ public class JsonReader implements JsonCallback {
             initDataType.setKind(DataType.KIND.STRUCT);
             initDataType.qualifiedName = optimizedStruct.struct.name;
             push(initDataType, -1, optimizedStruct, "start");
+            // level=1,push
+            if (objCurrent == null) {
+                objPush(optimizedStruct, cmH2o.markIndex());
+            }
             return;
         }
-
 
         assert current.dataType.kind == DataType.KIND.STRUCT || current.dataType.kind == DataType.KIND.MAP;
 
@@ -209,26 +206,24 @@ public class JsonReader implements JsonCallback {
                 }
                 assert struct != null;
                 if (struct.namespace != null) {
+                    objPush(getOptimizedStruct(optimizedService, struct.namespace, struct.name), cmH2o.markIndex());
+
                     //缓存操作，第二次不会再去写这个类的 Definition.
                     int ref = cmH2o.writeObjectBegin(struct.namespace + "." + struct.name);
-
-
                     if (ref < -1) {
-                        //todo writeObject10 问题
+                        logger.warn("Specified struct {}.{}  is written,return < -1, need writeObject10 but not.",
+                                struct.namespace, struct.name);
                     } else {
                         if (ref == -1) {
                             cmH2o.writeClassFieldLength(struct.fields.size());
-
-                            //hessian2 buffer 回溯.
-                            if (objCurrent == null) {
-                                objPush(current.optimizedStruct, struct.name, cmH2o.markIndex());
-                            }
-
-                            for (int i = 0; i < struct.fields.size(); i++) {
-                                Field field = struct.fields.get(i);
-                                cmH2o.writeString(field.getName());
-                            }
+                            int beforeIndex = writeObjectFiled(struct.fields);
                             cmH2o.writeObjectBegin(struct.namespace + "." + struct.name);
+
+                            afterWrite(beforeIndex);
+                        } else {
+                            //另外一种情况是 1，就是在之前已经写了这个类的定义了
+                            setWriteFlag(false);
+                            logger.debug("Specified struct {}.{}  is written,return 1 ", struct.namespace, struct.name);
                         }
                     }
                 }
@@ -243,10 +238,10 @@ public class JsonReader implements JsonCallback {
 
     }
 
+
     @Override
     public void onEndObject() throws IOException {
         level--;
-        // the outer body
         if (level == -1) return;
 
         if (skip) {
@@ -259,32 +254,59 @@ public class JsonReader implements JsonCallback {
             case STRUCT:
                 //重新计算定义
                 ObjectNode objNode = objPop();
-
-                if (objNode != null) {
-                    int definitionPos = objNode.getDefinitionPos();
-                    Field[] orderFields = objNode.getOrderFields();
-                    //fixme 这里不能够remove 原始的数据
-                    Map<String, Field> fieldMap = new HashMap<>(objNode.optimizedStruct.fieldMap);
-
-                    int _back = cmH2o.setIndex(definitionPos);
-
-                    for (Field field : orderFields) {
-                        if (field != null) {
-                            fieldMap.remove(field.name);
-                            cmH2o.writeString(field.getName());
-                        }
-                    }
-                    if (fieldMap.size() > 0) {
-                        for (Field fie : fieldMap.values()) {
-                            cmH2o.writeString(fie.getName());
-                        }
-                        cmH2o.resetIndex(_back);
-                        for (Field ignored : fieldMap.values()) {
+                //1.level为0时,是 json 的起始阶段，不考虑回写,objNode必须不能为空
+                //2.objNode.count,说明当前类一个值都没有传参数,那还是需要回溯的
+                if (level != 0 && objNode != null) {
+                    if (objNode.count == 0 && objNode.isMatch) {
+                        //可能情况是整个类的value为空，压根没有进入到改objNode定义,这里要做修改.
+                        for (Field ignored : objNode.optimizedStruct.fieldMap.values()) {
                             cmH2o.writeNull();
                         }
-                    } else {
-                        cmH2o.resetIndex(_back);
+                    } else if (!objNode.isMatch) {
+                        //1.!objNode.isMatch 参数值没有配对,说明和之前写入顺序不相同，需要进行调整
+                        //2.如果对于list、map等,只会写第一个element的定义,后面的只会写引用，所以之后的 element 没法修改定义了
+                        if (objNode.writeDefinition) {
+                            int definitionPos = objNode.getDefinitionPos();
+                            Field[] orderFields = objNode.getOrderFields();
+
+                            Map<String, Field> fieldMap = new HashMap<>(objNode.optimizedStruct.fieldMap);
+
+                            int _back = cmH2o.setIndex(definitionPos);
+
+                            for (Field field : orderFields) {
+                                if (field != null) {
+                                    fieldMap.remove(field.name);
+                                    cmH2o.writeString(field.getName());
+                                }
+                            }
+                            if (fieldMap.size() > 0) {
+                                for (Field fie : fieldMap.values()) {
+                                    cmH2o.writeString(fie.getName());
+                                }
+                                cmH2o.resetIndex(_back);
+                                for (Field ignored : fieldMap.values()) {
+                                    cmH2o.writeNull();
+                                }
+                            } else {
+                                cmH2o.resetIndex(_back);
+                            }
+                        } else {
+                            Field[] orderFields = objNode.getOrderFields();
+                            Map<String, Field> fieldMap = new HashMap<>(objNode.optimizedStruct.fieldMap);
+                            for (Field field : orderFields) {
+                                if (field != null) {
+                                    fieldMap.remove(field.name);
+                                }
+                            }
+                            if (fieldMap.size() > 0) {
+                                for (Field ignored : fieldMap.values()) {
+                                    cmH2o.writeNull();
+                                }
+                            }
+                        }
                     }
+
+
                 }
                 //todo
 //                validateStruct(current);
@@ -762,6 +784,41 @@ public class JsonReader implements JsonCallback {
         optimizedService.getEnumMap().get(current.dataType.qualifiedName);
     }
 
+
+    /**
+     * hessian2 写对象字段
+     */
+    private int writeObjectFiled(List<Field> fields) throws IOException {
+        int index = cmH2o.markIndex();
+        for (int i = 0; i < fields.size(); i++) {
+            Field field = fields.get(i);
+            cmH2o.writeString(field.getName());
+        }
+        return index;
+    }
+
+    private void afterWrite(int beforeIndex) {
+        ObjectNode objNode = objPeek();
+        if (objNode != null) {
+            objNode.setDefinitionPos(beforeIndex);
+        }
+    }
+
+    private void setWriteFlag(boolean flag) {
+        ObjectNode objNode = objPeek();
+        if (objNode != null) {
+            objNode.setWriteFlag(flag);
+        }
+    }
+
+
+    //====================
+    //
+    // 对象
+    //
+    //======================
+
+
     /**
      * 用于保存当前处理节点的信息, 从之前的 immutable 调整为  mutable，并使用了一个简单的池，这样，StackNode
      * 的数量 = json的深度，而不是长度，降低内存需求
@@ -840,34 +897,32 @@ public class JsonReader implements JsonCallback {
 
 
     static class ObjectNode {
-        /**
-         * optimizedStruct if dataType.kind==STRUCT
-         */
         private OptimizedStruct optimizedStruct;
-        /**
-         * the field name
-         */
+
         private String fieldName;
-        /**
-         * fieldName order
-         */
+
         private Field[] orderFields;
 
         private int count = 0;
 
         private int definitionPos = 0;
 
-        boolean isNull = false;
+        boolean isMatch = true;
+
+        boolean writeDefinition = true;
 
         ObjectNode() {
         }
 
-        public ObjectNode init(OptimizedStruct optimizedStruct, String fieldName, int definitionPos) {
-            this.fieldName = fieldName;
+        public ObjectNode init(OptimizedStruct optimizedStruct, int definitionPos) {
+            this.fieldName = optimizedStruct.struct.name;
             this.optimizedStruct = optimizedStruct;
             this.definitionPos = definitionPos;
             this.orderFields = new Field[optimizedStruct.fieldMap.size()];
-            this.isNull = false;
+            //回归初始状态
+            this.count = 0;
+            this.isMatch = true;
+            this.writeDefinition = true;
             return this;
         }
 
@@ -888,9 +943,24 @@ public class JsonReader implements JsonCallback {
             return definitionPos;
         }
 
-        public void setOrderField(Field orderField) {
-            this.orderFields[count] = orderField;
+        public void setDefinitionPos(int definitionPos) {
+            this.definitionPos = definitionPos;
+        }
+
+        public void setOrderField(Field field) {
+            judgeIfOrderMatch(field);
+            this.orderFields[count] = field;
             count++;
+        }
+
+        public void setWriteFlag(boolean flag) {
+            writeDefinition = flag;
+        }
+
+        private void judgeIfOrderMatch(Field field) {
+            if (isMatch) {
+                isMatch = field.name.equals(optimizedStruct.struct.fields.get(count).name);
+            }
         }
     }
 
@@ -902,7 +972,7 @@ public class JsonReader implements JsonCallback {
 
     private Stack<ObjectNode> objHistory = new Stack<>();
 
-    private void objPush(OptimizedStruct optimizedStruct, String fieldName, int definitionPos) {
+    private void objPush(OptimizedStruct optimizedStruct, int definitionPos) {
         ObjectNode node;
 
         if (objNodePool.size() > 0) {
@@ -910,7 +980,7 @@ public class JsonReader implements JsonCallback {
         } else {
             node = new ObjectNode();
         }
-        node.init(optimizedStruct, fieldName, definitionPos);
+        node.init(optimizedStruct, definitionPos);
         objHistory.push(node);
         this.objCurrent = node;
     }

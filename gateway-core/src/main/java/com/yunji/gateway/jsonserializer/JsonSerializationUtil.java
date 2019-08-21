@@ -1,5 +1,7 @@
 package com.yunji.gateway.jsonserializer;
 
+import com.yunji.gateway.metadata.OptimizedService;
+import com.yunji.gateway.metadata.OptimizedStruct;
 import com.yunji.gateway.metadata.tag.DataType;
 
 import java.time.LocalDateTime;
@@ -54,5 +56,16 @@ public class JsonSerializationUtil {
         }
 
         return dateTime.toInstant(ZoneOffset.of("+8")).toEpochMilli();
+    }
+
+    //======
+    // Json Reader util 方法
+    //======
+    public static OptimizedStruct getOptimizedStruct(OptimizedService optimizedService, String namespace, String name) {
+        return getOptimizedStruct(optimizedService, namespace + "." + name);
+    }
+
+    public static OptimizedStruct getOptimizedStruct(OptimizedService optimizedService, String qualifierName) {
+        return optimizedService.optimizedStructs.get(qualifierName);
     }
 }
