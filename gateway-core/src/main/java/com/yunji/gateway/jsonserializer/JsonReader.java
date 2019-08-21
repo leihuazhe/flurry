@@ -305,11 +305,9 @@ public class JsonReader implements JsonCallback {
                             }
                         }
                     }
-
-
                 }
-                //todo
-//                validateStruct(current);
+                //可传空值以后,对validateStruct已经没有意义了
+                //validateStruct(current);
                 break;
             case MAP:
                 cmH2o.writeMapEnd();
@@ -562,7 +560,6 @@ public class JsonReader implements JsonCallback {
         if (skip) {
             return;
         }
-//        current.isNull = true;
         cmH2o.writeNull();
     }
 
@@ -818,7 +815,6 @@ public class JsonReader implements JsonCallback {
     //
     //======================
 
-
     /**
      * 用于保存当前处理节点的信息, 从之前的 immutable 调整为  mutable，并使用了一个简单的池，这样，StackNode
      * 的数量 = json的深度，而不是长度，降低内存需求
@@ -875,24 +871,6 @@ public class JsonReader implements JsonCallback {
         public DataType getDataType() {
             return dataType;
         }
-
-        public int gettFieldPosition() {
-            return tFieldPosition;
-        }
-
-
-        public OptimizedStruct getOptimizedStruct() {
-            return optimizedStruct;
-        }
-
-        public String getFieldName() {
-            return fieldName;
-        }
-
-        public BitSet getFields4Struct() {
-            return fields4Struct;
-        }
-
     }
 
 
@@ -924,15 +902,6 @@ public class JsonReader implements JsonCallback {
             this.isMatch = true;
             this.writeDefinition = true;
             return this;
-        }
-
-
-        public OptimizedStruct getOptimizedStruct() {
-            return optimizedStruct;
-        }
-
-        public String getFieldName() {
-            return fieldName;
         }
 
         public Field[] getOrderFields() {
