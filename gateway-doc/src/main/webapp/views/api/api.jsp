@@ -44,7 +44,7 @@
                             <c:forEach var="service" items="${group.value}">
                                 <div class="col-sm-6 col-md-4 col-lg-3">
                                     <div style="height: 310px;" class="thumbnail">
-                                        <a href="${basePath}/api/service/${service.name}/${service.meta.version}.htm"
+                                        <a href="${basePath}/api/service/${service.namespace}.${service.name}/${service.meta.version}.htm"
                                            title="${service.doc}">
                                             <div style="width:100%; height:100px; background:<%=colors[index % colors.length]%>; color:white; text-align:center; font-size:20px; line-height:100px;">
                                                 <span style="font-weight: bold; font-size: 28px;"><%=index + 1%></span>
@@ -61,7 +61,7 @@
 
                                         <div style="text-align:center;" class="caption">
                                             <h3 style="font-size:20px;">
-                                                <a href="${basePath}/api/service/${service.name}/${service.meta.version}.htm"
+                                                <a href="${basePath}/api/service/${service.namespace}.${service.name}/${service.meta.version}.htm"
                                                    title="${service.doc}">
                                                     <c:out value="${service.name}"/> <br>
                                                     <small>版本：<c:out value="${service.meta.version}"/></small>

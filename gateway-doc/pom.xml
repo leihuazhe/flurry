@@ -16,6 +16,7 @@
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
+    <version>2.0.0-SNAPSHOT</version>
 
     <groupId>com.yunji.gateway</groupId>
     <artifactId>gateway-doc</artifactId>
@@ -123,26 +124,10 @@
             <version>2.3.1</version>
         </dependency>
 
-
-        <!--open-api -->
         <dependency>
-            <groupId>com.yunji.frameworks</groupId>
-            <artifactId>yunji-open-api</artifactId>
-            <version>1.0.1</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>log4j</groupId>
-                    <artifactId>log4j</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>slf4j-log4j12</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.apache.zookeeper</groupId>
-                    <artifactId>zookeeper</artifactId>
-                </exclusion>
-            </exclusions>
+            <groupId>com.yunji.gateway</groupId>
+            <artifactId>gateway-core</artifactId>
+            <version>${project.version}</version>
         </dependency>
 
         <dependency>
@@ -195,8 +180,6 @@
                 </exclusion>
             </exclusions>
         </dependency>
-
-
     </dependencies>
 
     <build>

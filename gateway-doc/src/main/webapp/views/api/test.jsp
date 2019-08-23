@@ -54,7 +54,7 @@
         }
         $(function () {
 
-            var url = window.basePath + "/api/findService/" + "${service.name}" + "/" + "${service.meta.version}" + ".htm";
+            var url = window.basePath + "/api/findService/" + "${service.namespace}.${service.name}" + "/" + "${service.meta.version}" + ".htm";
             var settings = {type: "get", url: url, dataType: "json"};
             $.ajax(settings).done(function (result) {
 
@@ -149,9 +149,9 @@
         <ol class="breadcrumb">
             <li><a href="${basePath}/">首页</a></li>
             <li><a href="${basePath}/api/index.htm">API</a></li>
-            <li><a href="${basePath}/api/service/${service.name}/${service.meta.version}.htm">${service.name}</a></li>
+            <li><a href="${basePath}/api/service/${service.namespace}.${service.name}/${service.meta.version}.htm">${service.name}</a></li>
             <li>
-                <a href="${basePath}/api/method/${service.name}/${service.meta.version}/${method.name}.htm">${method.name}</a>
+                <a href="${basePath}/api/method/${service.namespace}.${service.name}/${service.meta.version}/${method.name}.htm">${method.name}</a>
             </li>
             <li><a class="active">在线测试</a></li>
         </ol>
@@ -161,7 +161,7 @@
             <div class="list-group">
                 <c:forEach var="s" items="${services}">
                     <a class="list-group-item ${s == service ? 'active' : ''}"
-                       href="${basePath}/api/service/${s.name}/${s.meta.version}.htm">
+                       href="${basePath}/api/service/${s.namespace}.${s.name}/${s.meta.version}.htm">
                         <span class="glyphicon glyphicon-chevron-right"></span>
                         <c:choose>
                             <c:when test="${empty s.doc}">

@@ -1,1 +1,1 @@
-a_meta=org.apache.dubbo.metadata.auto.ServiceMetadataResolver
+a_meta=ServiceMetadataResolver

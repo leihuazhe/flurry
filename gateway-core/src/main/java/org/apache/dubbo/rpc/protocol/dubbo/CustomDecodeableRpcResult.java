@@ -5,10 +5,11 @@ import org.apache.dubbo.common.logger.Logger;
 import org.apache.dubbo.common.logger.LoggerFactory;
 import org.apache.dubbo.common.serialize.Cleanable;
 import org.apache.dubbo.common.serialize.ObjectInput;
+import org.apache.dubbo.common.serialize.compatible.CodecContext;
 import org.apache.dubbo.common.utils.ArrayUtils;
 import org.apache.dubbo.common.utils.Assert;
 import org.apache.dubbo.common.utils.StringUtils;
-import org.apache.dubbo.jsonserializer.json.JsonDuplexHandler;
+import com.yunji.gateway.jsonserializer.JsonDuplexHandler;
 import org.apache.dubbo.remoting.Channel;
 import org.apache.dubbo.remoting.Codec;
 import org.apache.dubbo.remoting.Decodeable;
@@ -16,6 +17,7 @@ import org.apache.dubbo.remoting.exchange.Response;
 import org.apache.dubbo.remoting.transport.CodecSupport;
 import org.apache.dubbo.rpc.AppResponse;
 import org.apache.dubbo.rpc.Invocation;
+import org.apache.dubbo.rpc.RpcContext;
 import org.apache.dubbo.rpc.support.RpcUtils;
 
 import java.io.IOException;
@@ -24,8 +26,8 @@ import java.io.OutputStream;
 import java.lang.reflect.Type;
 import java.util.Map;
 
-import static org.apache.dubbo.util.GateConstants.INTERFACE;
-import static org.apache.dubbo.util.GateConstants.METADATA_METHOD_NAME;
+import static com.yunji.gateway.util.GateConstants.INTERFACE;
+import static com.yunji.gateway.util.GateConstants.METADATA_METHOD_NAME;
 
 
 public class CustomDecodeableRpcResult extends AppResponse implements Codec, Decodeable {
@@ -67,36 +69,41 @@ public class CustomDecodeableRpcResult extends AppResponse implements Codec, Dec
         ObjectInput in = CodecSupport.getSerialization(channel.getUrl(), serializationType)
                 .deserialize(channel.getUrl(), input);
 
-        byte flag = in.readByte();
-        switch (flag) {
-            case DubboCodec.RESPONSE_NULL_VALUE:
-                break;
-            case DubboCodec.RESPONSE_VALUE:
-                handleJsonValue(in);
-//                handleValue(in);
-                break;
-            case DubboCodec.RESPONSE_WITH_EXCEPTION:
-                handleException(in);
-                break;
-            case DubboCodec.RESPONSE_NULL_VALUE_WITH_ATTACHMENTS:
-                handleAttachment(in);
-                break;
-            case DubboCodec.RESPONSE_VALUE_WITH_ATTACHMENTS:
-                handleJsonValue(in);
-//                handleValue(in);
-                handleAttachment(in);
-                break;
-            case DubboCodec.RESPONSE_WITH_EXCEPTION_WITH_ATTACHMENTS:
-                handleException(in);
-                handleAttachment(in);
-                break;
-            default:
-                throw new IOException("Unknown result flag, expect '0' '1' '2' '3' '4' '5', but received: " + flag);
+        try {
+            byte flag = in.readByte();
+            switch (flag) {
+                case DubboCodec.RESPONSE_NULL_VALUE:
+                    break;
+                case DubboCodec.RESPONSE_VALUE:
+                    CodecContext.getContext().setUseJsonDecoder(true);
+                    handleJsonValue(in);
+                    break;
+                case DubboCodec.RESPONSE_WITH_EXCEPTION:
+                    handleException(in);
+                    break;
+                case DubboCodec.RESPONSE_NULL_VALUE_WITH_ATTACHMENTS:
+                    handleAttachment(in);
+                    break;
+                case DubboCodec.RESPONSE_VALUE_WITH_ATTACHMENTS:
+                    CodecContext.getContext().setUseJsonDecoder(true);
+                    handleJsonValue(in);
+                    CodecContext.getContext().setUseJsonDecoder(false);
+                    handleAttachment(in);
+                    break;
+                case DubboCodec.RESPONSE_WITH_EXCEPTION_WITH_ATTACHMENTS:
+                    handleException(in);
+                    handleAttachment(in);
+                    break;
+                default:
+                    throw new IOException("Unknown result flag, expect '0' '1' '2' '3' '4' '5', but received: " + flag);
+            }
+            if (in instanceof Cleanable) {
+                ((Cleanable) in).cleanup();
+            }
+            return this;
+        } finally {
+            CodecContext.removeContext();
         }
-        if (in instanceof Cleanable) {
-            ((Cleanable) in).cleanup();
-        }
-        return this;
     }
 
     @Override

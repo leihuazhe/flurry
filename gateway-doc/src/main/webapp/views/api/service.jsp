@@ -22,13 +22,13 @@
 <jsp:include page="../core/header.jsp"/>
 <script>
     $(function () {
-        var urlToObj = window.basePath + "/api/enum/" + "${service.name}" + "/" + "${service.meta.version}" + "/jsonEnum";
-        var urlToStr = window.basePath + "/api/enum/" + "${service.name}" + "/" + "${service.meta.version}" + "/jsonEnumString";
+        var urlToObj = window.basePath + "/api/enum/" + "${service.namespace}.${service.name}" + "/" + "${service.meta.version}" + "/jsonEnum";
+        var urlToStr = window.basePath + "/api/enum/" + "${service.namespace}.${service.name}" + "/" + "${service.meta.version}" + "/jsonEnumString";
 
         $.get(urlToObj, function (data) {
             $("#enum-json-result-str").html(getFormatedJsonHTML(JSON.parse(data)));
-            if(data==="{}"){
-                $("#enum-json-result-str").hide()&&$("#enum-json-copy-but").hide()
+            if (data === "{}") {
+                $("#enum-json-result-str").hide() && $("#enum-json-copy-but").hide()
             }
         });
 
@@ -44,7 +44,7 @@
         try {
             document.execCommand('copy');
             $(obj).html("Copied")
-        }catch(e) {
+        } catch (e) {
             alert("复制枚举json失败,请更换浏览器重试！");
         }
     }
@@ -64,7 +64,7 @@
             <div class="list-group">
                 <c:forEach var="s" items="${services}">
                     <a class="list-group-item ${s == service ? 'active' : ''}"
-                       href="${basePath}/api/service/${s.name}/${s.meta.version}.htm">
+                       href="${basePath}/api/service/${s.namespace}.${s.name}/${s.meta.version}.htm">
                         <span class="glyphicon glyphicon-chevron-right"></span>
                         <c:choose>
                             <c:when test="${empty s.doc}">
@@ -81,7 +81,7 @@
         <div class="col-sm-9 col-md-9">
             <div class="page-header mt5">
                 <h1 class="mt5">${service.doc}
-                    <small>${service.name}</small>
+                    <small>${service.namespace}.${service.name}</small>
                 </h1>
             </div>
 
@@ -102,7 +102,7 @@
             </table>
 
             <h3 id="service-methods">方法列表</h3>
-            <table class="table table-bordered " >
+            <table class="table table-bordered ">
                 <thead>
                 <tr class="breadcrumb">
                     <th style="text-align: center">#</th>
@@ -117,43 +117,44 @@
                     <tr>
                         <td width="45px" style="text-align: center">${vs.index + 1}</td>
                         <td>
-                            <a target="_blank" href="${basePath}/api/method/${service.name}/${service.meta.version}/${method.name}.htm">${method.name}</a>
+                            <a target="_blank"
+                               href="${basePath}/api/method/${service.namespace}.${service.name}/${service.meta.version}/${method.name}.htm">${method.name}</a>
                         </td>
-                        <%--<td>--%>
+                            <%--<td>--%>
                             <%--<c:if test="${null == method.annotations}">--%>
-                                <%--${"无"}--%>
+                            <%--${"无"}--%>
                             <%--</c:if>--%>
                             <%--<c:if test="${null != method.annotations}">--%>
-                                <%--<c:forEach var="annotation" items="${method.annotations}" varStatus="vs">--%>
-                                    <%--<c:if test="${annotation.key eq 'events'}">--%>
-                                        <%--<c:if test="${fn:contains(annotation.value,',')}">--%>
-                                                <%--<c:forEach var="event" items="${fn:split(annotation.value,',')}" varStatus="vs1">--%>
-                                                    <%--<li style="list-style: none"><a href="javascript:void(0)"--%>
-                                                           <%--onclick=getStructDetail1('${service.name}','${service.meta.version}','${event}')>--%>
-                                                            <%--<c:forEach var="temp" items="${fn:split(event,'.')}" varStatus="vs2" >--%>
-                                                                <%--<c:if test="${vs2.last}">--%>
-                                                                    <%--${temp}--%>
-                                                                <%--</c:if>--%>
-                                                            <%--</c:forEach>--%>
-                                                    <%--</a></li>--%>
-                                                <%--</c:forEach>--%>
-                                        <%--</c:if>--%>
-                                    <%--<c:if test="${!fn:contains(annotation.value,',')}">--%>
-                                        <%--<li style="list-style: none"><a href="javascript:void(0)"--%>
-                                               <%--onclick=getStructDetail1('${service.name}','${service.meta.version}','${annotation.value}')>--%>
-                                            <%--<c:forEach var="temp" items="${fn:split(annotation.value,'.')}" varStatus="vs2" >--%>
-                                                <%--<c:if test="${vs2.last}">--%>
-                                                    <%--${temp}--%>
-                                                <%--</c:if>--%>
-                                            <%--</c:forEach>--%>
-                                        <%--</a></li>--%>
-                                    <%--</c:if>--%>
-                                    <%--</c:if>--%>
-                                    <%--<c:if test="!${annotation.key eq 'events'}">${"无"}</c:if>--%>
-                                <%--</c:forEach>--%>
+                            <%--<c:forEach var="annotation" items="${method.annotations}" varStatus="vs">--%>
+                            <%--<c:if test="${annotation.key eq 'events'}">--%>
+                            <%--<c:if test="${fn:contains(annotation.value,',')}">--%>
+                            <%--<c:forEach var="event" items="${fn:split(annotation.value,',')}" varStatus="vs1">--%>
+                            <%--<li style="list-style: none"><a href="javascript:void(0)"--%>
+                            <%--onclick=getStructDetail1('${service.name}','${service.meta.version}','${event}')>--%>
+                            <%--<c:forEach var="temp" items="${fn:split(event,'.')}" varStatus="vs2" >--%>
+                            <%--<c:if test="${vs2.last}">--%>
+                            <%--${temp}--%>
                             <%--</c:if>--%>
-                        <%--</td>--%>
-                        <td  >
+                            <%--</c:forEach>--%>
+                            <%--</a></li>--%>
+                            <%--</c:forEach>--%>
+                            <%--</c:if>--%>
+                            <%--<c:if test="${!fn:contains(annotation.value,',')}">--%>
+                            <%--<li style="list-style: none"><a href="javascript:void(0)"--%>
+                            <%--onclick=getStructDetail1('${service.name}','${service.meta.version}','${annotation.value}')>--%>
+                            <%--<c:forEach var="temp" items="${fn:split(annotation.value,'.')}" varStatus="vs2" >--%>
+                            <%--<c:if test="${vs2.last}">--%>
+                            <%--${temp}--%>
+                            <%--</c:if>--%>
+                            <%--</c:forEach>--%>
+                            <%--</a></li>--%>
+                            <%--</c:if>--%>
+                            <%--</c:if>--%>
+                            <%--<c:if test="!${annotation.key eq 'events'}">${"无"}</c:if>--%>
+                            <%--</c:forEach>--%>
+                            <%--</c:if>--%>
+                            <%--</td>--%>
+                        <td>
                             <a href="javascript:void(0)" onclick=openMethodDocDetail(this)>
                                 <c:if test="${fn:contains(fn:substringBefore(fn:trim(method.doc),'##'),'#')}">
                                     <div class="title">${fn:replace(fn:substringBefore(fn:trim(method.doc),'##'),'#','')}</div>
@@ -164,19 +165,23 @@
                             </a>
                             <div style="display: none">
                                 <div class="page-header mt5">
-                                    <h1 class="mt5"> <a target="_blank" href="${basePath}/api/method/${service.name}/${service.meta.version}/${method.name}.htm">
-                                        ${method.name}
+                                    <h1 class="mt5"><a target="_blank"
+                                                       href="${basePath}/api/method/${service.namespace}.${service.name}/${service.meta.version}/${method.name}.htm">
+                                            ${method.name}
                                     </a>
                                     </h1>
-                                    <p><span class="glyphicon glyphicon-flash"></span><a target="_blank" href="${basePath}/api/test/${service.name}/${service.meta.version}/${method.name}.htm">快速测试</a><span class="glyphicon glyphicon-flash"></span></p>
+                                    <p><span class="glyphicon glyphicon-flash"></span><a target="_blank"
+                                                                                         href="${basePath}/api/test/${service.namespace}.${service.name}/${service.meta.version}/${method.name}.htm">快速测试</a><span
+                                            class="glyphicon glyphicon-flash"></span></p>
                                 </div>
                                 <div data-marked-id="marked">
-                                     ${method.doc}
+                                        ${method.doc}
                                 </div>
                             </div>
                         </td>
                         <td width="45px" style="text-align: center">
-                            <a title="在线快速测试" target="_blank" href="${basePath}/api/test/${service.name}/${service.meta.version}/${method.name}.htm">
+                            <a title="在线快速测试" target="_blank"
+                               href="${basePath}/api/test/${service.namespace}.${service.name}/${service.meta.version}/${method.name}.htm">
                                 <span style="font-size: 18px" class="glyphicon glyphicon-flash"></span>
                             </a>
                         </td>
@@ -199,15 +204,16 @@
                     <tr>
                         <td width="45px" style="text-align: center">${vs.index + 1}
                             <c:forEach items="${events}" var="event">
-                                <c:set var="structName" value="${struct.namespace}.${struct.name }" />
+                                <c:set var="structName" value="${struct.namespace}.${struct.name }"/>
                                 <c:if test="${event.event eq structName}">
-                                    <span class="glyphicon glyphicon-bullhorn" style="cursor: pointer" title="事件"></span>
+                                    <span class="glyphicon glyphicon-bullhorn" style="cursor: pointer"
+                                          title="事件"></span>
                                 </c:if>
                             </c:forEach>
                         </td>
                         <td>
                             <a href="javascript:void(0)" class="service-struct-item"
-                               onclick=getStructDetail('${service.name}','${service.meta.version}','${struct.namespace}','${struct.name}')>${struct.name}</a>
+                               onclick=getStructDetail('${service.namespace}.${service.name}','${service.meta.version}','${struct.namespace}','${struct.name}')>${struct.name}</a>
                                 <%--<a href="${basePath}/api/struct/${service.name}/${service.meta.version}/${struct.namespace}.${struct.name}.htm">${struct.name}</a>--%>
                         </td>
                         <td data-marked-id="marked">${struct.doc}</td>
@@ -232,8 +238,8 @@
 
                         <td>
                             <a href="javascript:void(0)" class="service-enum-item"
-                               onclick=getEnumDetail('${service.name}','${service.meta.version}','${anEnum.namespace}','${anEnum.name}')>${anEnum.name}</a>
-                            <%--<a href="${basePath}/api/enum/${service.name}/${service.meta.version}/${anEnum.namespace}.${anEnum.name}.htm">${anEnum.name}</a>--%>
+                               onclick=getEnumDetail('${service.namespace}.${service.name}','${service.meta.version}','${anEnum.namespace}','${anEnum.name}')>${anEnum.name}</a>
+                                <%--<a href="${basePath}/api/enum/${service.name}/${service.meta.version}/${anEnum.namespace}.${anEnum.name}.htm">${anEnum.name}</a>--%>
                         </td>
 
                         <td data-marked-id="marked">${anEnum.doc}</td>
@@ -241,41 +247,43 @@
                 </c:forEach>
                 </tbody>
             </table>
-            <h3 id="service-enums-json"><a href="javascript:void(0)" class="toggle-json-str" onclick=$("#enum-json-result-str").toggle()&&$("#enum-json-copy-but").toggle()>枚举结构Json</a>
+            <h3 id="service-enums-json"><a href="javascript:void(0)" class="toggle-json-str"
+                                           onclick=$("#enum-json-result-str").toggle()&&$("#enum-json-copy-but").toggle()>枚举结构Json</a>
             </h3>
             <div style="position: relative">
-                <a href="javascript:void(0)" title="点击复制" onclick="copyText(this)" id="enum-json-copy-but" class="copy-but">copy</a>
+                <a href="javascript:void(0)" title="点击复制" onclick="copyText(this)" id="enum-json-copy-but"
+                   class="copy-but">copy</a>
                 <textarea id="enum-json-str-text" class="json-str-text"></textarea>
                 <div id="enum-json-result-str"
                      style="height:300px;padding:20px;border:solid 1px #ddd;border-radius:0;resize: none;overflow-y:auto;margin-bottom: 20px"></div>
             </div>
             <%--<h3 id="service-events">事件清单</h3>--%>
             <%--<table class="table table-bordered">--%>
-                <%--<thead>--%>
-                <%--<tr class="breadcrumb">--%>
-                    <%--<th width="45px" style="text-align: center">#</th>--%>
-                    <%--<th>事件</th>--%>
-                    <%--<th>触发方法</th>--%>
-                    <%--&lt;%&ndash;<th>简述</th>&ndash;%&gt;--%>
-                <%--</tr>--%>
-                <%--</thead>--%>
-                <%--<tbody>--%>
-                <%--<c:forEach var="event" items="${events}" varStatus="vs">--%>
-                    <%--<tr>--%>
-                        <%--<td width="45px" style="text-align: center">${vs.index + 1}</td>--%>
-                        <%--<td>--%>
-                            <%--<a href="javascript:void(0)"--%>
-                               <%--onclick=getStructDetail1('${service.name}','${service.meta.version}','${event.event}')>${event.shortName}</a></td>--%>
-                        <%--<td>--%>
-                            <%--<c:forEach var="method" items="${event.touchMethods}" varStatus="vs">--%>
-                                <%--<li style="list-style: none"><a href="${basePath}/api/method/${service.name}/${service.meta.version}/${method}.htm">${method}</a></li>--%>
-                            <%--</c:forEach>--%>
-                        <%--</td>--%>
+            <%--<thead>--%>
+            <%--<tr class="breadcrumb">--%>
+            <%--<th width="45px" style="text-align: center">#</th>--%>
+            <%--<th>事件</th>--%>
+            <%--<th>触发方法</th>--%>
+            <%--&lt;%&ndash;<th>简述</th>&ndash;%&gt;--%>
+            <%--</tr>--%>
+            <%--</thead>--%>
+            <%--<tbody>--%>
+            <%--<c:forEach var="event" items="${events}" varStatus="vs">--%>
+            <%--<tr>--%>
+            <%--<td width="45px" style="text-align: center">${vs.index + 1}</td>--%>
+            <%--<td>--%>
+            <%--<a href="javascript:void(0)"--%>
+            <%--onclick=getStructDetail1('${service.name}','${service.meta.version}','${event.event}')>${event.shortName}</a></td>--%>
+            <%--<td>--%>
+            <%--<c:forEach var="method" items="${event.touchMethods}" varStatus="vs">--%>
+            <%--<li style="list-style: none"><a href="${basePath}/api/method/${service.name}/${service.meta.version}/${method}.htm">${method}</a></li>--%>
+            <%--</c:forEach>--%>
+            <%--</td>--%>
 
-                        <%--&lt;%&ndash;<td data-marked-id="marked">${event.mark}</td>&ndash;%&gt;--%>
-                    <%--</tr>--%>
-                <%--</c:forEach>--%>
-                <%--</tbody>--%>
+            <%--&lt;%&ndash;<td data-marked-id="marked">${event.mark}</td>&ndash;%&gt;--%>
+            <%--</tr>--%>
+            <%--</c:forEach>--%>
+            <%--</tbody>--%>
             <%--</table>--%>
         </div>
     </div>

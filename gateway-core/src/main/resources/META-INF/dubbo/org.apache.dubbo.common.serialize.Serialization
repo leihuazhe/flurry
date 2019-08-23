@@ -1,1 +1,1 @@
-custom_hessian2=org.apache.dubbo.common.serialize.CustomHessian2Serialization
+a_highly_hessian2=org.apache.dubbo.common.serialize.HighlyHessian2Serialization

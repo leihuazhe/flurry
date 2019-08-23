@@ -18,7 +18,7 @@
         <ol class="breadcrumb">
             <li><a href="${basePath}/">首页</a></li>
             <li><a href="${basePath}/api/index.htm">API</a></li>
-            <li><a href="${basePath}/api/service/${service.name}/${service.meta.version}.htm">${service.name}</a></li>
+            <li><a href="${basePath}/api/service/${service.namespace}.${service.name}/${service.meta.version}.htm">${service.name}</a></li>
             <li><a class="active">${anEnum.name}</a></li>
         </ol>
     </div>
@@ -26,7 +26,7 @@
         <div class="col-sm-3 col-md-3">
             <div class="list-group">
                 <c:forEach var="e" items="${enums}">
-                    <a class="list-group-item ${e == anEnum ? 'active' : ''}" href="${basePath}/api/enum/${service.name}/${service.meta.version}/${e.namespace}.${e.name}.htm">
+                    <a class="list-group-item ${e == anEnum ? 'active' : ''}" href="${basePath}/api/enum/${service.namespace}.${service.name}/${service.meta.version}/${e.namespace}.${e.name}.htm">
                         <span class="glyphicon glyphicon-chevron-right"></span>
                         <c:out value="${e.name}"/>
                     </a>

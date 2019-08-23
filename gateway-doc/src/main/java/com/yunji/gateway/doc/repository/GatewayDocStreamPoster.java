@@ -1,8 +1,7 @@
 package com.yunji.gateway.doc.repository;
 
-import com.yunji.api.doc.compatible.SoaCode;
-import org.apache.dubbo.gateway.core.DubboExecutedFacade;
-import org.apache.dubbo.metadata.OptimizedMetadata;
+import com.yunji.gateway.core.DubboExecutedFacade;
+import com.yunji.gateway.metadata.OptimizedService;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -16,28 +15,25 @@ public class GatewayDocStreamPoster extends GatewayDocPoster {
 
     public GatewayDocStreamPoster(String registryUrl, String diamondId) {
         super(registryUrl, diamondId);
-        executedFacade = new DubboExecutedFacade(registryUrl, diamondId, false);
+        executedFacade = new DubboExecutedFacade(registryUrl, diamondId);
     }
 
     @Override
     protected String doPost(String service,
-                            OptimizedMetadata.OptimizedService bizService,
+                            OptimizedService bizService,
                             String method,
                             String finalVersion,
                             String parameter) {
-
         CompletableFuture<String> resultFuture = executedFacade.execute(service, method, finalVersion, parameter, bizService);
-
-
         try {
             String result = resultFuture.get();
 
-            LOGGER.info("service: {}, method: {}, result:{}", service, method, result);
+            logger.info("service: {}, method: {}, result:{}", service, method, result);
 
             return result;
         } catch (InterruptedException | ExecutionException e) {
-            LOGGER.error(e.getMessage(), e);
-            return String.format("{\"responseCode\":\"%s\", \"responseMsg\":\"%s\", \"success\":\"%s\", \"status\":0}", SoaCode.ClientUnKnown.getCode(), e.getMessage(), "{}");
+            logger.error(e.getMessage(), e);
+            return String.format("{\"responseCode\":\"%s\", \"responseMsg\":\"%s\", \"success\":\"%s\", \"status\":0}", "ClientUnKnown", e.getMessage(), "{}");
         }
     }
 }
