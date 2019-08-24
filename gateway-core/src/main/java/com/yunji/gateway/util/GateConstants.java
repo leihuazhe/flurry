@@ -28,7 +28,7 @@ public interface GateConstants {
     /**
      * 默认获取元数据信息的方法
      */
-    String METADATA_METHOD_NAME = "getServiceMetadata";
+    String METADATA_METHOD_NAME = "_getServiceMetadata";
     /**
      * 注册中心环境变量
      */

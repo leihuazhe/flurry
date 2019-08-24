@@ -2,7 +2,6 @@ package com.yunji.gateway.metadata.core;
 
 import com.yunji.gateway.core.RegistryMetadataClient;
 import com.yunji.gateway.metadata.common.ChangeType;
-import com.yunji.gateway.metadata.common.RegistryConstants;
 import org.apache.dubbo.common.URL;
 import org.apache.dubbo.common.utils.CollectionUtils;
 import org.apache.dubbo.remoting.zookeeper.ChildListener;
@@ -29,6 +28,8 @@ public class CuratorMetadataClient implements RegistryMetadataClient {
 
     private String root;
 
+    private String GROUP_KEY = "group";
+
     private static final String DEFAULT_ROOT = "dubbo";
 
     private Set<RegistryListener> listeners = new HashSet<>();
@@ -41,7 +42,7 @@ public class CuratorMetadataClient implements RegistryMetadataClient {
             throw new IllegalStateException("registry address == null");
         }
 
-        String group = url.getParameter(RegistryConstants.GROUP_KEY, DEFAULT_ROOT);
+        String group = url.getParameter(GROUP_KEY, DEFAULT_ROOT);
         if (!group.startsWith(PATH_SEPARATOR)) {
             group = PATH_SEPARATOR + group;
         }

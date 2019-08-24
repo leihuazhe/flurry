@@ -54,12 +54,12 @@ public class MetadataUtil {
                 GateWayService gateWayService = GatewayServiceFactory.create(
                         MetaServiceInfo.builder()
                                 .serviceName(serviceName)
-                                .methodName(RegistryConstants.METADATA_METHOD)
+                                .methodName(GateConstants.METADATA_METHOD_NAME)
                                 .version(version)
                                 .group(group)
                                 .build());
                 //Invoke.
-                gateWayService.invoke(RegistryConstants.METADATA_METHOD, new String[]{}, new Object[]{});
+                gateWayService.invoke(GateConstants.METADATA_METHOD_NAME, new String[]{}, new Object[]{});
 
                 String metaString = (String) RpcContext.getContext()
                         .getCompletableFuture()
@@ -73,7 +73,7 @@ public class MetadataUtil {
             } catch (ExecutionException tx) {
                 String detailMsg = tx.getMessage();
                 if (detailMsg.contains("org.apache.dubbo.common.bytecode.NoSuchMethodException")) {
-                    logger.error("目标服务:{} 没有增强方法 getServiceMetadata,无法获取到服务元数据.", serviceName);
+                    logger.error("目标服务:{} 没有增强方法 _getServiceMetadata,无法获取到服务元数据.", serviceName);
                     return null;
                 }
                 logger.error("[" + serviceName + "]: ResolveServiceMetadata get error: " + tx.getMessage(), tx);
