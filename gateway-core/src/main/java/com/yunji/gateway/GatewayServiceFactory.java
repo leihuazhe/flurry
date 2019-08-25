@@ -16,7 +16,7 @@ import static com.yunji.gateway.util.GateConstants.GATEWAY_REFERENCE_TIME_OUT;
  * Dubbo {@link GateWayService} Factory
  */
 public class GatewayServiceFactory {
-    private static final Integer TIME_OUT = Integer.valueOf(MixUtils.get(GATEWAY_REFERENCE_TIME_OUT, "10 * 1000"));
+    private static final Integer TIME_OUT = Integer.valueOf(MixUtils.get(GATEWAY_REFERENCE_TIME_OUT, "10000"));
 
     private static final ConcurrentMap<Integer, GateWayService> SERVICE_CACHE = new ConcurrentHashMap<>();
 
