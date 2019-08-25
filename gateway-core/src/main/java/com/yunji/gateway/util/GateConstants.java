@@ -52,15 +52,17 @@ public interface GateConstants {
 
     String DEFAULT_APPLICATION_NAME = "gateway-application";
 
-    String REGISTEY_PROTOCOL = "zookeeper";
+    String REGISTER_PROTOCOL = "zookeeper";
+
+    String GATEWAY_REFERENCE_TIME_OUT = "gateway.reference.timeout";
+
 
     int POLLING_INTERVAL_TIME = 10;
 
     long DIAMOND_TIME_OUT = 2000L;
 
-    long TIME_OUT = 2000L;
+    long METADATA_CALL_TIME_OUT = 2000L;
 
-    String REFERENCE_TIME_OUT = "reference.service.time.out";
 
 
     int DEFAULT_RETRY = 3;

@@ -138,7 +138,7 @@ public class DubboExecutedFacade {
             application = new ApplicationConfig();
             application.setName(applicationName);
             RegistryConfig registryConfig = new RegistryConfig();
-            registryConfig.setProtocol(GateConstants.REGISTEY_PROTOCOL);
+            registryConfig.setProtocol(GateConstants.REGISTER_PROTOCOL);
             registryConfig.setAddress(registryUrl);
             application.setRegistry(registryConfig);
         }

@@ -63,7 +63,7 @@ public class MetadataUtil {
 
                 String metaString = (String) RpcContext.getContext()
                         .getCompletableFuture()
-                        .get(GateConstants.TIME_OUT, TimeUnit.MILLISECONDS);
+                        .get(GateConstants.METADATA_CALL_TIME_OUT, TimeUnit.MILLISECONDS);
 
 
                 try (StringReader reader = new StringReader(metaString)) {
