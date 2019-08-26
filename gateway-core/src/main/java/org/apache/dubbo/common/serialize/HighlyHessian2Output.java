@@ -4,9 +4,13 @@ import com.alibaba.com.caucho.hessian.io.AbstractHessianOutput;
 import com.alibaba.com.caucho.hessian.io.Hessian2Constants;
 import com.alibaba.com.caucho.hessian.io.Serializer;
 import com.alibaba.com.caucho.hessian.util.IdentityIntMap;
+import com.yunji.gateway.util.DumpUtil;
+import org.apache.dubbo.remoting.buffer.ChannelBufferOutputStream;
+import org.apache.dubbo.remoting.transport.netty4.NettyBackedChannelBuffer;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Arrays;
 import java.util.HashMap;
 
 /**
@@ -54,16 +58,6 @@ public class HighlyHessian2Output
         writeInt(offset, length);
     }
 
-    /**
-     * 自定义，重写长度
-     */
-    public void reWriteListLength(int offset, int length, String type)
-            throws IOException {
-        int currentOffset = _offset;
-        _offset = offset;
-        writeListBegin(length, type);
-        _offset = currentOffset;
-    }
 
     @Override
     public void call(String method, Object[] args)
@@ -236,7 +230,7 @@ public class HighlyHessian2Output
                 _buffer[_offset++] = (byte) BC_LIST_VARIABLE_UNTYPED;
 
             return true;
-        } else if (length <= LIST_DIRECT_MAX) {
+        } /*else if (length <= LIST_DIRECT_MAX) {
             if (type != null) {
                 _buffer[_offset++] = (byte) (BC_LIST_DIRECT + length);
                 writeType(type);
@@ -245,7 +239,7 @@ public class HighlyHessian2Output
             }
 
             return false;
-        } else {
+        }*/ else {
             if (type != null) {
                 _buffer[_offset++] = (byte) BC_LIST_FIXED;
                 writeType(type);
@@ -1105,10 +1099,23 @@ public class HighlyHessian2Output
     //==========
     //
     // 自定义新加入的方法
+    // 8.26 fix 这里需要考虑已经 flush 的情况.
     // =========
-    public int markIndex() throws IOException {
-        return _offset;
+
+    /**
+     * 当前写指针,包括byteBuf + 缓冲区
+     *
+     * @param buffer 在操作之前起始的 writeIndex.
+     * @return index.
+     */
+    public int markIndex() {
+        ChannelBufferOutputStream bos = (ChannelBufferOutputStream) _os;
+        NettyBackedChannelBuffer nbBuffer = (NettyBackedChannelBuffer) bos.buffer();
+        //当前buffer 的指针
+        int bufferIndex = nbBuffer.writerIndex();
+        return bufferIndex + _offset;
     }
+
 
     public int setIndex(int offset) throws IOException {
         int _back = _offset;
@@ -1119,5 +1126,68 @@ public class HighlyHessian2Output
 
     public void resetIndex(int offset) throws IOException {
         _offset = offset;
+    }
+
+    /**
+     * 自定义，重写 List 长度
+     *
+     * @param offset 在上一次某次标记的 write index.
+     * @param length 写长度
+     * @throws IOException
+     * com.yunji.gateway.util.DumpUtil.dump(getByteBuf().buffer);
+     */
+    public void reWriteListLength(int offset, int length)
+            throws IOException {
+        int bufferIndex = getByteBufWriteIndex();
+        //说明原来mark的index 还没有 flush 到 buffer 中
+        if (offset > bufferIndex) {
+            int currentOffset = _offset;
+            _offset = offset - bufferIndex;
+            writeListBegin(length, null);
+            _offset = currentOffset;
+        } else {
+            //已经写入到了ByteBuf
+            int currentOffset = _offset;
+            customWriteListBegin(length);
+            byte[] needFlush = Arrays.copyOfRange(_buffer, currentOffset, _offset);
+
+            getByteBuf().markWriterIndex();
+
+            getByteBuf().writerIndex(offset);
+            getByteBuf().writeBytes(needFlush, 0, needFlush.length);
+
+            getByteBuf().resetWriterIndex();
+
+            _offset = currentOffset;
+        }
+
+
+    }
+
+    /**
+     * Returns the {@code writerIndex} of this buffer.
+     */
+    public int getByteBufWriteIndex() {
+        return getByteBuf().writerIndex();
+    }
+
+    /**
+     * Returns  this buffer.
+     */
+    private NettyBackedChannelBuffer getByteBuf() {
+        ChannelBufferOutputStream bos = (ChannelBufferOutputStream) _os;
+        return (NettyBackedChannelBuffer) bos.buffer();
+    }
+
+    private boolean customWriteListBegin(int length) throws IOException {
+        if (length <= LIST_DIRECT_MAX) {
+            _buffer[_offset++] = (byte) (BC_LIST_DIRECT_UNTYPED + length);
+            return false;
+        } else {
+            _buffer[_offset++] = (byte) BC_LIST_FIXED_UNTYPED;
+            writeInt(length);
+
+            return false;
+        }
     }
 }

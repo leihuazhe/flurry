@@ -29,7 +29,10 @@ public class JsonReader implements JsonCallback {
      * Hessian2 Custom output
      */
     private final HighlyHessian2Output cmH2o;
-
+    /**
+     * 起始 channelBuffer index
+     */
+    private int startBufferIndex;
 
     /**
      * 当前处理数据节点
@@ -161,10 +164,11 @@ public class JsonReader implements JsonCallback {
     private List<StackNode> nodePool = new ArrayList<>(64);
 
     JsonReader(OptimizedStruct optimizedStruct, OptimizedService optimizedService,
-               HighlyHessian2ObjectOutput out) {
+               HighlyHessian2ObjectOutput out, int bufferWriteIndex) {
         this.optimizedStruct = optimizedStruct;
         this.optimizedService = optimizedService;
         this.cmH2o = out.getCmH2o();
+        this.startBufferIndex = bufferWriteIndex;
     }
 
 
@@ -747,8 +751,17 @@ public class JsonReader implements JsonCallback {
         cmH2o.writeListBegin(defaultSize, null);
     }
 
+    /**
+     * 需要考虑是否刷到了 ByteBuf 中了，因为 buffer 只有 4K 的缓冲区
+     *
+     * @param offset
+     * @param length
+     * @throws IOException
+     */
     private void reWriteCollectionBegin(int offset, int length) throws IOException {
-        cmH2o.reWriteListLength(offset, length, null);
+        int bufferIndex = cmH2o.getByteBufWriteIndex();
+        //说明原来mark的index 还没有 flush 到 buffer 中
+        cmH2o.reWriteListLength(offset, length);
     }
 
 
