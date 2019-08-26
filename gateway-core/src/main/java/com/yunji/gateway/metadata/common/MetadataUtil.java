@@ -210,9 +210,9 @@ public class MetadataUtil {
             case MAP:
                 return "java.util.Map";
             case LIST:
-                return "java.lang.List";
+                return "java.util.List";
             case SET:
-                return "java.lang.Set";
+                return "java.util.Set";
             case ENUM:
                 return "java.lang.Enum";
             case STRUCT:
