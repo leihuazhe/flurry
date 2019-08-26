@@ -1,6 +1,5 @@
 package org.apache.dubbo.common.serialize;
 
-import com.alibaba.com.caucho.hessian.io.Deserializer;
 import com.yunji.gateway.jsonserializer.JsonCallback;
 import org.apache.dubbo.common.serialize.compatible.CodecContext;
 
@@ -487,27 +486,29 @@ public class HighlyHessian2Input extends HiglyHessian2InputCompatible {
                 // fixed length lists
                 String type = readType();
                 int length = readInt();
-
+                customReadList(length);
+                return null;
+                /*
                 Deserializer reader;
                 reader = findSerializerFactory().getListDeserializer(type, null);
 
                 boolean valueType = expectedTypes != null && expectedTypes.size() == 1;
 
-                return reader.readLengthList(this, length, valueType ? expectedTypes.get(0) : null);
+                return reader.readLengthList(this, length, valueType ? expectedTypes.get(0) : null);*/
             }
 
             case BC_LIST_FIXED_UNTYPED: {
                 // fixed length lists
                 int length = readInt();
-
-                Deserializer reader;
+                customReadList(length);
+                return null;
+                /*Deserializer reader;
                 reader = findSerializerFactory().getListDeserializer(null, null);
 
                 boolean valueType = expectedTypes != null && expectedTypes.size() == 1;
 
-                return reader.readLengthList(this, length, valueType ? expectedTypes.get(0) : null);
+                return reader.readLengthList(this, length, valueType ? expectedTypes.get(0) : null);*/
             }
-
             // compact fixed list
             case 0x70:
             case 0x71:
@@ -520,7 +521,6 @@ public class HighlyHessian2Input extends HiglyHessian2InputCompatible {
                 // fixed length lists
                 String type = readType();
                 int length = tag - 0x70;
-
                 customReadList(length);
                 return null;
             }
@@ -548,8 +548,9 @@ public class HighlyHessian2Input extends HiglyHessian2InputCompatible {
 
             case 'M': {
                 String type = readType();
-
-                return findSerializerFactory().readMap(this, type);
+                customReadMap();
+                return null;
+//                return findSerializerFactory().readMap(this, type);
             }
 
             case 'C': {
