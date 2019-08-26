@@ -37,10 +37,7 @@ public class JsonSerializer implements BeanSerializer<String> {
     @Override
     public void write(String input, ObjectOutput oproto) throws IOException {
         JsonReader jsonReader;
-        HighlyHessian2ObjectOutput hessian2ObjectOutput = (HighlyHessian2ObjectOutput) oproto;
-        HighlyHessian2Output cmH2o = hessian2ObjectOutput.getCmH2o();
-        int bufferWriteIndex = cmH2o.getByteBufWriteIndex();
-        jsonReader = new JsonReader(optimizedStruct, optimizedService, (HighlyHessian2ObjectOutput) oproto, bufferWriteIndex);
+        jsonReader = new JsonReader(optimizedStruct, optimizedService, (HighlyHessian2ObjectOutput) oproto);
 
         new JsonParser(input, jsonReader).parseJsValue();
     }

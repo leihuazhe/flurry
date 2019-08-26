@@ -4,7 +4,6 @@ import com.alibaba.com.caucho.hessian.io.AbstractHessianOutput;
 import com.alibaba.com.caucho.hessian.io.Hessian2Constants;
 import com.alibaba.com.caucho.hessian.io.Serializer;
 import com.alibaba.com.caucho.hessian.util.IdentityIntMap;
-import com.yunji.gateway.util.DumpUtil;
 import org.apache.dubbo.remoting.buffer.ChannelBufferOutputStream;
 import org.apache.dubbo.remoting.transport.netty4.NettyBackedChannelBuffer;
 
@@ -1103,9 +1102,8 @@ public class HighlyHessian2Output
     // =========
 
     /**
-     * 当前写指针,包括byteBuf + 缓冲区
+     * 当前写指针,包括byteBuf + 缓冲区 byte offset
      *
-     * @param buffer 在操作之前起始的 writeIndex.
      * @return index.
      */
     public int markIndex() {
@@ -1133,8 +1131,7 @@ public class HighlyHessian2Output
      *
      * @param offset 在上一次某次标记的 write index.
      * @param length 写长度
-     * @throws IOException
-     * com.yunji.gateway.util.DumpUtil.dump(getByteBuf().buffer);
+     * @throws IOException com.yunji.gateway.util.DumpUtil.dump(getByteBuf().buffer);
      */
     public void reWriteListLength(int offset, int length)
             throws IOException {
@@ -1179,15 +1176,18 @@ public class HighlyHessian2Output
         return (NettyBackedChannelBuffer) bos.buffer();
     }
 
-    private boolean customWriteListBegin(int length) throws IOException {
+    /**
+     * 写 集合 length 长度,直接写大，兼容 7以下的
+     *
+     * @param length 集合长度.
+     * @throws IOException
+     */
+    private void customWriteListBegin(int length) throws IOException {
         if (length <= LIST_DIRECT_MAX) {
             _buffer[_offset++] = (byte) (BC_LIST_DIRECT_UNTYPED + length);
-            return false;
         } else {
             _buffer[_offset++] = (byte) BC_LIST_FIXED_UNTYPED;
             writeInt(length);
-
-            return false;
         }
     }
 }

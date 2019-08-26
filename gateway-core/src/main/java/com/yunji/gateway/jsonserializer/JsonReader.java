@@ -24,16 +24,10 @@ public class JsonReader implements JsonCallback {
 
     private final OptimizedStruct optimizedStruct;
     private final OptimizedService optimizedService;
-
     /**
      * Hessian2 Custom output
      */
     private final HighlyHessian2Output cmH2o;
-    /**
-     * 起始 channelBuffer index
-     */
-    private int startBufferIndex;
-
     /**
      * 当前处理数据节点
      */
@@ -48,8 +42,7 @@ public class JsonReader implements JsonCallback {
      * incr: startObject/startArray
      * decr: endObject/endArray
      */
-//    int level = -1;
-    int level = 0;
+    private int level = 0;
 
     /**
      * onStartField的时候, 记录是否找到该Field. 如果没找到,那么需要skip这个field
@@ -58,8 +51,11 @@ public class JsonReader implements JsonCallback {
      * - onEndObject/onEndArray时，skipDepth--
      * 当 skipDepth 为 0 且进入 onEndField 时， skip 复位为false
      */
-    boolean skip = false;
-    int skipDepth = 0;
+    private boolean skip = false;
+    /**
+     * Json 深度
+     */
+    private int skipDepth = 0;
 
     /**
      * <pre>
@@ -164,11 +160,10 @@ public class JsonReader implements JsonCallback {
     private List<StackNode> nodePool = new ArrayList<>(64);
 
     JsonReader(OptimizedStruct optimizedStruct, OptimizedService optimizedService,
-               HighlyHessian2ObjectOutput out, int bufferWriteIndex) {
+               HighlyHessian2ObjectOutput out) {
         this.optimizedStruct = optimizedStruct;
         this.optimizedService = optimizedService;
         this.cmH2o = out.getCmH2o();
-        this.startBufferIndex = bufferWriteIndex;
     }
 
 
@@ -429,9 +424,6 @@ public class JsonReader implements JsonCallback {
                         tFieldPos,
                         optimizedService.optimizedStructs.get(field.dataType.qualifiedName),
                         name);
-
-//                objPeek().setOrderField(field);
-
             } else {
                 logAndThrowTException("field " + name + " type " + toString(current.dataType) + " not compatible with json object");
             }
@@ -759,7 +751,6 @@ public class JsonReader implements JsonCallback {
      * @throws IOException
      */
     private void reWriteCollectionBegin(int offset, int length) throws IOException {
-        int bufferIndex = cmH2o.getByteBufWriteIndex();
         //说明原来mark的index 还没有 flush 到 buffer 中
         cmH2o.reWriteListLength(offset, length);
     }
