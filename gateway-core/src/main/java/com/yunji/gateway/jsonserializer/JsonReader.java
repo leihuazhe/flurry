@@ -253,7 +253,7 @@ public class JsonReader implements JsonCallback {
             case STRUCT:
                 //重新计算定义
                 ObjectNode objNode = objPop();
-                //1.level为0时,是 json 的起始阶段，不考虑回写,objNode必须不能为空
+                //1.level为0时,是 json 的起始阶段，不考虑回写,objNode 必须不能为空
                 //2.objNode.count,说明当前类一个值都没有传参数,那还是需要回溯的
                 if (level != 0 && objNode != null) {
                     if (objNode.count == 0 && objNode.isMatch) {
@@ -265,12 +265,15 @@ public class JsonReader implements JsonCallback {
                         //1.!objNode.isMatch 参数值没有配对,说明和之前写入顺序不相同，需要进行调整
                         //2.如果对于list、map等,只会写第一个element的定义,后面的只会写引用，所以之后的 element 没法修改定义了
                         if (objNode.writeDefinition) {
-                            int definitionPos = objNode.getDefinitionPos();
+                            int reBackIndex = objNode.getDefinitionPos();
                             Field[] orderFields = objNode.getOrderFields();
 
                             Map<String, Field> fieldMap = new HashMap<>(objNode.optimizedStruct.fieldMap);
 
-                            int _back = cmH2o.setIndex(definitionPos);
+                            //先 flush
+                            cmH2o.flush();
+                            int markCurrentOffset = cmH2o.markBufferOffset();
+
 
                             for (Field field : orderFields) {
                                 if (field != null) {
@@ -282,12 +285,15 @@ public class JsonReader implements JsonCallback {
                                 for (Field fie : fieldMap.values()) {
                                     cmH2o.writeString(fie.getName());
                                 }
-                                cmH2o.resetIndex(_back);
+                                //此步同时 reset 了index
+                                cmH2o.reWriteBuf(reBackIndex, markCurrentOffset);
+
                                 for (Field ignored : fieldMap.values()) {
                                     cmH2o.writeNull();
                                 }
                             } else {
-                                cmH2o.resetIndex(_back);
+                                cmH2o.reWriteBuf(reBackIndex, markCurrentOffset);
+//                                cmH2o.resetIndex(markCurrentOffset);
                             }
                         } else {
                             Field[] orderFields = objNode.getOrderFields();
@@ -714,7 +720,6 @@ public class JsonReader implements JsonCallback {
 
         //拿到当前node的开始位置以及集合元素大小
         int beginPosition = current.tFieldPosition;
-//        int beginPosition = current.valuePosition;
         int elCount = current.elCount;
 
         switch (current.dataType.kind) {

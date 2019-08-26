@@ -1011,6 +1011,7 @@ public class HighlyHessian2Output
         }
     }
 
+
     class BytesOutputStream extends OutputStream {
         private int _startOffset;
 
@@ -1114,12 +1115,11 @@ public class HighlyHessian2Output
         return bufferIndex + _offset;
     }
 
-
-    public int setIndex(int offset) throws IOException {
-        int _back = _offset;
-        _offset = offset;
-
-        return _back;
+    /**
+     * mark buffer byte array 缓冲区
+     */
+    public int markBufferOffset() {
+        return _offset;
     }
 
     public void resetIndex(int offset) throws IOException {
@@ -1138,27 +1138,42 @@ public class HighlyHessian2Output
         int bufferIndex = getByteBufWriteIndex();
         //说明原来mark的index 还没有 flush 到 buffer 中
         if (offset > bufferIndex) {
-            int currentOffset = _offset;
+           /* int currentOffset = _offset;
             _offset = offset - bufferIndex;
             writeListBegin(length, null);
-            _offset = currentOffset;
-        } else {
-            //已经写入到了ByteBuf
-            int currentOffset = _offset;
-            customWriteListBegin(length);
-            byte[] needFlush = Arrays.copyOfRange(_buffer, currentOffset, _offset);
-
-            getByteBuf().markWriterIndex();
-
-            getByteBuf().writerIndex(offset);
-            getByteBuf().writeBytes(needFlush, 0, needFlush.length);
-
-            getByteBuf().resetWriterIndex();
-
-            _offset = currentOffset;
+            _offset = currentOffset;*/
+            flush();
         }
+        //已经写入到了ByteBuf
+        int currentOffset = _offset;
+        customWriteListBegin(length);
+        byte[] needFlush = Arrays.copyOfRange(_buffer, currentOffset, _offset);
 
+        getByteBuf().markWriterIndex();
 
+        getByteBuf().writerIndex(offset);
+        getByteBuf().writeBytes(needFlush, 0, needFlush.length);
+
+        getByteBuf().resetWriterIndex();
+
+        _offset = currentOffset;
+    }
+
+    /**
+     * @param reBackIndex      byteBuf 重写指针
+     * @param markCurrentIndex 从哪里开始的 offset
+     */
+    public void reWriteBuf(int reBackIndex, int markCurrentIndex) {
+        getByteBuf().markWriterIndex();
+        //已经写入到了ByteBuf
+        byte[] needFlush = Arrays.copyOfRange(_buffer, markCurrentIndex, _offset);
+        getByteBuf().writerIndex(reBackIndex);
+
+        getByteBuf().writeBytes(needFlush, 0, needFlush.length);
+
+        getByteBuf().resetWriterIndex();
+
+        _offset = markCurrentIndex;
     }
 
     /**
@@ -1171,9 +1186,13 @@ public class HighlyHessian2Output
     /**
      * Returns  this buffer.
      */
-    private NettyBackedChannelBuffer getByteBuf() {
+    public NettyBackedChannelBuffer getByteBuf() {
         ChannelBufferOutputStream bos = (ChannelBufferOutputStream) _os;
         return (NettyBackedChannelBuffer) bos.buffer();
+    }
+
+    public ChannelBufferOutputStream getOS() {
+        return (ChannelBufferOutputStream) _os;
     }
 
     /**
@@ -1183,11 +1202,13 @@ public class HighlyHessian2Output
      * @throws IOException
      */
     private void customWriteListBegin(int length) throws IOException {
-        if (length <= LIST_DIRECT_MAX) {
+        /*if (length <= LIST_DIRECT_MAX) {
             _buffer[_offset++] = (byte) (BC_LIST_DIRECT_UNTYPED + length);
         } else {
             _buffer[_offset++] = (byte) BC_LIST_FIXED_UNTYPED;
             writeInt(length);
-        }
+        }*/
+        _buffer[_offset++] = (byte) BC_LIST_FIXED_UNTYPED;
+        writeInt(length);
     }
 }
