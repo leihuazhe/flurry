@@ -125,6 +125,9 @@ public class DubboExecutedFacade {
         throw new RuntimeException("Metadata service definition == null.");
     }
 
+    public ConfigService getConfigService() {
+        return configService;
+    }
 
     /**
      * 初始化 ApplicationConfig
