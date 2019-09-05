@@ -119,7 +119,10 @@ public class MetadataUtil {
             }
             return list;
         } else {
-            throw new IllegalArgumentException("White list String is empty. Please specify the list string on config server.");
+//            throw new IllegalArgumentException("White list String is empty. Please specify the list string on config server.");
+            logger.warn("White list String is empty. Please specify the list string on config server.");
+            //返回空
+            return new HashSet<>();
         }
     }
 
