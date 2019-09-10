@@ -3,6 +3,7 @@ package com.yunji.gateway.doc.repository;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.yunji.gateway.doc.util.MixUtils;
 import com.yunji.gateway.metadata.OptimizedService;
 import com.yunji.gateway.metadata.core.ExportServiceManager;
 import com.yunji.gateway.metadata.tag.*;
@@ -39,16 +40,20 @@ public abstract class GatewayDocPoster implements Post {
                        String version,
                        String method,
                        String parameter,
-                       HttpServletRequest req) {
+                       HttpServletRequest req) throws Exception{
         return post(service, version, method, parameter);
     }
 
     private String post(String service,
                         String version,
                         String method,
-                        String parameter) {
-        OptimizedService bizService = ExportServiceManager.getInstance().getMetadata(service, version);
+                        String parameter) throws Exception {
 
+        if (MixUtils.ECHO_NAME.equals(method)) {
+            return executeEcho(service, version);
+        }
+
+        OptimizedService bizService = ExportServiceManager.getInstance().getMetadata(service, version);
         if (bizService == null) {
             logger.error("bizService not found[service:" + service + ", version:" + version + "]");
             return String.format("{\"responseCode\":\"%s\", \"responseMsg\":\"%s\", \"success\":\"%s\", \"status\":0}", 500, "No matched service", "{}");
@@ -56,12 +61,13 @@ public abstract class GatewayDocPoster implements Post {
         return doPost(service, bizService, method, version, parameter);
     }
 
+    protected abstract String executeEcho(String service, String version) throws Exception;
+
     protected abstract String doPost(String service,
                                      OptimizedService bizService,
                                      String method,
                                      String finalVersion,
                                      String parameter);
-
 
 
     /**

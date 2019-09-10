@@ -30,6 +30,10 @@ public interface GateConstants {
      */
     String METADATA_METHOD_NAME = "_getServiceMetadata";
     /**
+     * ECHO method
+     */
+    String ECHO_METHOD = "$echo";
+    /**
      * 注册中心环境变量
      */
     String REGISTRY_URL_KEY = "dubbo.registry.address";

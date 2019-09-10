@@ -36,8 +36,9 @@ public class JsonDuplexHandler {
         OptimizedService bizService;
         try {
             //todo version 版本
-            bizService = getServiceMetadata(service, null);
-            return readObject(bizService, methodName, in);
+//            bizService = getServiceMetadata(service, null);
+//            return readObject(bizService, methodName, in);
+            return readObject((OptimizedService) null, methodName, in);
         } catch (IOException e) {
             LOGGER.error(e.getMessage(), e);
             throw new RpcException("Got occurred when custom readObject.");
@@ -61,12 +62,9 @@ public class JsonDuplexHandler {
     }
 
     private static String readObject(OptimizedService bizService, String methodName, ObjectInput in) throws IOException {
-        Method method = bizService.getMethodMap().get(methodName);
-
-        OptimizedStruct resp = bizService.getOptimizedStructs().get(method.response.namespace + "." + method.response.name);
-
-        JsonSerializer jsonDecoder = new JsonSerializer(bizService, resp);
-
+//        Method method = bizService.getMethodMap().get(methodName);
+//        OptimizedStruct resp = bizService.getOptimizedStructs().get(method.response.namespace + "." + method.response.name);
+        JsonSerializer jsonDecoder = new JsonSerializer(null, null);
         return jsonDecoder.read(in);
     }
 

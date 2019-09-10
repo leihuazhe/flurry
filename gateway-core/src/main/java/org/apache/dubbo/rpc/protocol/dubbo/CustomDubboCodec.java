@@ -165,10 +165,9 @@ public class CustomDubboCodec extends ExchangeCodec {
         out.writeUTF(inv.getMethodName());
 
         //Notice: 这里进行自定义,请求参数传送过来的数据是 json 形式.
-        if (Boolean.valueOf(inv.getInvoker().getUrl().getParameter(GATEWAY_KEY))) {
+        if (Boolean.valueOf(inv.getInvoker().getUrl().getParameter(GATEWAY_KEY)) && !ECHO_METHOD.equals(inv.getMethodName())) {
             String parameterTypes = inv.getAttachment(PARAMETER_TYPE);
             out.writeUTF(MixUtils.getDescOfString(parameterTypes));
-
             Object[] args = inv.getArguments();
 
             //Get interface
@@ -177,7 +176,8 @@ public class CustomDubboCodec extends ExchangeCodec {
             String serviceVersion = inv.getAttachment(VERSION_KEY);
 
             if (!METADATA_METHOD_NAME.equals(methodName)) {
-                JsonDuplexHandler.writeObject(service, serviceVersion, inv.getMethodName(), args[args.length - 1], out);
+                Object valueJson = args.length > 0 ? args[args.length - 1] : "{}";
+                JsonDuplexHandler.writeObject(service, serviceVersion, inv.getMethodName(), valueJson, out);
             }
         } else {
             out.writeUTF(ReflectUtils.getDesc(inv.getParameterTypes()));
