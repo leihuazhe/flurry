@@ -22,8 +22,10 @@ public class OptimizedService {
         for (Struct struct : service.structDefinitions) {
             optimizedStructs.put(struct.namespace + "." + struct.name, new OptimizedStruct(struct));
         }
-        for (TEnum tEnum : service.enumDefinitions) {
-            enumMap.put(tEnum.namespace + "." + tEnum.name, tEnum);
+        if (service.enumDefinitions != null) {
+            for (TEnum tEnum : service.enumDefinitions) {
+                enumMap.put(tEnum.namespace + "." + tEnum.name, tEnum);
+            }
         }
         for (Method method : service.methods) {
             methodMap.put(method.name, method);
