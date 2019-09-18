@@ -72,7 +72,7 @@ public class MetadataUtil {
                 }
             } catch (ExecutionException tx) {
                 String detailMsg = tx.getMessage();
-                if (detailMsg.contains("org.apache.dubbo.common.bytecode.NoSuchMethodException")) {
+                if (detailMsg != null && detailMsg.contains("org.apache.dubbo.common.bytecode.NoSuchMethodException")) {
                     logger.error("目标服务:{} 没有增强方法 _getServiceMetadata,无法获取到服务元数据.", serviceName);
                     return null;
                 }
