@@ -238,7 +238,7 @@ public class ExportServiceManager implements RegistryListener, ConfigListener {
             final JmxCache jmxCache = new JmxCache(serviceMetadataMap);
             mBeanServer.registerMBean(jmxCache, jmxName);
         } catch (Exception e) {
-            logger.error("registerJMX error.....", e);
+            logger.warn("RegisterJMX failed ....., cause: ", e);
         }
     }
 
