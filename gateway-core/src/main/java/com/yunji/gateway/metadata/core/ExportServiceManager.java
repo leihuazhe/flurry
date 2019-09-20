@@ -232,8 +232,8 @@ public class ExportServiceManager implements RegistryListener, ConfigListener {
      * 注册 Jmx 信息
      */
     private void registerJmx() {
-        MBeanServer mBeanServer = ManagementFactory.getPlatformMBeanServer();
         try {
+            MBeanServer mBeanServer = ManagementFactory.getPlatformMBeanServer();
             ObjectName jmxName = new ObjectName(this.getClass().getName() + ":name=metadataMap");
             final JmxCache jmxCache = new JmxCache(serviceMetadataMap);
             mBeanServer.registerMBean(jmxCache, jmxName);
