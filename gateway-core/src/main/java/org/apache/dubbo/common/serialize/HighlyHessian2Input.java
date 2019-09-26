@@ -712,7 +712,7 @@ public class HighlyHessian2Input extends HiglyHessian2InputCompatible {
     /**
      * 处理 hessian2 共用对象的情况
      */
-    public int addRef(Offset offset) {
+    private int addRef(Offset offset) {
         if (_refs == null)
             _refs = new ArrayList();
 
@@ -721,7 +721,7 @@ public class HighlyHessian2Input extends HiglyHessian2InputCompatible {
         return _refs.size() - 1;
     }
 
-    public void setRef(int position, int endIndex) {
+    private void setRef(int position, int endIndex) {
         if (_refs != null) {
             ((Offset) _refs.get(position)).setEndIndex(endIndex);
         }
