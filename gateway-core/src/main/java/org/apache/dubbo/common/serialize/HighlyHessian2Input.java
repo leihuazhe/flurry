@@ -3,6 +3,8 @@ package org.apache.dubbo.common.serialize;
 import com.yunji.gateway.jsonserializer.JsonCallback;
 import org.apache.dubbo.common.serialize.compatible.CodecContext;
 import org.apache.dubbo.common.serialize.compatible.Offset;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayOutputStream;
 import java.io.EOFException;
@@ -15,6 +17,8 @@ import java.util.List;
  * @author Denim.leihz 2019-07-11 9:17 AM
  */
 public class HighlyHessian2Input extends HiglyHessian2InputCompatible {
+
+    private Logger logger = LoggerFactory.getLogger(getClass());
 
     private JsonCallback jsonWriter;
 
@@ -669,39 +673,40 @@ public class HighlyHessian2Input extends HiglyHessian2InputCompatible {
 
     private void customReadList(int length) throws IOException {
         if (ifExist()) {
+            int position = addRef(new Offset(jsonWriter.markIndex()));
             jsonWriter.onStartArray();
-        }
-        for (; length > 0; length--) {
-            readObject();
-            jsonWriter.onEndField();
-        }
-        if (ifExist()) {
+            for (; length > 0; length--) {
+                readObject();
+                jsonWriter.onEndField();
+            }
             jsonWriter.onEndArray();
+            setRef(position, jsonWriter.markIndex());
+
+        } else {
+            for (; length > 0; length--) {
+                readObject();
+            }
         }
+
     }
 
     private void customReadMap() throws IOException {
         if (ifExist()) {
+            int position = addRef(new Offset(jsonWriter.markIndex()));
             jsonWriter.onStartObject();
-        }
-
-        while (!isEnd()) {
-            readObject();
-
-            if (ifExist()) {
+            while (!isEnd()) {
+                readObject();
                 jsonWriter.onColon();
-            }
-            readObject();
-
-            if (ifExist()) {
+                readObject();
                 jsonWriter.onEndField();
             }
-        }
-        readEnd();
-
-        if (ifExist()) {
+            readEnd();
             jsonWriter.onEndObject();
+            setRef(position, jsonWriter.markIndex());
+        } else {
+            logger.warn("Write custom read map when got json writer is null! ");
         }
+
     }
 
     /**
