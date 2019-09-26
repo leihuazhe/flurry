@@ -8,6 +8,7 @@ import com.yunji.gateway.metadata.tag.Field;
 import com.yunji.gateway.metadata.tag.Struct;
 import org.apache.dubbo.common.serialize.HighlyHessian2ObjectOutput;
 import org.apache.dubbo.common.serialize.HighlyHessian2Output;
+import org.apache.dubbo.common.serialize.compatible.Offset;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -628,6 +629,16 @@ public class JsonReader implements JsonCallback {
      */
     @Override
     public void onColon() throws IOException {
+
+    }
+
+    @Override
+    public int markIndex() {
+        return 0;
+    }
+
+    @Override
+    public void copyObjectJson(Offset offset) {
 
     }
 

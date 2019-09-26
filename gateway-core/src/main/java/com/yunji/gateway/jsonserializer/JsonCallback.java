@@ -1,6 +1,8 @@
 package com.yunji.gateway.jsonserializer;
 
 
+import org.apache.dubbo.common.serialize.compatible.Offset;
+
 import java.io.IOException;
 
 /**
@@ -108,5 +110,9 @@ public interface JsonCallback {
      * @throws IOException
      */
     void onColon() throws IOException;
+
+    int markIndex();
+
+    void copyObjectJson(Offset offset);
 }
 

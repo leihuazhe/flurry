@@ -2,11 +2,13 @@ package org.apache.dubbo.common.serialize;
 
 import com.yunji.gateway.jsonserializer.JsonCallback;
 import org.apache.dubbo.common.serialize.compatible.CodecContext;
+import org.apache.dubbo.common.serialize.compatible.Offset;
 
 import java.io.ByteArrayOutputStream;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -595,8 +597,10 @@ public class HighlyHessian2Input extends HiglyHessian2InputCompatible {
 
             case BC_REF: {
                 int ref = readInt();
-
-                return _refs.get(ref);
+                if (_refs != null) {
+                    jsonWriter.copyObjectJson((Offset) _refs.get(ref));
+                }
+                return null;
             }
 
             default:
@@ -609,25 +613,52 @@ public class HighlyHessian2Input extends HiglyHessian2InputCompatible {
 
     private Object readObjectInstance0(Class cl, ObjectDefinition def)
             throws IOException {
-        if (ifExist()) {
-            jsonWriter.onStartObject();
-        }
-        String[] fieldNames = def.getFieldNames();
+        boolean special = judgeSpecificObjectDefinition(def);
 
-        for (int i = 0; i < fieldNames.length; i++) {
-            String name = fieldNames[i];
-            if (ifExist()) {
-                jsonWriter.onStartField(name);
-            }
-            readObject();
-            if (ifExist()) {
-                jsonWriter.onEndField();
-            }
-        }
         if (ifExist()) {
-            jsonWriter.onEndObject();
+            int position = addRef(new Offset(jsonWriter.markIndex()));
+            if (!special) {
+                jsonWriter.onStartObject();
+            }
+            String[] fieldNames = def.getFieldNames();
+
+            for (int i = 0; i < fieldNames.length; i++) {
+                String name = fieldNames[i];
+                if (!special) {
+                    jsonWriter.onStartField(name);
+                }
+                readObject();
+                if (!special) {
+                    jsonWriter.onEndField();
+                }
+            }
+            if (!special) {
+                jsonWriter.onEndObject();
+            }
+
+            setRef(position, jsonWriter.markIndex());
+            return null;
+        } else {
+            if (ifExist()) {
+                jsonWriter.onStartObject();
+            }
+            String[] fieldNames = def.getFieldNames();
+
+            for (int i = 0; i < fieldNames.length; i++) {
+                String name = fieldNames[i];
+                if (ifExist()) {
+                    jsonWriter.onStartField(name);
+                }
+                readObject();
+                if (ifExist()) {
+                    jsonWriter.onEndField();
+                }
+            }
+            if (ifExist()) {
+                jsonWriter.onEndObject();
+            }
+            return null;
         }
-        return null;
     }
 
 
@@ -673,4 +704,37 @@ public class HighlyHessian2Input extends HiglyHessian2InputCompatible {
         }
     }
 
+    /**
+     * 处理 hessian2 共用对象的情况
+     */
+    public int addRef(Offset offset) {
+        if (_refs == null)
+            _refs = new ArrayList();
+
+        _refs.add(offset);
+
+        return _refs.size() - 1;
+    }
+
+    public void setRef(int position, int endIndex) {
+        if (_refs != null) {
+            ((Offset) _refs.get(position)).setEndIndex(endIndex);
+        }
+    }
+
+    /**
+     * 特殊对象处理
+     */
+    private boolean judgeSpecificObjectDefinition(ObjectDefinition def) {
+        if (def != null) {
+            switch (def.getType()) {
+                case "java.math.BigDecimal":
+                    return true;
+                default:
+                    return false;
+            }
+
+        }
+        return false;
+    }
 }

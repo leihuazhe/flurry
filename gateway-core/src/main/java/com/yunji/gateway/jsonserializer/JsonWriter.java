@@ -1,5 +1,7 @@
 package com.yunji.gateway.jsonserializer;
 
+import org.apache.dubbo.common.serialize.compatible.Offset;
+
 /**
  * thrift -> json
  *
@@ -126,6 +128,17 @@ public class JsonWriter implements JsonCallback {
 
             } while (index < length);
         }
+    }
+
+
+    public int markIndex() {
+        return builder.length();
+    }
+
+    @Override
+    public void copyObjectJson(Offset offset) {
+        String json = builder.substring(offset.getStartIndex(), offset.getEndIndex());
+        builder.append(json);
     }
 
     @Override
