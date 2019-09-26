@@ -683,9 +683,10 @@ public class HighlyHessian2Input extends HiglyHessian2InputCompatible {
             setRef(position, jsonWriter.markIndex());
 
         } else {
-            for (; length > 0; length--) {
-                readObject();
-            }
+            //for (; length > 0; length--) {
+            //    readObject();
+            //}
+            logger.warn("Hessian2 to json in read List got error cause jsonWriter is null.");
         }
 
     }
@@ -704,7 +705,7 @@ public class HighlyHessian2Input extends HiglyHessian2InputCompatible {
             jsonWriter.onEndObject();
             setRef(position, jsonWriter.markIndex());
         } else {
-            logger.warn("Write custom read map when got json writer is null! ");
+            logger.warn("Hessian2 to json in read Map got error cause jsonWriter is null.");
         }
 
     }
