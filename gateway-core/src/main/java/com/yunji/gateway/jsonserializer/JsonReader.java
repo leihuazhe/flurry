@@ -508,6 +508,8 @@ public class JsonReader implements JsonCallback {
         if (peek != null && isMultiElementKind(peek.dataType.kind)) {
             peek.incrElementSize();
         }
+        //9.27添加 json 传 true/false 的情况(不是 "true"/"false")
+        cmH2o.writeBoolean(value);
     }
 
     @Override
@@ -556,6 +558,7 @@ public class JsonReader implements JsonCallback {
 
     @Override
     public void onNumber(long value) throws IOException {
+
     }
 
     @Override
