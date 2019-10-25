@@ -103,6 +103,7 @@ public class DubboExecutedFacade {
 
     public CompletableFuture<String> execute(String interfaceName, String methodName, String version,
                                              String requestJson, OptimizedService optimizedService) {
+        if (requestJson == null) requestJson = "{}";
         if (optimizedService != null) {
             List<Field> requestFields = optimizedService.getMethodMap().get(methodName).request.fields;
 

@@ -24,7 +24,8 @@ public interface GateConstants {
     /**
      * Gateway 自定义修改的 hessian2 协议,排序超过 hessian2 本身,这样才会被 ignore.
      */
-    String SERIALIZATION_CUSTOM = "a_highly_hessian2";
+//    String SERIALIZATION_CUSTOM = "a_highly_hessian2";
+    String SERIALIZATION_CUSTOM = "hessian3";
     /**
      * 默认获取元数据信息的方法
      */
@@ -66,7 +67,6 @@ public interface GateConstants {
     long DIAMOND_TIME_OUT = 2000L;
 
     long METADATA_CALL_TIME_OUT = 2000L;
-
 
 
     int DEFAULT_RETRY = 3;

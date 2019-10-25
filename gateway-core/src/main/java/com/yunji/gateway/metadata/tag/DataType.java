@@ -26,8 +26,9 @@ import javax.xml.bind.annotation.*;
 public class DataType {
 
     @XmlEnum
-    public static enum KIND {
-        VOID, BOOLEAN, BYTE, SHORT, INTEGER, LONG, DOUBLE, STRING, BINARY, MAP, LIST, SET, ENUM, STRUCT, DATE, BIGDECIMAL;
+    public enum KIND {
+        VOID, BOOLEAN, BYTE, SHORT, INTEGER, LONG, DOUBLE, STRING, BINARY, MAP, LIST, SET, ENUM, STRUCT, DATE, BIGDECIMAL,
+        ARRAY;
     }
 
     public KIND kind;

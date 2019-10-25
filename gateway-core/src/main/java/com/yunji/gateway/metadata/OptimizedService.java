@@ -14,8 +14,8 @@ public class OptimizedService {
     public final Service service;
     public final Map<String, OptimizedStruct> optimizedStructs = new HashMap<>(1024);
 
-    final Map<String, Method> methodMap = new HashMap<>(128);
-    final Map<String, TEnum> enumMap = new HashMap<>(128);
+    private final Map<String, Method> methodMap = new HashMap<>(128);
+    private final Map<String, TEnum> enumMap = new HashMap<>(128);
 
     public OptimizedService(Service service) {
         this.service = service;
@@ -50,6 +50,11 @@ public class OptimizedService {
 
     public Map<String, TEnum> getEnumMap() {
         return Collections.unmodifiableMap(enumMap);
+    }
+
+
+    public OptimizedStruct getOptimizedStruct(String qualifiedName) {
+        return optimizedStructs.get(qualifiedName);
     }
 
     private OptimizedStruct wrapperReq(Method method) {

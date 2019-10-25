@@ -31,6 +31,7 @@ public class HighlyHessian2Serialization implements Serialization {
     public ObjectOutput serialize(URL url, OutputStream out) throws IOException {
         if (SERIALIZATION_CUSTOM.equals(url.getParameter(SERIALIZATION_KEY))) {
             return new HighlyHessian2ObjectOutput(out);
+//            return new Hessian3ObjectOutput(out);
         }
         return new Hessian2ObjectOutput(out);
     }

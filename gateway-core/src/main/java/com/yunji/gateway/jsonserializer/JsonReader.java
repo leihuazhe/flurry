@@ -1,13 +1,12 @@
 package com.yunji.gateway.jsonserializer;
 
+import com.yunji.com.caucho.hessian.io.Hessian2Output;
+import com.yunji.dubbo.common.serialize.streaming.Hessian2StreamingObjectOutput;
 import com.yunji.gateway.metadata.OptimizedService;
 import com.yunji.gateway.metadata.OptimizedStruct;
-import com.yunji.gateway.metadata.common.MetadataUtil;
 import com.yunji.gateway.metadata.tag.DataType;
 import com.yunji.gateway.metadata.tag.Field;
 import com.yunji.gateway.metadata.tag.Struct;
-import org.apache.dubbo.common.serialize.HighlyHessian2ObjectOutput;
-import org.apache.dubbo.common.serialize.HighlyHessian2Output;
 import org.apache.dubbo.common.serialize.compatible.Offset;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,135 +24,18 @@ public class JsonReader implements JsonCallback {
 
     private final OptimizedStruct optimizedStruct;
     private final OptimizedService optimizedService;
-    /**
-     * Hessian2 Custom output
-     */
-    private final HighlyHessian2Output cmH2o;
-    /**
-     * 当前处理数据节点
-     */
+
+    private final Hessian2Output cmH3o;
+
     private StackNode current;
 
-    /**
-     * 当前的 ObjectNode
-     */
-    private ObjectNode objCurrent;
 
-    /**
-     * incr: startObject/startArray
-     * decr: endObject/endArray
-     */
     private int level = 0;
 
-    /**
-     * onStartField的时候, 记录是否找到该Field. 如果没找到,那么需要skip这个field
-     * 当 skip 设置为 true 时， skipDepth 初始化为 0。
-     * - onStartObject/onStartArray) 则 skipDepth++
-     * - onEndObject/onEndArray时，skipDepth--
-     * 当 skipDepth 为 0 且进入 onEndField 时， skip 复位为false
-     */
     private boolean skip = false;
-    /**
-     * Json 深度
-     */
+
     private int skipDepth = 0;
 
-    /**
-     * <pre>
-     *
-     * 按照事件流解析 JSON 时， JsonReader 为维护一个 NodeInfo 的 stack， 基本原则是：
-     * - 栈顶的NodeInfo(current) 总是对应当前的 json value 的信息。
-     * - 对 JsonObject
-     * -- 当 onStartField(String) 时，会将子字段的 NodeInfo 压栈
-     * -- 当 onEndField 时， 会 pop 到 上一层NodeInfo 应该是 Struct or MAP 对应的NodeInfo
-     * - 对 JsonArray
-     * -- 当 onStartFiled(int) 时，会将数组元素对应的 NodeInfo 压栈
-     * -- 当 onEndField 时，会pop，恢复到 List/SET 对应的 NodeInfo
-     *
-     * 也就是说，对JSON中的每一个值( object, array, string, number, boolean, null），都会有一个
-     * 对应的 NodeInfo, 这个随着 JSON 的事件流，不断的新建，然后当json值处理完成后，NodeInfo又会销毁。
-     *
-     * NodeInfo 中包括了如下信息：
-     * - DataType 当前 value 对应的元数据类型。
-     * - tFieldPos 对应与 { name: null } 这样的 field，当检测到value 是一个null值时，我们需要将
-     *     thrift流回滚到 tFieldPos，即消除在流中的field头部信息。这个检测在 onEndField 时进行。
-     *     对于LIST/SET 这是不容许子元素有 null 值的。
-     * - valuePos 如果 value 时一个MAP/LIST/SET，在 value 的开始部分会是这个集合的长度，
-     *     在 onEndObject/onEndArray 时，我们会回到 valuePos，重写集合的长度。
-     * - elCount 如果 parent 是MAP/LIST/SET，对非 null 值(onStartObject, onStartArray,onString,
-     *     onNumber, onBoolean)都会新增 parent.elCount。然后在parent结束后重置长度。
-     * - isNull onNull 会设置当前的 isNull 为true，在onEndField 时，进行 tFieldPos的特殊处理。
-     *
-     *  主要的处理逻辑：
-     *
-     * - onStartObject
-     *  - 当前栈顶 ：STRUCT or MAP
-     *  - 栈操作：无
-     *  - 处理：proto.writeStructBegin or proto.writeMapBegin
-     *
-     * - onEndObject
-     *  - 当前栈顶：STRUCT or MAP
-     *  - 栈操作：无
-     *  - 处理：proto.writeStructEnd or proto.writeMapEnd
-     *
-     * - onStartArray
-     *  - 当前栈顶：LIST/SET
-     *  - 栈操作：无
-     *  - 处理：proto.writeListBegin or proto.writeSetBegin
-     *
-     * - onEndArray
-     *  - 当前栈顶：
-     *  - 栈操作：无
-     *  - 处理：proto.writeListEnd or proto.writeSetEnd 并重置长度
-     *
-     * - onStartField name
-     *  - 当前栈顶：STRUCT / MAP
-     *  - 栈操作：
-     *      - STRUCT：将结构体的fields[name] 压栈
-     *      - MAP：将 valueType 压栈
-     *  - 处理：
-     *      - STRUCT: proto.writeFieldBegin name
-     *      - MAP: proto.writeString name or proto.writeInt name.toInt
-     *
-     *  - onStartField int
-     *   - 当前栈顶：LIST/SET
-     *   - 栈操作：
-     *      - 将 valueType 压栈
-     *   - 处理：
-     *
-     * - onEndField
-     *  - 当前栈顶：any
-     *  - 栈操作：pop 恢复上一层。
-     *  - 处理：
-     *   - 当前字段是Map的元素且当前值为 null，则回退到 tFieldPos
-     *   - 当前字段为LIST/SET的子元素，不容许当前值为 null
-     *   - 当前字段是Struct的字段，则回退到 tFieldPos(null) 或者 writeFieldEnd(not null)
-     *   - rewrite array size
-     *
-     * - onNumber
-     *  - 当前栈顶：BYTE/SHORT/INTEGER/LONG/DOUBLE
-     *  - 栈操作：无
-     *  - 处理
-     *      - proto.writeI8, writeI16, ...
-     *
-     * - onBoolean
-     *  - 当前栈顶：BOOLEAN
-     *  - 栈操作：无
-     *  - 处理
-     *      - proto.writeBoolean.
-     *
-     * - onString
-     *  - 当前栈顶：STRING
-     *  - 栈操作：无
-     *  - 处理
-     *      - proto.writeString, ...
-     *
-     * - onNull
-     *  - 当前栈顶：any
-     *  - 栈操作：无
-     *  - 处理 current.isNull = true
-     * </pre>
-     */
     private Stack<StackNode> history = new Stack<>();
     /**
      * keep a minimum StackNode Pool
@@ -161,10 +43,10 @@ public class JsonReader implements JsonCallback {
     private List<StackNode> nodePool = new ArrayList<>(64);
 
     JsonReader(OptimizedStruct optimizedStruct, OptimizedService optimizedService,
-               HighlyHessian2ObjectOutput out) {
+               Hessian2StreamingObjectOutput out) {
         this.optimizedStruct = optimizedStruct;
         this.optimizedService = optimizedService;
-        this.cmH2o = out.getCmH2o();
+        this.cmH3o = out.getmH2o();
     }
 
 
@@ -180,62 +62,24 @@ public class JsonReader implements JsonCallback {
         }
 
         if (current == null) {
-            DataType initDataType = new DataType();
-            initDataType.setKind(DataType.KIND.STRUCT);
-            initDataType.qualifiedName = optimizedStruct.struct.name;
-            push(initDataType, -1, optimizedStruct, "start");
-            // level=1,push
-            if (objCurrent == null) {
-                objPush(optimizedStruct, cmH2o.markIndex());
-            }
+            initAndPushDataType();
             return;
         }
 
         assert current.dataType.kind == DataType.KIND.STRUCT || current.dataType.kind == DataType.KIND.MAP;
-
-        StackNode peek = peek();
-        if (peek != null && isMultiElementKind(peek.dataType.kind)) {
-            peek.incrElementSize();
-        }
         switch (current.dataType.kind) {
             case STRUCT:
-                Struct struct = current.optimizedStruct.struct;
-                if (struct == null) {
-                    logger.error("optimizedStruct not found");
-                    logAndThrowTException();
-                }
-                assert struct != null;
-                if (struct.namespace != null) {
-                    objPush(getOptimizedStruct(optimizedService, struct.namespace, struct.name), cmH2o.markIndex());
-
-                    //缓存操作，第二次不会再去写这个类的 Definition.
-                    int ref = cmH2o.writeObjectBegin(struct.namespace + "." + struct.name);
-                    if (ref < -1) {
-                        logger.warn("Specified struct {}.{}  is written,return < -1, need writeObject10 but not.",
-                                struct.namespace, struct.name);
-                    } else {
-                        if (ref == -1) {
-                            cmH2o.writeClassFieldLength(struct.fields.size());
-                            int beforeIndex = writeObjectFiled(struct.fields);
-                            cmH2o.writeObjectBegin(struct.namespace + "." + struct.name);
-
-                            afterWrite(beforeIndex);
-                        } else {
-                            //另外一种情况是 1，就是在之前已经写了这个类的定义了
-                            setWriteFlag(false);
-                            logger.debug("Specified struct {}.{}  is written,return 1 ", struct.namespace, struct.name);
-                        }
-                    }
-                }
+                //Just like writeObject(Object obj, AbstractHessianOutput out) in hessian2
+                writeStruct();
                 break;
             case MAP:
-                assert isValidMapKeyType(current.dataType.keyType.kind);
+                DataType.KIND kind = current.dataType.keyType.kind;
+                asserts(isValidMapKeyType(kind), "Map key only support basic type,current type: " + kind);
                 writeMapBegin();
                 break;
             default:
                 logAndThrowTException();
         }
-
     }
 
 
@@ -252,71 +96,10 @@ public class JsonReader implements JsonCallback {
 
         switch (current.dataType.kind) {
             case STRUCT:
-                //重新计算定义
-                ObjectNode objNode = objPop();
-                //1.level为0时,是 json 的起始阶段，不考虑回写,objNode 必须不能为空
-                //2.objNode.count,说明当前类一个值都没有传参数,那还是需要回溯的
-                if (level != 0 && objNode != null) {
-                    if (objNode.count == 0 && objNode.isMatch) {
-                        //可能情况是整个类的value为空，压根没有进入到改objNode定义,这里要做修改.
-                        for (Field ignored : objNode.optimizedStruct.fieldMap.values()) {
-                            cmH2o.writeNull();
-                        }
-                    } else if (!objNode.isMatch) {
-                        //1.!objNode.isMatch 参数值没有配对,说明和之前写入顺序不相同，需要进行调整
-                        //2.如果对于list、map等,只会写第一个element的定义,后面的只会写引用，所以之后的 element 没法修改定义了
-                        if (objNode.writeDefinition) {
-                            int reBackIndex = objNode.getDefinitionPos();
-                            Field[] orderFields = objNode.getOrderFields();
-
-                            Map<String, Field> fieldMap = new HashMap<>(objNode.optimizedStruct.fieldMap);
-
-                            //先 flush
-                            cmH2o.flush();
-                            int markCurrentOffset = cmH2o.markBufferOffset();
-
-
-                            for (Field field : orderFields) {
-                                if (field != null) {
-                                    fieldMap.remove(field.name);
-                                    cmH2o.writeString(field.getName());
-                                }
-                            }
-                            if (fieldMap.size() > 0) {
-                                for (Field fie : fieldMap.values()) {
-                                    cmH2o.writeString(fie.getName());
-                                }
-                                //此步同时 reset 了index
-                                cmH2o.reWriteBuf(reBackIndex, markCurrentOffset);
-
-                                for (Field ignored : fieldMap.values()) {
-                                    cmH2o.writeNull();
-                                }
-                            } else {
-                                cmH2o.reWriteBuf(reBackIndex, markCurrentOffset);
-//                                cmH2o.resetIndex(markCurrentOffset);
-                            }
-                        } else {
-                            Field[] orderFields = objNode.getOrderFields();
-                            Map<String, Field> fieldMap = new HashMap<>(objNode.optimizedStruct.fieldMap);
-                            for (Field field : orderFields) {
-                                if (field != null) {
-                                    fieldMap.remove(field.name);
-                                }
-                            }
-                            if (fieldMap.size() > 0) {
-                                for (Field ignored : fieldMap.values()) {
-                                    cmH2o.writeNull();
-                                }
-                            }
-                        }
-                    }
-                }
-                //可传空值以后,对validateStruct已经没有意义了
-                //validateStruct(current);
+                cmH3o.writeInt(-1);
                 break;
             case MAP:
-                cmH2o.writeMapEnd();
+                cmH3o.writeMapEnd();
                 break;
             default:
                 logAndThrowTException();
@@ -334,24 +117,23 @@ public class JsonReader implements JsonCallback {
             skipDepth++;
             return;
         }
-
-        assert isCollectionKind(current.dataType.kind);
-
-        StackNode peek = peek();
-        if (peek != null && isMultiElementKind(peek.dataType.kind)) {
-            peek.incrElementSize();
-        }
+        DataType.KIND kind = current.dataType.kind;
+        asserts(isCollectionKind(kind), "Current DataType " + kind + " is not a collection type.");
 
         switch (current.dataType.kind) {
             case LIST:
             case SET:
-                writeCollectionBegin(0, MetadataUtil.dataType2Byte(current.dataType.valueType));
+                writeCollectionBegin();
+                break;
+            case ARRAY:
+                writeArrayBegin(current.dataType);
                 break;
             default:
                 logAndThrowTException();
         }
 
     }
+
 
     @Override
     public void onEndArray() throws IOException {
@@ -360,19 +142,17 @@ public class JsonReader implements JsonCallback {
             skipDepth--;
             return;
         }
-
-        assert isCollectionKind(current.dataType.kind);
+        DataType.KIND kind = current.dataType.kind;
+        asserts(isCollectionKind(kind), "Current DataType " + kind + " is not a collection type.");
 
         switch (current.dataType.kind) {
             case LIST:
-                //重写长度
-                reWriteLength();
-                break;
             case SET:
-                reWriteLength();
+            case ARRAY:
+                cmH3o.writeListEnd();
                 break;
             default:
-                //do nothing
+                break;
         }
     }
 
@@ -381,17 +161,10 @@ public class JsonReader implements JsonCallback {
         if (skip) {
             return;
         }
-        // expect only the "body"
         if (level == 0) {
             if ("body".equals(name) || "request".equals(name)) {
-                DataType initDataType = new DataType();
-                initDataType.setKind(DataType.KIND.STRUCT);
-                initDataType.qualifiedName = optimizedStruct.struct.name;
-                // not a struct field
-//                push(initDataType, -1, optimizedStruct, "body");
-                push(initDataType, -1, optimizedStruct, "start");
+                initAndPushDataType();
             } else {
-                // others, just skip now
                 skip = true;
                 skipDepth = 0;
             }
@@ -400,15 +173,15 @@ public class JsonReader implements JsonCallback {
                 assert isValidMapKeyType(current.dataType.keyType.kind);
 
                 if (current.dataType.keyType.kind == DataType.KIND.STRING) {
-                    cmH2o.writeString(name);
+                    cmH3o.writeString(name);
                 } else {
                     writeIntField(name, current.dataType.keyType.kind);
                 }
-                // so value can't be null
-                push(current.dataType.valueType,
-                        -1,
-                        optimizedService.optimizedStructs.get(current.dataType.valueType.qualifiedName),
-                        name);
+
+                DataType valueType = current.dataType.valueType;
+                OptimizedStruct optimizedStruct = optimizedService.getOptimizedStruct(valueType.qualifiedName);
+                push(current.dataType.valueType, optimizedStruct, name);
+
             } else if (current.dataType.kind == DataType.KIND.STRUCT) {
                 Field field = current.optimizedStruct.fieldMap.get(name);
 
@@ -420,17 +193,12 @@ public class JsonReader implements JsonCallback {
                 } else {
                     skip = false;
                 }
-                //设置进去
-                ObjectNode objNode = objPeek();
-                if (objNode != null) {
-                    objNode.setOrderField(field);
-                }
+                //Fixme support 方法调用
+                cmH3o.writeInt(field.getTag());
 
-                int tFieldPos = cmH2o.markIndex();
-                push(field.dataType,
-                        tFieldPos,
-                        optimizedService.optimizedStructs.get(field.dataType.qualifiedName),
-                        name);
+                DataType valueType = field.dataType;
+                OptimizedStruct optimizedStruct = optimizedService.getOptimizedStruct(valueType.qualifiedName);
+                push(valueType, optimizedStruct, name);
             } else {
                 logAndThrowTException("field " + name + " type " + toString(current.dataType) + " not compatible with json object");
             }
@@ -438,24 +206,22 @@ public class JsonReader implements JsonCallback {
     }
 
     @Override
-    public void onStartField(int index) {
+    public void onStartField(int index) throws IOException {
         if (skip) {
             return;
         }
-        assert isCollectionKind(current.dataType.kind);
+        DataType.KIND kind = current.dataType.kind;
+        asserts(isCollectionKind(kind), "Current DataType " + kind + " is not a collection type.");
 
-        DataType next = current.dataType.valueType;
-        OptimizedStruct nextStruct = (next.kind == DataType.KIND.STRUCT) ?
-                optimizedService.optimizedStructs.get(next.qualifiedName) : null;
-
-        push(current.dataType.valueType, -1, nextStruct, null);
-
+        DataType valueType = current.dataType.valueType;
+        OptimizedStruct optimizedStruct = (valueType.kind == DataType.KIND.STRUCT) ?
+                optimizedService.getOptimizedStruct(valueType.qualifiedName) : null;
+        push(valueType, optimizedStruct, null);
     }
 
     @Override
     public void onEndField() throws IOException {
         if (skip) {
-            // reset skipFlag
             if (skipDepth == 0) {
                 skip = false;
             }
@@ -466,7 +232,8 @@ public class JsonReader implements JsonCallback {
         // level = 0 will having no current dataType
         if (level > 0) {
             StackNode parent = peek();
-            assert (parent != null);
+            asserts(parent != null, "StackNode parent should not be null.");
+            assert parent != null;
 
             switch (parent.dataType.kind) {
                 case SET:
@@ -481,10 +248,6 @@ public class JsonReader implements JsonCallback {
                     break;
                 case STRUCT:
                     if (current.isNull) {
-
-                    } else {
-                        Field field = parent.optimizedStruct.fieldMap.get(fieldName);
-                        parent.fields4Struct.set(field.tag - parent.optimizedStruct.tagBase);
                     }
                     break;
             }
@@ -499,55 +262,43 @@ public class JsonReader implements JsonCallback {
         if (skip) {
             return;
         }
-
         if (current.dataType.kind != DataType.KIND.BOOLEAN) {
             logAndThrowTException();
         }
-
-        StackNode peek = peek();
-        if (peek != null && isMultiElementKind(peek.dataType.kind)) {
-            peek.incrElementSize();
-        }
         //9.27添加 json 传 true/false 的情况(不是 "true"/"false")
-        cmH2o.writeBoolean(value);
+        cmH3o.writeBoolean(value);
     }
 
     @Override
     public void onNumber(double value) throws IOException {
         DataType.KIND currentType = current.dataType.kind;
-
         if (skip) {
             return;
         }
 
-        StackNode peek = peek();
-        if (peek != null && isMultiElementKind(peek.dataType.kind)) {
-            peek.incrElementSize();
-        }
-
         switch (currentType) {
             case SHORT:
-                cmH2o.writeInt((int) value);
+                cmH3o.writeInt((int) value);
                 break;
             case INTEGER:
             case ENUM:
-                cmH2o.writeInt((int) value);
+                cmH3o.writeInt((int) value);
                 break;
             case LONG:
-                cmH2o.writeLong((long) value);
+                cmH3o.writeLong((long) value);
                 break;
             case DOUBLE:
-                cmH2o.writeDouble(value);
+                cmH3o.writeDouble(value);
                 break;
             case BIGDECIMAL:
-                cmH2o.writeString(String.valueOf(value));
+                cmH3o.writeString(String.valueOf(value));
                 break;
             case BYTE:
-//                customOut.writeByte((byte) value);
+                cmH3o.writeInt((int) value);
                 break;
             default:
                 if ("java.sql.Timestamp".equals(current.dataType.qualifiedName)) {
-                    cmH2o.writeUTCDate((long) value);
+                    cmH3o.writeUTCDate((long) value);
                     break;
                 }
                 throw new IOException("Field:" + current.fieldName + ", DataType(" + current.dataType.kind
@@ -566,7 +317,7 @@ public class JsonReader implements JsonCallback {
         if (skip) {
             return;
         }
-        cmH2o.writeNull();
+        cmH3o.writeNull();
     }
 
     @Override
@@ -575,32 +326,27 @@ public class JsonReader implements JsonCallback {
             return;
         }
 
-        StackNode peek = peek();
-        if (peek != null && isMultiElementKind(peek.dataType.kind)) {
-            peek.incrElementSize();
-        }
-
         switch (current.dataType.kind) {
             case ENUM:
-                writeEnum(value);
+                writeEnum(current.dataType.qualifiedName, value);
                 break;
             case BOOLEAN:
-                cmH2o.writeBoolean(Boolean.parseBoolean(value));
+                cmH3o.writeBoolean(Boolean.parseBoolean(value));
                 break;
             case DOUBLE:
-                cmH2o.writeDouble(Double.parseDouble(value));
+                cmH3o.writeDouble(Double.parseDouble(value));
                 break;
             case BIGDECIMAL:
-                cmH2o.writeString(value);
+                cmH3o.writeString(value);
                 break;
             case INTEGER:
-                cmH2o.writeInt(Integer.parseInt(value));
+                cmH3o.writeInt(Integer.parseInt(value));
                 break;
             case LONG:
-                cmH2o.writeLong(Long.parseLong(value));
+                cmH3o.writeLong(Long.parseLong(value));
                 break;
             case SHORT:
-                cmH2o.writeInt(Integer.parseInt(value));
+                cmH3o.writeInt(Integer.parseInt(value));
                 break;
 
             case DATE:
@@ -610,28 +356,26 @@ public class JsonReader implements JsonCallback {
                 } catch (NumberFormatException e) {
                     throw new IOException("Field DATE 类型需要传入的是数字类型，却传入了 " + value);
                 }
-                cmH2o.writeUTCDate(time);
+                cmH3o.writeUTCDate(time);
                 break;
             default:
                 if ("java.util.Date".equals(current.dataType.qualifiedName)) {
-                    cmH2o.writeUTCDate(JsonSerializationUtil.parseDateString(value));
+                    cmH3o.writeUTCDate(JsonSerializationUtil.parseDateString(value));
                     break;
                 }
                 if (current.dataType.kind != DataType.KIND.STRING) {
                     throw new IOException("Field:" + current.fieldName + ", Not a real String!");
                 }
-                cmH2o.writeString(value);
+                cmH3o.writeString(value);
         }
     }
 
 
     /**
      * onColon ":"
-     *
-     * @throws IOException
      */
     @Override
-    public void onColon() throws IOException {
+    public void onColon() {
 
     }
 
@@ -645,22 +389,18 @@ public class JsonReader implements JsonCallback {
 
     }
 
+
     // only used in startField
-    private void push(final DataType dataType, final int tFieldPos,
+    private void push(final DataType dataType,
                       final OptimizedStruct optimizedStruct, String fieldName) {
-        StackNode node;
 
-        if (nodePool.size() > 0) {
-            node = nodePool.remove(nodePool.size() - 1);
-        } else {
-            node = new StackNode();
-        }
-
-        node.init(dataType, tFieldPos, optimizedStruct, fieldName);
-        //if(current != null)
+        StackNode node = nodePool.size() > 0 ? nodePool.remove(nodePool.size() - 1) : new StackNode();
+        node.init(dataType, optimizedStruct, fieldName);
         history.push(node);
+
         this.current = node;
     }
+
 
     // only used in endField
     private StackNode pop() {
@@ -692,22 +432,22 @@ public class JsonReader implements JsonCallback {
         return sb.toString();
     }
 
-    private void validateStruct(StackNode current) throws IOException {
-        /**
-         * 不在该Struct必填字段列表的字段列表
-         */
-        OptimizedStruct struct = current.optimizedStruct;
-        List<Field> fields = struct.struct.fields;
+    private void writeStruct() throws IOException {
+        Struct struct = current.optimizedStruct.struct;
+        if (struct == null) {
+            logger.error("optimizedStruct not found");
+            logAndThrowTException();
+        }
+        if (struct.namespace != null) {
+            int ref = cmH3o.writeObjectBegin(struct.namespace + "." + struct.name);
+            if (ref < -1) {
+                writeObject10(struct);
 
-        // iterator need more allocation
-        for (int i = 0; i < fields.size(); i++) {
-            Field field = fields.get(i);
-            if (field != null && !field.isOptional() && !current.fields4Struct.get(field.tag - struct.tagBase)) {
-                String structName = struct.struct.name;
-                String fieldName = current.fieldName;
-
-                throw new IOException(String.format("JsonError, please check:%s.%s, optimizedStruct mandatory fields missing:%s",
-                        structName, fieldName, field.name));
+            } else {
+                if (ref == -1) {
+                    writeDefinition20(struct.fields);
+                    cmH3o.writeObjectBegin(struct.namespace + "." + struct.name);
+                }
             }
         }
     }
@@ -716,69 +456,83 @@ public class JsonReader implements JsonCallback {
         switch (kind) {
             case SHORT:
             case INTEGER:
-                cmH2o.writeInt(Integer.valueOf(value));
+                cmH3o.writeInt(Integer.valueOf(value));
                 break;
             case LONG:
-                cmH2o.writeLong(Long.valueOf(value));
+                cmH3o.writeLong(Long.valueOf(value));
                 break;
             default:
                 logAndThrowTException();
         }
     }
 
+    private void writeMapBegin() throws IOException {
+        cmH3o.writeMapBegin(null);
+    }
+
+
     /**
-     * 根据current 节点重写集合元素长度
+     * 写 -1,然后最后根据 onEnd 来判断是否结束
      */
-    private void reWriteLength() throws IOException {
-        assert isMultiElementKind(current.dataType.kind);
+    private void writeCollectionBegin() throws IOException {
+        cmH3o.writeListBegin(-1, null);
+    }
 
-        //拿到当前node的开始位置以及集合元素大小
-        int beginPosition = current.tFieldPosition;
-        int elCount = current.elCount;
+    /**
+     * 写数组
+     */
+    private void writeArrayBegin(DataType dataType) throws IOException {
+        DataType valueType = dataType.valueType;
 
-        switch (current.dataType.kind) {
-            case MAP:
-                //Hessian2 Map 不需要 reWrite长度
-                break;
-            case SET:
-            case LIST:
-                reWriteCollectionBegin(beginPosition, elCount);
-                break;
-            default:
-                logger.error("Field:" + current.fieldName + ", won't be here", new Throwable());
+        if (valueType != null) {
+            switch (valueType.kind) {
+                case STRUCT:
+                    String qualifiedName = valueType.qualifiedName;
+                    String arrayType = getArrayType(qualifiedName);
+                    cmH3o.writeListBegin(-1, "[" + arrayType);
+                    break;
+                case STRING:
+                    cmH3o.writeListBegin(-1, "[string");
+                    break;
+                default:
+                    break;
+            }
+        } else {
+            logAndThrowTException("DataType valueType  is null.");
         }
     }
 
-    private void writeMapBegin() throws IOException {
-        cmH2o.writeMapBegin(null);
-    }
-
-
     /**
-     * TList just the same as TSet
-     */
-    //todo 其他 List，如 LinkedList等,除了 ArrayList
-    private void writeCollectionBegin(int defaultSize, byte valueType) throws IOException {
-        cmH2o.writeListBegin(defaultSize, null);
-    }
-
-    /**
-     * 需要考虑是否刷到了 ByteBuf 中了，因为 buffer 只有 4K 的缓冲区
+     * Get 数组对象类型名
      *
-     * @param offset
-     * @param length
-     * @throws IOException
+     * @param name 全限定名
+     * @return Real type.
      */
-    private void reWriteCollectionBegin(int offset, int length) throws IOException {
-        //说明原来mark的index 还没有 flush 到 buffer 中
-        cmH2o.reWriteListLength(offset, length);
+    private String getArrayType(String name) {
+        switch (name) {
+            case "java.lang.String":
+                return "string";
+            case "java.lang.Object":
+                return "object";
+            case "java.util.Date":
+                return "date";
+            default:
+                return name;
+        }
     }
 
+    private void asserts(boolean flag, String msg) throws IOException {
+        if (!flag) {
+            logAndThrowTException(msg);
+        }
+    }
 
     private void logAndThrowTException() throws IOException {
         String fieldName = current == null ? "" : current.fieldName;
 
         StackNode peek = peek();
+        assert peek != null;
+
         String struct = current == null ? "" : current.optimizedStruct == null ? (peek.optimizedStruct == null ? "" : peek.optimizedStruct.struct.name) : current.optimizedStruct.struct.name;
         IOException ex = new IOException("JsonError, please check:"
                 + struct + "." + fieldName);
@@ -792,51 +546,50 @@ public class JsonReader implements JsonCallback {
         throw ex;
     }
 
-    private void writeEnum(String value) {
-        //                TEnum tEnum = optimizedService.enumMap.get(current.dataType.qualifiedName);
-//                Integer tValue = findEnumItemValue(tEnum, value);
-//                if (tValue == null) {
-//                    logger.error("Enum(" + current.dataType.qualifiedName + ") not found for value:" + value);
-//                    logAndThrowTException();
-//                }
-//                customOut.writeI32(tValue);
+    private void writeEnum(String enumType, String name)
+            throws IOException {
+        int ref = cmH3o.writeObjectBegin(enumType);
 
-        optimizedService.getEnumMap().get(current.dataType.qualifiedName);
+        if (ref < -1) {
+            cmH3o.writeString("name");
+            cmH3o.writeString(name);
+            cmH3o.writeMapEnd();
+        } else {
+            if (ref == -1) {
+                cmH3o.writeClassFieldLength(1);
+                cmH3o.writeString("name");
+                cmH3o.writeObjectBegin(enumType);
+            }
+            cmH3o.writeString(name);
+        }
+    }
+
+    private void writeObject10(Struct struct) throws IOException {
+        logAndThrowTException("Source method [writeObject10]:Specified  struct " + struct.namespace + "." + struct.name +
+                " got occurred when written, caused: Streaming serializer not support writeObject10.");
+    }
+
+    private void writeDefinition20(List<Field> fields)
+            throws IOException {
+
+        int fieldSize = fields.size();
+        cmH3o.writeClassFieldLength(fieldSize);
+
+        for (Field field : fields) {
+            cmH3o.writeString(field.getName());
+        }
     }
 
 
     /**
-     * hessian2 写对象字段
+     * Init DataType then push data type to the stack.
      */
-    private int writeObjectFiled(List<Field> fields) throws IOException {
-        int index = cmH2o.markIndex();
-        for (int i = 0; i < fields.size(); i++) {
-            Field field = fields.get(i);
-            cmH2o.writeString(field.getName());
-        }
-        return index;
+    private void initAndPushDataType() {
+        DataType initDataType = new DataType();
+        initDataType.setKind(DataType.KIND.STRUCT);
+        initDataType.qualifiedName = optimizedStruct.struct.name;
+        push(initDataType, optimizedStruct, "start");
     }
-
-    private void afterWrite(int beforeIndex) {
-        ObjectNode objNode = objPeek();
-        if (objNode != null) {
-            objNode.setDefinitionPos(beforeIndex);
-        }
-    }
-
-    private void setWriteFlag(boolean flag) {
-        ObjectNode objNode = objPeek();
-        if (objNode != null) {
-            objNode.setWriteFlag(flag);
-        }
-    }
-
-
-    //====================
-    //
-    // 对象
-    //
-    //======================
 
     /**
      * 用于保存当前处理节点的信息, 从之前的 immutable 调整为  mutable，并使用了一个简单的池，这样，StackNode
@@ -846,150 +599,29 @@ public class JsonReader implements JsonCallback {
 
         private DataType dataType;
         /**
-         * byteBuf position before this node created, maybe a Struct Field, or a Map field, or an array element
-         */
-        private int tFieldPosition;
-        /**
          * optimizedStruct if dataType.kind==STRUCT
          */
         private OptimizedStruct optimizedStruct;
-
         /**
          * the field name
          */
         private String fieldName;
-
         /**
-         * if datatype is optimizedStruct, all fieldMap parsed will be add to this set
+         * 字段是否为Null.
          */
-        private BitSet fields4Struct = new BitSet(64);
-
-        /**
-         * if dataType is a Collection(such as LIST, MAP, SET etc), elCount represents the size of the Collection.
-         */
-        int elCount = 0;
-
         boolean isNull = false;
 
         StackNode() {
         }
 
-        public StackNode init(final DataType dataType, int tFieldPosition,
-                              final OptimizedStruct optimizedStruct, String fieldName) {
+        void init(final DataType dataType,
+                  final OptimizedStruct optimizedStruct,
+                  String fieldName) {
+
             this.dataType = dataType;
-            this.tFieldPosition = tFieldPosition;
             this.optimizedStruct = optimizedStruct;
             this.fieldName = fieldName;
-
-            this.fields4Struct.clear();
-            this.elCount = 0;
             this.isNull = false;
-            return this;
         }
-
-        void incrElementSize() {
-            elCount++;
-        }
-
-        public DataType getDataType() {
-            return dataType;
-        }
-    }
-
-
-    static class ObjectNode {
-        private OptimizedStruct optimizedStruct;
-
-        private String fieldName;
-
-        private Field[] orderFields;
-
-        private int count = 0;
-
-        private int definitionPos = 0;
-
-        boolean isMatch = true;
-
-        boolean writeDefinition = true;
-
-        ObjectNode() {
-        }
-
-        public ObjectNode init(OptimizedStruct optimizedStruct, int definitionPos) {
-            this.fieldName = optimizedStruct.struct.name;
-            this.optimizedStruct = optimizedStruct;
-            this.definitionPos = definitionPos;
-            this.orderFields = new Field[optimizedStruct.fieldMap.size()];
-            //回归初始状态
-            this.count = 0;
-            this.isMatch = true;
-            this.writeDefinition = true;
-            return this;
-        }
-
-        public Field[] getOrderFields() {
-            return orderFields;
-        }
-
-        public int getDefinitionPos() {
-            return definitionPos;
-        }
-
-        public void setDefinitionPos(int definitionPos) {
-            this.definitionPos = definitionPos;
-        }
-
-        public void setOrderField(Field field) {
-            judgeIfOrderMatch(field);
-            this.orderFields[count] = field;
-            count++;
-        }
-
-        public void setWriteFlag(boolean flag) {
-            writeDefinition = flag;
-        }
-
-        private void judgeIfOrderMatch(Field field) {
-            if (isMatch) {
-                isMatch = field.name.equals(optimizedStruct.struct.fields.get(count).name);
-            }
-        }
-    }
-
-
-    /**
-     * keep a minimum StackNode Pool
-     */
-    private List<ObjectNode> objNodePool = new ArrayList<>(64);
-
-    private Stack<ObjectNode> objHistory = new Stack<>();
-
-    private void objPush(OptimizedStruct optimizedStruct, int definitionPos) {
-        ObjectNode node;
-
-        if (objNodePool.size() > 0) {
-            node = objNodePool.remove(objNodePool.size() - 1);
-        } else {
-            node = new ObjectNode();
-        }
-        node.init(optimizedStruct, definitionPos);
-        objHistory.push(node);
-        this.objCurrent = node;
-    }
-
-    // only used in endField
-    private ObjectNode objPop() {
-        if (objHistory.empty()) {
-            return null;
-        }
-        ObjectNode old = objHistory.pop();
-        objNodePool.add(old);
-
-        return this.objCurrent = old;
-//        return this.objCurrent = (objHistory.size() > 0) ? objHistory.peek() : null;
-    }
-
-    private ObjectNode objPeek() {
-        return objHistory.size() == 0 ? null : objHistory.get(objHistory.size() - 1);
     }
 }

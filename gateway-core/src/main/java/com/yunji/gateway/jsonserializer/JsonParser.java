@@ -163,7 +163,7 @@ public class JsonParser {
     ParsingException fail(String target, int cursor, char errorChar) {
         Line line = input.getLine(cursor);
 
-        String unexpected = null;
+        String unexpected;
         if (errorChar == EOI) unexpected = "end-of-input";
         else if (Character.isISOControl(errorChar)) unexpected = String.format("\\u%04x", (int) errorChar);
         else unexpected = "" + errorChar;

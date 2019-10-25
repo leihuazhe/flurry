@@ -54,7 +54,10 @@ public class TestController {
         String methodName = req.getParameter("methodName");
 
         try {
-            return post.post(serviceName, versionName, methodName, jsonParameter, req);
+            String json = this.post.post(serviceName, versionName, methodName, jsonParameter, req);
+            LOGGER.info("Receive response: " + json);
+
+            return json;
         } catch (Exception e) {
             return new BaseObject(1000L, "Error:" + e.getMessage());
         }

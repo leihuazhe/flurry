@@ -1,10 +1,10 @@
 package org.apache.dubbo.rpc.protocol.dubbo;
 
+import com.yunji.dubbo.common.serialize.util.CodecContext;
 import org.apache.dubbo.common.logger.Logger;
 import org.apache.dubbo.common.logger.LoggerFactory;
 import org.apache.dubbo.common.serialize.Cleanable;
 import org.apache.dubbo.common.serialize.ObjectInput;
-import org.apache.dubbo.common.serialize.compatible.CodecContext;
 import org.apache.dubbo.common.utils.ArrayUtils;
 import org.apache.dubbo.common.utils.Assert;
 import org.apache.dubbo.common.utils.StringUtils;

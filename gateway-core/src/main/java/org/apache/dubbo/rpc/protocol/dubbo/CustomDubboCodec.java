@@ -34,7 +34,7 @@ import static org.apache.dubbo.rpc.protocol.dubbo.CallbackServiceCodec.encodeInv
 
 public class CustomDubboCodec extends ExchangeCodec {
 
-    public static final String NAME = "extremejson";
+
     public static final String DUBBO_VERSION = Version.getProtocolVersion();
     public static final byte RESPONSE_WITH_EXCEPTION = 0;
     public static final byte RESPONSE_VALUE = 1;
@@ -176,8 +176,12 @@ public class CustomDubboCodec extends ExchangeCodec {
             String serviceVersion = inv.getAttachment(VERSION_KEY);
 
             if (!METADATA_METHOD_NAME.equals(methodName)) {
-                Object valueJson = args.length > 0 ? args[args.length - 1] : "{}";
-                JsonDuplexHandler.writeObject(service, serviceVersion, inv.getMethodName(), valueJson, out);
+                //必须有参数，没有参数还写个毛线
+                if (args.length > 0 && !"".equals(parameterTypes)) {
+//                    Object valueJson = args.length > 0 ? args[args.length - 1] : "{}";
+                    Object valueJson = args[args.length - 1];
+                    JsonDuplexHandler.writeObject(service, serviceVersion, inv.getMethodName(), valueJson, out);
+                }
             }
         } else {
             out.writeUTF(ReflectUtils.getDesc(inv.getParameterTypes()));
