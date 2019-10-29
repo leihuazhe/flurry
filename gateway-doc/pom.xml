@@ -192,6 +192,14 @@
             <version>1.0.0</version>
             <artifactId>tomcat-7.x-8.x-plugin</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>com.yunji.gateway</groupId>
+            <version>2.5.3-SNAPSHOT</version>
+            <artifactId>dubbo-demo-api</artifactId>
+        </dependency>
+
+
     </dependencies>
 
     <build>
