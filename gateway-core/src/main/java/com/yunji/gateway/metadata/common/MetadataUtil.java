@@ -2,11 +2,11 @@ package com.yunji.gateway.metadata.common;
 
 import com.yunji.gateway.GateWayService;
 import com.yunji.gateway.GatewayServiceFactory;
+import com.yunji.gateway.jsonserializer.TType;
 import com.yunji.gateway.metadata.OptimizedService;
 import com.yunji.gateway.util.GateConstants;
 import org.apache.dubbo.common.utils.Assert;
 import org.apache.dubbo.common.utils.StringUtils;
-import com.yunji.gateway.jsonserializer.TType;
 import com.yunji.gateway.metadata.tag.DataType;
 import com.yunji.gateway.metadata.tag.Service;
 import org.apache.dubbo.config.MetaServiceInfo;
