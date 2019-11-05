@@ -22,25 +22,23 @@ import java.util.stream.Collectors;
 
 public abstract class GatewayDocPoster implements Post {
 
-    private static final AtomicInteger serviceGetCounter = new AtomicInteger();
-
     protected final Logger logger = LoggerFactory.getLogger(getClass());
 
-    protected String registryUrl;
+//    protected String registryUrl;
 
-    protected String diamondId;
+//    protected String diamondId;
 
-    public GatewayDocPoster(String registryUrl, String diamondId) {
-        this.registryUrl = registryUrl;
-        this.diamondId = diamondId;
-    }
+//    public GatewayDocPoster(String registryUrl, String diamondId) {
+//        this.registryUrl = registryUrl;
+//        this.diamondId = diamondId;
+//    }
 
     @Override
     public String post(String service,
                        String version,
                        String method,
                        String parameter,
-                       HttpServletRequest req) throws Exception{
+                       HttpServletRequest req) throws Exception {
         return post(service, version, method, parameter);
     }
 

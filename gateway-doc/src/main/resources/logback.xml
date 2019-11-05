@@ -61,6 +61,7 @@
 
 
     <logger name="druid.sql" level="OFF"/>
+    <logger name="org.apache.dubbo" level="warn"/>
 
     <root level="INFO">
         <appender-ref ref="STDOUT"/>

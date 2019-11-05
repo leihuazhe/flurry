@@ -32,11 +32,10 @@ import java.util.concurrent.ExecutionException;
  */
 public class GatewayDocStreamPoster extends GatewayDocPoster {
 
-    private DubboExecutedFacade executedFacade;
+    private final DubboExecutedFacade executedFacade;
 
-    public GatewayDocStreamPoster(String registryUrl, String diamondId) {
-        super(registryUrl, diamondId);
-        executedFacade = new DubboExecutedFacade(registryUrl, diamondId);
+    public GatewayDocStreamPoster(DubboExecutedFacade executedFacade) {
+        this.executedFacade = executedFacade;
     }
 
     @Override

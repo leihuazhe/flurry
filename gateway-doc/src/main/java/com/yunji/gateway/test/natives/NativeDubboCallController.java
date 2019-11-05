@@ -18,7 +18,7 @@ import java.util.Map;
 /**
  * @author Denim.leihz 2019-10-29 2:37 PM
  */
-@RestController
+//@RestController
 @RequestMapping("/")
 @Slf4j
 public class NativeDubboCallController {

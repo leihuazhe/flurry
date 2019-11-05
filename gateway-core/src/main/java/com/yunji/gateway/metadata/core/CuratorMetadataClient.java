@@ -2,6 +2,7 @@ package com.yunji.gateway.metadata.core;
 
 import com.yunji.gateway.core.RegistryMetadataClient;
 import com.yunji.gateway.metadata.common.ChangeType;
+import com.yunji.gateway.util.MixUtils;
 import org.apache.dubbo.common.URL;
 import org.apache.dubbo.common.utils.CollectionUtils;
 import org.apache.dubbo.remoting.zookeeper.ChildListener;
@@ -33,7 +34,7 @@ public class CuratorMetadataClient implements RegistryMetadataClient {
     private static final String DEFAULT_ROOT = "dubbo";
 
     private Set<RegistryListener> listeners = new HashSet<>();
-
+    //key 是订阅的服务路径 path,不是服务名称 eg:
     private final ConcurrentMap<String, ChildListener> childListeners = new ConcurrentHashMap<>(64);
 
 
@@ -55,7 +56,6 @@ public class CuratorMetadataClient implements RegistryMetadataClient {
                     try {
                         logger.info("Zookeeper status is reconnected,recover watcher,serviceRegistryListeners size: {}",
                                 childListeners.size());
-
                         recover();
                     } catch (Exception e) {
                         logger.error(e.getMessage(), e);
@@ -68,7 +68,7 @@ public class CuratorMetadataClient implements RegistryMetadataClient {
     @Override
     public List<URL> subscribe(String serviceName, RegistryListener registryListener) {
         String subscribePath = toServicePath(serviceName) + PATH_SEPARATOR + PROVIDERS_CATEGORY;
-        logger.info("Subscribe service interface: [{}], subscribePath: [{}]", serviceName, subscribePath);
+//        logger.info("Subscribe service interface: [{}], subscribePath: [{}]", serviceName, subscribePath);
         listeners.add(registryListener);
 
         ChildListener childListener = childListeners.get(subscribePath);
@@ -106,9 +106,10 @@ public class CuratorMetadataClient implements RegistryMetadataClient {
      * @throws Exception
      */
     private void recover() throws Exception {
-        childListeners.forEach((serviceName, childListener) -> {
-            String subscribePath = toServicePath(serviceName) + PATH_SEPARATOR + PROVIDERS_CATEGORY;
-            logger.info("Recover Subscribe  service interface: [{}], subscribePath: [{}]", serviceName, subscribePath);
+        //
+        childListeners.forEach((subscribePath, childListener) -> {
+            String serviceName = MixUtils.getServiceNameByPath(subscribePath);
+//            logger.info("Recover Subscribe path, 重新恢复订阅service {}, 路径: {}", serviceName, subscribePath);
             List<String> urlString = zkClient.addChildListener(subscribePath, childListener);
             List<URL> childrenUrls = toUrls(urlString);
             for (RegistryListener listener : listeners) {

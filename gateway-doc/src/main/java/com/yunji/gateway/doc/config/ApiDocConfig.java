@@ -46,8 +46,8 @@ public class ApiDocConfig implements InitializingBean {
     }
 
     @Bean
-    public Post getPost() {
-        return new GatewayDocStreamPoster(registryUrl, diamondId);
+    public Post getPost(DubboExecutedFacade dubboExecutedFacade) {
+        return new GatewayDocStreamPoster(dubboExecutedFacade);
     }
 
 
