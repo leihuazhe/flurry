@@ -46,6 +46,8 @@ public enum GateWayErrorCode {
 
     RemotingError(1550, "当前请求出现远程remote错误"),
 
+    RemotingNullError(1551, "服务端返回空指针异常"),
+
     TimeOutError(1555, "当前请求超时,请重试.");
 
 

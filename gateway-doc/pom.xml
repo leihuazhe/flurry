@@ -20,7 +20,8 @@
 
     <groupId>com.yunji.gateway</groupId>
     <artifactId>gateway-doc</artifactId>
-    <packaging>war</packaging>
+    <!--<packaging>war</packaging>-->
+    <packaging>jar</packaging>
 
     <properties>
         <spring.version>4.3.9.RELEASE</spring.version>

@@ -7,7 +7,8 @@ package com.yunji.gateway.netty.http.util;
  */
 public class Constants {
 
-    public static final int DEFAULT_IO_THREADS = Math.min(Runtime.getRuntime().availableProcessors() * 2, 32);
+//    public static final int DEFAULT_IO_THREADS = Math.min(Runtime.getRuntime().availableProcessors() * 2, 32);
+    public static final int DEFAULT_IO_THREADS = Math.min(Runtime.getRuntime().availableProcessors() * 3, 32);
 
 
     public static final String GET_HEALTH_CHECK_URL = "/health/check";

@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeoutException;
+import java.util.function.BiConsumer;
 
 import static com.yunji.gateway.util.GateWayErrorCode.*;
 import static com.yunji.gateway.util.HttpHandlerUtil.*;
@@ -84,5 +85,4 @@ public class HttpPostProcessor {
     private void doResponse(ChannelHandlerContext ctx, String info, FullHttpRequest request) {
         HttpHandlerUtil.sendHttpResponse(ctx, info, request, HttpResponseStatus.OK);
     }
-
 }

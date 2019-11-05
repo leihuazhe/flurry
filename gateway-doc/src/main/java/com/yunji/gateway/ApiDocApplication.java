@@ -21,7 +21,7 @@ import java.util.List;
  */
 @SpringBootApplication
 @EnableConfigurationProperties(ApiDocProperties.class)
-@ImportResource(locations = {"classpath:spring.xml"})
+@ImportResource(locations = {"classpath:spring.xml", "classpath:dubbo-consumer.xml"})
 public class ApiDocApplication /*implements CommandLineRunner*/ {
 
     public static void main(String[] args) {

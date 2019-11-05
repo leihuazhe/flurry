@@ -6,6 +6,8 @@ import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.cookie.ServerCookieDecoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.AntPathMatcher;
+import org.springframework.util.PathMatcher;
 
 import java.util.Arrays;
 import java.util.regex.Matcher;
@@ -19,18 +21,23 @@ import static io.netty.handler.codec.http.HttpHeaderNames.COOKIE;
 public class UrlMappingResolver {
     private static Logger logger = LoggerFactory.getLogger(UrlMappingResolver.class);
 
-    private static final Pattern POST_GATEWAY_PATTERN = Pattern.compile("/([^\\s|^/]*)/([^\\s|^/]*)/([^\\s|^/]*)/([^\\s|^/]*)(?:/([^\\s|^/]*))?");
+    //    private static final Pattern POST_GATEWAY_PATTERN = Pattern.compile("/([^\\s|^/]*)/([^\\s|^/]*)/([^\\s|^/]*)/([^\\s|^/]*)(?:/([^\\s|^/]*))?");
+    private static final Pattern POST_GATEWAY_PATTERN = Pattern.compile("/(api)/(.*?)/([0-9.]+)/(.*?)");
 
     private static final Pattern POST_GATEWAY_PATTERN_1 = Pattern.compile("/([^\\s|^/]*)(?:/([^\\s|^/]*))?");
 
     private static final Pattern ECHO_PATTERN = Pattern.compile("/([^\\s|^/]*)/([^\\s|^/]*)/([^\\s|^/]*)/([^\\s|^/]*)");
+
+    private static String ANT_PATTERN = "/api/{service:[0-9a-zA-Z_\\.]+}/{version:[0-9\\.]+}/{method:[\\w]+}{params:.*?}";
+
+    private static PathMatcher pathMatcher = new AntPathMatcher();
 
 
     private static final String[] WILDCARD_CHARS = {"/", "?", "&", "="};
 
     private static final String DEFAULT_URL_PREFIX = "api";
 
-
+    //fixme 性能优化
     public static void handlerPostUrl(FullHttpRequest request, RequestContext context) {
         Matcher matcherFirst = POST_GATEWAY_PATTERN.matcher(request.uri());
 
@@ -60,27 +67,26 @@ public class UrlMappingResolver {
      */
     private static void handlerMappingUrl(Matcher matcher, FullHttpRequest request, RequestContext context) {
         getRequestCookies(request, context);
-
-        String prefix = matcher.group(1);
+        String prefix = "api";
         String serviceName = matcher.group(2);
         String versionName = matcher.group(3);
         String methodName = matcher.group(4);
-        String apiKey = matcher.group(5);
-        //apiKey为null，也要解析 parameter
-        if (apiKey == null) {
+
+        if (matcher.groupCount() == 4) {
             UrlArgumentHolder holder = doResolveArgument(methodName);
             context.urlPrefix(prefix);
             context.service(serviceName);
             context.version(versionName);
             context.method(holder.getLastPath());
+            context.method(methodName);
 
             String parameter = RequestParser.fastParseParam(request, "parameter");
-
             context.parameter(parameter);
-
             context.arguments(holder.getArgumentMap());
             return;
         }
+        //TODO 2019.11.01 鉴权之后的情形
+        String apiKey = matcher.group(5);
         UrlArgumentHolder holder = doResolveArgument(apiKey);
 
         String timestamp = RequestParser.fastParseParam(request, "timestamp");
