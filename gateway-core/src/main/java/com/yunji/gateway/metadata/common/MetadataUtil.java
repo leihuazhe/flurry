@@ -65,11 +65,16 @@ public class MetadataUtil {
                         .getCompletableFuture()
                         .get(GateConstants.METADATA_CALL_TIME_OUT, TimeUnit.MILLISECONDS);
 
-
-                try (StringReader reader = new StringReader(metaString)) {
-                    Service service = JAXB.unmarshal(reader, Service.class);
-                    return new OptimizedService(service);
+                if (StringUtils.isNotEmpty(metaString)) {
+                    try (StringReader reader = new StringReader(metaString)) {
+                        Service service = JAXB.unmarshal(reader, Service.class);
+                        return new OptimizedService(service);
+                    }
+                } else {
+                    logger.error("订阅目标服务 {} 元数据获取为空,请检查.", serviceName);
+                    return null;
                 }
+
             } catch (ExecutionException tx) {
                 String detailMsg = tx.getMessage();
                 if (detailMsg != null && detailMsg.contains("org.apache.dubbo.common.bytecode.NoSuchMethodException")) {
