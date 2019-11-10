@@ -308,6 +308,10 @@ function getDataTypeElement(dataType, name, service, optional, doc) {
             return li[0];
 
         case 'STRUCT':
+            if ("java.math.BigDecimal" === dataType.qualifiedName) {
+                return createInputGroup(name, "BigDecimal", optional, doc);
+            }
+
             var li = $("<li><div class='input-group'><span class='input-group-addon parameterName'></span><input class='form-control' style='display: none'/><span class='input-group-addon'></span></div></li>");
             var span = li.find('span.parameterName');
             if (doc == null || doc == '') {
@@ -386,8 +390,8 @@ function applyTest(serviceName, version, methodName) {
     }, function (result) {
         try {
             $("#json-result").html(getFormatedJsonHTML(JSON.parse(result)));
-        }catch (e) {
-            console.error("response to json error",result);
+        } catch (e) {
+            console.error("response to json error", result);
             //var finalResult = result.replace(/\r\n/g,"");
             //console.log(finalResult);
             $("#json-result").html(getFormatedJsonHTML(result));
@@ -446,7 +450,7 @@ function getRequestTemplate(serviceName, version, methodName) {
                 "<a href='#template" + i + "'" +
                 " id='template" + i + "-tab' role='tab' data-toggle='tab'" +
                 "      aria-controls='template" + i + "'" + "  onclick=$('#apply-template-button-group').hide() onfocus=$('#removeTemplate" + i + "').show() onblur=$('#removeTemplate" + i + "').hide() >" +
-                "<span class='glyphicon glyphicon-send'></span> "+result[i].label +
+                "<span class='glyphicon glyphicon-send'></span> " + result[i].label +
                 " <span title='删除此模版' href='javascript:void(0)' style='display: none;cursor: pointer' class='remove-template-but' id='removeTemplate" + i + "' onclick=deleteTemplate('" + result[i].id + "','" + serviceName + "','" + version + "','" + methodName + "') ><span class='glyphicon glyphicon-remove'></span></>" +
                 "</a>" +
                 "</li>";
@@ -454,10 +458,10 @@ function getRequestTemplate(serviceName, version, methodName) {
             tabContentDoms += "<div role='tabpane1' class='tab-pane fade dynamic-tab-pane' id='template" + i + "'" + " aria-labelledby='template" + i + "Data-tab'>" +
                 "<p>请求模版: " + result[i].label + "</p>" +
                 "<p>更新时间: " + new Date(result[i].updateDate).toLocaleString() + "</p>" +
-                "<P><button class='btn btn-success' type='button' onclick=applyTestForTemplate('" + serviceName + "','" + version + "','" + methodName + "','"+result[i].template+"')>提交测试</button>" +
+                "<P><button class='btn btn-success' type='button' onclick=applyTestForTemplate('" + serviceName + "','" + version + "','" + methodName + "','" + result[i].template + "')>提交测试</button>" +
                 /*"<button class='btn btn-default' type='button' onclick=useTemplate2From('"+result[i].template+"')>回填表单</button></P>"+*/
-            "<div id='template" + i + "Data'>" + getFormatedJsonHTML(JSON.parse(result[i].template)) + "</div>" +
-            "</div>";
+                "<div id='template" + i + "Data'>" + getFormatedJsonHTML(JSON.parse(result[i].template)) + "</div>" +
+                "</div>";
         }
         // 清除历史虚拟dom
         $(".dynamic-tab-title").remove();
@@ -558,12 +562,12 @@ function deleteTemplate(id, serviceName, version, methodName) {
  * @param version
  * @param methodName
  */
-function applyTestForJsonStr(serviceName, version, methodName){
+function applyTestForJsonStr(serviceName, version, methodName) {
     var params = $("#pasteJsonBox").val();
     var jsonObj = {};
     try {
         jsonObj = JSON.parse(params)
-    }catch (e){
+    } catch (e) {
         alert("json格式异常请检查");
         return;
     }
