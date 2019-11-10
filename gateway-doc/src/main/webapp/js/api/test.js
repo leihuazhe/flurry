@@ -752,6 +752,10 @@ function getJsonSample(dataType, service) {
             list.push(getJsonSample(dataType.valueType, service));
             return list;
         case 'STRUCT':
+            if ("java.math.BigDecimal" === dataType.qualifiedName) {
+                return Math.random() * 100;
+            }
+
             var p = {};
             for (var i = 0; i < service.structDefinitions.length; i++) {
                 var struct = service.structDefinitions[i];
