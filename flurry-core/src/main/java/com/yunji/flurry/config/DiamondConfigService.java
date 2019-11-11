@@ -4,6 +4,7 @@ import com.taobao.diamond.manager.ManagerListener;
 import com.yunji.diamond.client.api.DiamondClient;
 import com.yunji.flurry.core.ConfigListener;
 import com.yunji.flurry.core.ConfigService;
+import org.apache.dubbo.common.utils.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -91,6 +92,9 @@ public class DiamondConfigService implements ConfigService {
 
     private Properties load(String configInfo) {
         logger.info(diamondClient.getDataId() + " load config:\n" + configInfo);
+        if (StringUtils.isBlank(configInfo)) {
+            throw new IllegalArgumentException("Diamond id: " + diamondClient.getDataId() + " 配置信息为空,请检查");
+        }
         Properties properties = new Properties();
         try {
             properties.load(new StringReader(configInfo));
