@@ -1,0 +1,375 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<service namespace="com.yunji.multi" name="MultiParameterService">
+    <meta>
+        <version>1.0.0</version>
+        <timeout>30000</timeout>
+    </meta>
+    <doc>
+        MultiParameterService
+    </doc>
+
+    <annotations>
+        <annotation key="group" value="gatewayDemo"/>
+    </annotations>
+    <methods>
+        <method name="getName">
+            <doc>
+
+            </doc>
+
+            <request name="getName_args">
+                <fields>
+                    <field tag="0" name="args0" optional="false" privacy="false">
+                        <dataType>
+                            <kind>STRING</kind>
+                        </dataType>
+                        <doc>
+
+                        </doc>
+
+                    </field>
+                    <field tag="1" name="args1" optional="false" privacy="false">
+                        <dataType>
+                            <kind>INTEGER</kind>
+                        </dataType>
+                        <doc>
+
+                        </doc>
+
+                    </field>
+                </fields>
+            </request>
+            <response name="getName_result">
+                <fields>
+                    <field tag="0" name="success" optional="false" privacy="false">
+                        <dataType>
+                            <kind>STRING</kind>
+                        </dataType>
+                    </field>
+                </fields>
+            </response>
+        </method>
+        <method name="detail">
+            <doc>
+
+            </doc>
+
+            <request name="detail_args">
+                <fields>
+                    <field tag="0" name="args0" optional="false" privacy="false">
+                        <dataType>
+                            <kind>INTEGER</kind>
+                        </dataType>
+                        <doc>
+
+                        </doc>
+
+                    </field>
+                </fields>
+            </request>
+            <response name="detail_result">
+                <fields>
+                    <field tag="0" name="success" optional="false" privacy="false">
+                        <dataType>
+                            <kind>STRING</kind>
+                        </dataType>
+                    </field>
+                </fields>
+            </response>
+        </method>
+        <method name="detail">
+            <doc>
+
+            </doc>
+
+            <request name="detail_args">
+                <fields>
+                    <field tag="0" name="args0" optional="false" privacy="false">
+                        <dataType>
+                            <kind>INTEGER</kind>
+                        </dataType>
+                        <doc>
+
+                        </doc>
+
+                    </field>
+                    <field tag="1" name="args1" optional="false" privacy="false">
+                        <dataType>
+                            <kind>STRING</kind>
+                        </dataType>
+                        <doc>
+
+                        </doc>
+
+                    </field>
+                </fields>
+            </request>
+            <response name="detail_result">
+                <fields>
+                    <field tag="0" name="success" optional="false" privacy="false">
+                        <dataType>
+                            <kind>STRING</kind>
+                        </dataType>
+                    </field>
+                </fields>
+            </response>
+        </method>
+        <method name="getList">
+            <doc>
+
+            </doc>
+
+            <request name="getList_args">
+                <fields>
+                    <field tag="0" name="args0" optional="false" privacy="false">
+                        <dataType>
+                            <kind>LIST</kind>
+                            <valueType>
+                                <kind>STRUCT</kind>
+                                <ref>com.yunji.multi.FmsVO</ref>
+
+                            </valueType>
+                        </dataType>
+                        <doc>
+
+                        </doc>
+
+                    </field>
+                    <field tag="1" name="args1" optional="false" privacy="false">
+                        <dataType>
+                            <kind>STRING</kind>
+                        </dataType>
+                        <doc>
+
+                        </doc>
+
+                    </field>
+                </fields>
+            </request>
+            <response name="getList_result">
+                <fields>
+                    <field tag="0" name="success" optional="false" privacy="false">
+                        <dataType>
+                            <kind>STRUCT</kind>
+                            <ref>org.apache.dubbo.hello.HelloResponse</ref>
+                        </dataType>
+                    </field>
+                </fields>
+            </response>
+        </method>
+        <method name="sayHello">
+            <doc>
+
+            </doc>
+
+            <request name="sayHello_args">
+                <fields>
+                    <field tag="0" name="args0" optional="false" privacy="false">
+                        <dataType>
+                            <kind>STRING</kind>
+                        </dataType>
+                        <doc>
+
+                        </doc>
+
+                    </field>
+                    <field tag="1" name="args1" optional="false" privacy="false">
+                        <dataType>
+                            <kind>INTEGER</kind>
+                        </dataType>
+                        <doc>
+
+                        </doc>
+
+                    </field>
+                    <field tag="2" name="args2" optional="false" privacy="false">
+                        <dataType>
+                            <kind>STRUCT</kind>
+                            <ref>org.apache.dubbo.hello.HelloRequest</ref>
+                        </dataType>
+                        <doc>
+
+                        </doc>
+
+                    </field>
+                </fields>
+            </request>
+            <response name="sayHello_result">
+                <fields>
+                    <field tag="0" name="success" optional="false" privacy="false">
+                        <dataType>
+                            <kind>STRUCT</kind>
+                            <ref>org.apache.dubbo.hello.HelloResponse</ref>
+                        </dataType>
+                    </field>
+                </fields>
+            </response>
+        </method>
+        <method name="getByParams">
+            <doc>
+
+            </doc>
+
+            <request name="getByParams_args">
+                <fields>
+                    <field tag="0" name="args0" optional="false" privacy="false">
+                        <dataType>
+                            <kind>STRING</kind>
+                        </dataType>
+                        <doc>
+
+                        </doc>
+
+                    </field>
+                    <field tag="1" name="args1" optional="false" privacy="false">
+                        <dataType>
+                            <kind>STRING</kind>
+                        </dataType>
+                        <doc>
+
+                        </doc>
+
+                    </field>
+                </fields>
+            </request>
+            <response name="getByParams_result">
+                <fields>
+                    <field tag="0" name="success" optional="false" privacy="false">
+                        <dataType>
+                            <kind>STRUCT</kind>
+                            <ref>org.apache.dubbo.hello.HelloResponse</ref>
+                        </dataType>
+                    </field>
+                </fields>
+            </response>
+        </method>
+    </methods>
+    <structs>
+        <struct namespace="com.yunji.multi" name="FmsVO">
+            <doc>
+
+            </doc>
+            <fields>
+                <field tag="0" name="applyId" optional="false" privacy="false">
+                    <dataType>
+                        <kind>STRING</kind>
+                    </dataType>
+                    <doc>
+
+                    </doc>
+
+                </field>
+                <field tag="1" name="dataType" optional="false" privacy="false">
+                    <dataType>
+                        <kind>STRING</kind>
+                    </dataType>
+                    <doc>
+
+                    </doc>
+
+                </field>
+                <field tag="2" name="data" optional="false" privacy="false">
+                    <dataType>
+                        <kind>STRING</kind>
+                    </dataType>
+                    <doc>
+
+                    </doc>
+
+                </field>
+            </fields>
+        </struct>
+        <struct namespace="org.apache.dubbo.hello" name="HelloResponse">
+            <doc>
+
+            </doc>
+            <fields>
+                <field tag="0" name="id" optional="false" privacy="false">
+                    <dataType>
+                        <kind>INTEGER</kind>
+                    </dataType>
+                    <doc>
+
+                    </doc>
+
+                </field>
+                <field tag="1" name="name" optional="false" privacy="false">
+                    <dataType>
+                        <kind>STRING</kind>
+                    </dataType>
+                    <doc>
+
+                    </doc>
+
+                </field>
+                <field tag="2" name="attachments" optional="false" privacy="false">
+                    <dataType>
+                        <kind>MAP</kind>
+                        <keyType>
+                            <kind>STRING</kind>
+
+                        </keyType>
+                        <valueType>
+                            <kind>STRING</kind>
+
+                        </valueType>
+                    </dataType>
+                    <doc>
+
+                    </doc>
+
+                </field>
+            </fields>
+        </struct>
+        <struct namespace="org.apache.dubbo.hello" name="HelloRequest">
+            <doc>
+
+            </doc>
+            <fields>
+                <field tag="0" name="id" optional="false" privacy="false">
+                    <dataType>
+                        <kind>INTEGER</kind>
+                    </dataType>
+                    <doc>
+
+                    </doc>
+
+                </field>
+                <field tag="1" name="name" optional="false" privacy="false">
+                    <dataType>
+                        <kind>STRING</kind>
+                    </dataType>
+                    <doc>
+
+                    </doc>
+
+                </field>
+                <field tag="2" name="attachments" optional="false" privacy="false">
+                    <dataType>
+                        <kind>MAP</kind>
+                        <keyType>
+                            <kind>STRING</kind>
+
+                        </keyType>
+                        <valueType>
+                            <kind>STRING</kind>
+
+                        </valueType>
+                    </dataType>
+                    <doc>
+
+                    </doc>
+
+                </field>
+            </fields>
+        </struct>
+        <struct namespace="java.lang" name="Object">
+            <doc>
+
+            </doc>
+            <fields>
+            </fields>
+        </struct>
+    </structs>
+    <enums/>
+</service>
