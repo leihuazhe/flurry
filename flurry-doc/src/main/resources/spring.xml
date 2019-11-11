@@ -25,7 +25,7 @@
             <bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter"/>
         </property>
         <!-- 配置实体类所在的包 -->
-        <property name="packagesToScan" value="com.yunji.gateway.doc"/>
+        <property name="packagesToScan" value="com.yunji.flurry.doc"/>
 
         <property name="jpaProperties">
             <props>

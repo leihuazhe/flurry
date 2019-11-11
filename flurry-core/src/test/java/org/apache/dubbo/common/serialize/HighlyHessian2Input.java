@@ -2,7 +2,7 @@ package org.apache.dubbo.common.serialize;
 
 import com.yunji.dubbo.common.serialize.util.CodecContext;
 import com.yunji.dubbo.common.serialize.util.Offset;
-import com.yunji.gateway.jsonserializer.JsonCallback;
+import com.yunji.flurry.jsonserializer.JsonCallback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

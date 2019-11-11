@@ -5,9 +5,9 @@ import org.apache.dubbo.common.constants.CommonConstants;
 import org.apache.dubbo.common.extension.Activate;
 import org.apache.dubbo.common.utils.StringUtils;
 import org.apache.dubbo.rpc.*;
-import com.yunji.gateway.util.MixUtils;
+import com.yunji.flurry.util.MixUtils;
 
-import static com.yunji.gateway.util.GateConstants.*;
+import static com.yunji.flurry.util.GateConstants.*;
 import static org.apache.dubbo.rpc.Constants.GENERIC_KEY;
 
 /**

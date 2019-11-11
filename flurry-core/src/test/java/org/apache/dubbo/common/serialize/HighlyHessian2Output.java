@@ -1131,7 +1131,7 @@ public class HighlyHessian2Output
      *
      * @param offset 在上一次某次标记的 write index.
      * @param length 写长度
-     * @throws IOException com.yunji.gateway.util.DumpUtil.dump(getByteBuf().buffer);
+     * @throws IOException DumpUtil.dump(getByteBuf().buffer);
      */
     public void reWriteListLength(int offset, int length)
             throws IOException {

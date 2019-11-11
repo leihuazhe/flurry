@@ -11,7 +11,7 @@ import org.apache.dubbo.common.utils.ReflectUtils;
 import org.apache.dubbo.common.utils.StringUtils;
 
 
-import com.yunji.gateway.jsonserializer.JsonDuplexHandler;
+import com.yunji.flurry.jsonserializer.JsonDuplexHandler;
 import org.apache.dubbo.remoting.Channel;
 import org.apache.dubbo.remoting.exchange.Request;
 import org.apache.dubbo.remoting.exchange.Response;
@@ -20,12 +20,12 @@ import org.apache.dubbo.remoting.transport.CodecSupport;
 import org.apache.dubbo.rpc.Invocation;
 import org.apache.dubbo.rpc.Result;
 import org.apache.dubbo.rpc.RpcInvocation;
-import com.yunji.gateway.util.MixUtils;
+import com.yunji.flurry.util.MixUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
 
-import static com.yunji.gateway.util.GateConstants.*;
+import static com.yunji.flurry.util.GateConstants.*;
 import static org.apache.dubbo.common.constants.CommonConstants.*;
 import static org.apache.dubbo.rpc.protocol.dubbo.Constants.*;
 import static org.apache.dubbo.remoting.Constants.DUBBO_VERSION_KEY;

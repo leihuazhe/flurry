@@ -24,7 +24,7 @@
     <version>3.0.0-SNAPSHOT</version>
 
     <name>${project.artifactId}</name>
-    <description>The streamed based Gateway for Dubbo</description>
+    <description>Flurry: The streamed based Gateway for Dubbo</description>
 
     <properties>
         <skip_maven_deploy>true</skip_maven_deploy>
@@ -51,8 +51,8 @@
             </dependency>
 
             <dependency>
-                <groupId>com.yunji.gateway</groupId>
-                <artifactId>gateway-core</artifactId>
+                <groupId>com.yunji.flurry</groupId>
+                <artifactId>flurry-core</artifactId>
                 <version>${project.version}</version>
             </dependency>
 

@@ -6,7 +6,7 @@
        http://dubbo.apache.org/schema/dubbo http://dubbo.apache.org/schema/dubbo/dubbo.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
 
 
-    <dubbo:application name="gateway-provider"/>
+    <dubbo:application name="flurry-provider"/>
 
     <dubbo:consumer cluster="failfast" />
 

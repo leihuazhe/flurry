@@ -1,7 +1,7 @@
 package com.yunji.backup;
 
-import com.yunji.gateway.metadata.OptimizedService;
-import com.yunji.gateway.metadata.common.MetadataUtil;
+import com.yunji.flurry.metadata.OptimizedService;
+import com.yunji.flurry.metadata.common.MetadataUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

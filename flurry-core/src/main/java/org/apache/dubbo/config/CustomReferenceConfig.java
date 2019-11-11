@@ -9,7 +9,7 @@ import org.apache.dubbo.common.utils.*;
 import org.apache.dubbo.config.annotation.Reference;
 import org.apache.dubbo.config.context.ConfigManager;
 import org.apache.dubbo.config.support.Parameter;
-import com.yunji.gateway.GateWayService;
+import com.yunji.flurry.GateWayService;
 import org.apache.dubbo.metadata.integration.MetadataReportService;
 import org.apache.dubbo.rpc.Invoker;
 import org.apache.dubbo.rpc.Protocol;
@@ -23,7 +23,7 @@ import org.apache.dubbo.rpc.model.ConsumerModel;
 import org.apache.dubbo.rpc.protocol.injvm.InjvmProtocol;
 import org.apache.dubbo.rpc.service.GenericService;
 import org.apache.dubbo.rpc.support.ProtocolUtils;
-import com.yunji.gateway.util.MixUtils;
+import com.yunji.flurry.util.MixUtils;
 
 import java.io.File;
 import java.io.FileInputStream;

@@ -66,8 +66,8 @@
         </dependency>
 
         <dependency>
-            <groupId>com.yunji.gateway</groupId>
-            <artifactId>gateway-core</artifactId>
+            <groupId>com.yunji.flurry</groupId>
+            <artifactId>flurry-core</artifactId>
         </dependency>
 
 
@@ -93,7 +93,7 @@
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <version>${spring-boot-maven-plugin.version}</version>
                 <configuration>
-                    <mainClass>com.yunji.gateway.GatewayApplication</mainClass>
+                    <mainClass>com.yunji.flurry.GatewayApplication</mainClass>
                 </configuration>
 
                 <executions>

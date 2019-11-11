@@ -13,6 +13,7 @@
     <packaging>jar</packaging>
 
     <dependencies>
+
         <dependency>
             <groupId>com.yunji.flurry</groupId>
             <artifactId>y-hessian-lite</artifactId>

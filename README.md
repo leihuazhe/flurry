@@ -2,13 +2,13 @@
 
 本工程主要分为3个模块:
 
-- gateway-app 
+- flurry-gateway 
     - 流式网关入口,启动后提供 web 调用,可部署多套,然后前端直接通过 http 请就可以直接请求到 dubbo 后台服务.
 
-- gateway-core
+- flurry-core
    - 流式网关核心基础组建工程,包括序列化、元数据获取、动态服务发现等
   
-- gateway-doc
+- flurry-doc
     - 这是一个供用户测试的文档站点工程,连接好 zookeeper 地址后，可直接通过此站点来获取服务文档信息，并可以在线通过 json 请求的模式来请求服务。
     **注意**：生产环境不需要部署此工程.
     

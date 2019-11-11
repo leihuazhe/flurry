@@ -125,10 +125,7 @@
             <version>2.3.1</version>
         </dependency>
 
-
-
-
-
+        <!--flurry-->
         <dependency>
             <groupId>com.yunji.flurry</groupId>
             <artifactId>flurry-core</artifactId>
@@ -190,19 +187,28 @@
             <groupId>com.yunji.erlang</groupId>
             <version>1.0.0</version>
             <artifactId>tomcat-7.x-8.x-plugin</artifactId>
+            <optional>true</optional>
         </dependency>
 
-        <dependency>
-            <groupId>com.yunji.gateway</groupId>
-            <version>2.5.3-SNAPSHOT</version>
-            <artifactId>dubbo-demo-api</artifactId>
-        </dependency>
+
 
         <dependency>
             <groupId>org.lz4</groupId>
             <artifactId>lz4-java</artifactId>
             <version>1.6.0</version>
         </dependency>
+
+         <dependency>
+           <groupId>com.yunji.gateway</groupId>
+           <version>2.5.3-SNAPSHOT</version>
+           <artifactId>dubbo-demo-api</artifactId>
+             <exclusions>
+                 <exclusion>
+                     <groupId>com.yunji.gateway</groupId>
+                     <artifactId>hessian-lite</artifactId>
+                 </exclusion>
+             </exclusions>
+       </dependency>
 
     </dependencies>
 

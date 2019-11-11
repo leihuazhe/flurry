@@ -8,7 +8,7 @@ import org.apache.dubbo.common.serialize.ObjectInput;
 import org.apache.dubbo.common.utils.ArrayUtils;
 import org.apache.dubbo.common.utils.Assert;
 import org.apache.dubbo.common.utils.StringUtils;
-import com.yunji.gateway.jsonserializer.JsonDuplexHandler;
+import com.yunji.flurry.jsonserializer.JsonDuplexHandler;
 import org.apache.dubbo.remoting.Channel;
 import org.apache.dubbo.remoting.Codec;
 import org.apache.dubbo.remoting.Decodeable;
@@ -24,8 +24,8 @@ import java.io.OutputStream;
 import java.lang.reflect.Type;
 import java.util.Map;
 
-import static com.yunji.gateway.util.GateConstants.INTERFACE;
-import static com.yunji.gateway.util.GateConstants.METADATA_METHOD_NAME;
+import static com.yunji.flurry.util.GateConstants.INTERFACE;
+import static com.yunji.flurry.util.GateConstants.METADATA_METHOD_NAME;
 
 
 public class CustomDecodeableRpcResult extends AppResponse implements Codec, Decodeable {
