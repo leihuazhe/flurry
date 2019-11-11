@@ -1,0 +1,84 @@
+{
+  "args0": {
+    "orderNo": "1101201301023",
+    "productCount": 14,
+    "totalAmount": 121.96,
+    "storeId": "1270001",
+    "flag": "false",
+    "status": "DOING",
+    "orderDetailList": [
+      {
+        "orderNo": "1101201301023",
+        "detailSeq": 1,
+        "Amount": 68.48,
+        "remark": "第一件商品(第一件商品)(第一件商品)",
+        "bigDecimal": 12.3,
+        "status": "FINISHED"
+      },
+      {
+        "Amount": 69.69,
+        "orderNo": "1101201301023",
+        "detailSeq": 2,
+        "remark": "第二件商品",
+        "bigDecimal": 12.4,
+        "status": "DOING"
+      },
+      {
+        "orderNo": "1101201301023",
+        "Amount": 68.48,
+        "remark": "第三件商品",
+        "bigDecimal": 12.3,
+        "detailSeq": 1,
+        "status": "FINISHED"
+      },
+      {
+        "orderNo": "1101201301023",
+        "bigDecimal": 12.3,
+        "detailSeq": 1,
+        "Amount": 68.48,
+        "remark": "第四件商品",
+        "status": "FINISHED"
+      },
+      {
+        "orderNo": "1101201301023",
+        "detailSeq": 1,
+        "Amount": 68.48,
+        "remark": "第五件商品",
+        "bigDecimal": 12.3,
+        "status": "FINISHED"
+      },
+      {
+        "orderNo": "1101201301023",
+        "detailSeq": 1,
+        "Amount": 68.48,
+        "remark": "第六件商品",
+        "bigDecimal": 12.3,
+        "status": "FINISHED"
+      },
+      {
+        "detailSeq": 1,
+        "Amount": 68.48,
+        "remark": "第七件商品",
+        "bigDecimal": 12.3,
+        "status": "FINISHED",
+        "orderNo": "1101201301023"
+      },
+      {
+        "detailSeq": 1,
+        "orderNo": "1101201301023",
+        "Amount": 68.48,
+        "bigDecimal": 12.3,
+        "status": "FINISHED",
+        "remark": "第八件商品"
+      },
+      {
+        "detailSeq": 1,
+        "orderNo": "110120_1121_1301023",
+        "Amount": 68.48,
+        "bigDecimal": 12.3,
+        "status": "FINISHED",
+        "remark": "第八件商品的描述或者是副本"
+      }
+    ]
+  }
+}

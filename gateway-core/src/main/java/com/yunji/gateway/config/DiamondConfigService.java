@@ -42,8 +42,8 @@ public class DiamondConfigService implements ConfigService {
                     diamondClient.setPollingIntervalTime(diamondBean.getPollingIntervalTime());
                     diamondClient.setTimeout(diamondBean.getTimeout());
                     /* 初始化diamond */
-                    diamondClient.init();
                     diamondClient.setManagerListener(sharedManagerListener);
+                    diamondClient.init();
                     properties = load(diamondClient.getConfig());
                     sharedManagerListener.addCallBack(this);
                     start.compareAndSet(false, true);

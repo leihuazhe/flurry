@@ -24,11 +24,16 @@ public interface GateConstants {
     /**
      * Gateway 自定义修改的 hessian2 协议,排序超过 hessian2 本身,这样才会被 ignore.
      */
-    String SERIALIZATION_CUSTOM = "a_highly_hessian2";
+//    String SERIALIZATION_CUSTOM = "a_highly_hessian2";
+    String SERIALIZATION_CUSTOM = "hessian3";
     /**
      * 默认获取元数据信息的方法
      */
-    String METADATA_METHOD_NAME = "getServiceMetadata";
+    String METADATA_METHOD_NAME = "_getServiceMetadata";
+    /**
+     * ECHO method
+     */
+    String ECHO_METHOD = "$echo";
     /**
      * 注册中心环境变量
      */
@@ -52,15 +57,16 @@ public interface GateConstants {
 
     String DEFAULT_APPLICATION_NAME = "gateway-application";
 
-    String REGISTEY_PROTOCOL = "zookeeper";
+    String REGISTER_PROTOCOL = "zookeeper";
+
+    String GATEWAY_REFERENCE_TIME_OUT = "gateway.reference.timeout";
+
 
     int POLLING_INTERVAL_TIME = 10;
 
     long DIAMOND_TIME_OUT = 2000L;
 
-    long TIME_OUT = 2000L;
-
-    String REFERENCE_TIME_OUT = "reference.service.time.out";
+    long METADATA_CALL_TIME_OUT = 2000L;
 
 
     int DEFAULT_RETRY = 3;

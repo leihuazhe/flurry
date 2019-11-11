@@ -1,19 +1,24 @@
 package org.apache.dubbo.common.serialize;
 
-import com.alibaba.com.caucho.hessian.io.Deserializer;
+import com.yunji.dubbo.common.serialize.util.CodecContext;
+import com.yunji.dubbo.common.serialize.util.Offset;
 import com.yunji.gateway.jsonserializer.JsonCallback;
-import org.apache.dubbo.common.serialize.compatible.CodecContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayOutputStream;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
  * @author Denim.leihz 2019-07-11 9:17 AM
  */
 public class HighlyHessian2Input extends HiglyHessian2InputCompatible {
+
+    private Logger logger = LoggerFactory.getLogger(getClass());
 
     private JsonCallback jsonWriter;
 
@@ -487,27 +492,29 @@ public class HighlyHessian2Input extends HiglyHessian2InputCompatible {
                 // fixed length lists
                 String type = readType();
                 int length = readInt();
-
+                customReadList(length);
+                return null;
+                /*
                 Deserializer reader;
                 reader = findSerializerFactory().getListDeserializer(type, null);
 
                 boolean valueType = expectedTypes != null && expectedTypes.size() == 1;
 
-                return reader.readLengthList(this, length, valueType ? expectedTypes.get(0) : null);
+                return reader.readLengthList(this, length, valueType ? expectedTypes.get(0) : null);*/
             }
 
             case BC_LIST_FIXED_UNTYPED: {
                 // fixed length lists
                 int length = readInt();
-
-                Deserializer reader;
+                customReadList(length);
+                return null;
+                /*Deserializer reader;
                 reader = findSerializerFactory().getListDeserializer(null, null);
 
                 boolean valueType = expectedTypes != null && expectedTypes.size() == 1;
 
-                return reader.readLengthList(this, length, valueType ? expectedTypes.get(0) : null);
+                return reader.readLengthList(this, length, valueType ? expectedTypes.get(0) : null);*/
             }
-
             // compact fixed list
             case 0x70:
             case 0x71:
@@ -520,7 +527,6 @@ public class HighlyHessian2Input extends HiglyHessian2InputCompatible {
                 // fixed length lists
                 String type = readType();
                 int length = tag - 0x70;
-
                 customReadList(length);
                 return null;
             }
@@ -548,8 +554,9 @@ public class HighlyHessian2Input extends HiglyHessian2InputCompatible {
 
             case 'M': {
                 String type = readType();
-
-                return findSerializerFactory().readMap(this, type);
+                customReadMap();
+                return null;
+//                return findSerializerFactory().readMap(this, type);
             }
 
             case 'C': {
@@ -594,8 +601,10 @@ public class HighlyHessian2Input extends HiglyHessian2InputCompatible {
 
             case BC_REF: {
                 int ref = readInt();
-
-                return _refs.get(ref);
+                if (_refs != null) {
+                    jsonWriter.copyObjectJson((Offset) _refs.get(ref));
+                }
+                return null;
             }
 
             default:
@@ -608,25 +617,52 @@ public class HighlyHessian2Input extends HiglyHessian2InputCompatible {
 
     private Object readObjectInstance0(Class cl, ObjectDefinition def)
             throws IOException {
-        if (ifExist()) {
-            jsonWriter.onStartObject();
-        }
-        String[] fieldNames = def.getFieldNames();
+        boolean special = judgeSpecificObjectDefinition(def);
 
-        for (int i = 0; i < fieldNames.length; i++) {
-            String name = fieldNames[i];
-            if (ifExist()) {
-                jsonWriter.onStartField(name);
-            }
-            readObject();
-            if (ifExist()) {
-                jsonWriter.onEndField();
-            }
-        }
         if (ifExist()) {
-            jsonWriter.onEndObject();
+            int position = addRef(new Offset(jsonWriter.markIndex()));
+            if (!special) {
+                jsonWriter.onStartObject();
+            }
+            String[] fieldNames = def.getFieldNames();
+
+            for (int i = 0; i < fieldNames.length; i++) {
+                String name = fieldNames[i];
+                if (!special) {
+                    jsonWriter.onStartField(name);
+                }
+                readObject();
+                if (!special) {
+                    jsonWriter.onEndField();
+                }
+            }
+            if (!special) {
+                jsonWriter.onEndObject();
+            }
+
+            setRef(position, jsonWriter.markIndex());
+            return null;
+        } else {
+            if (ifExist()) {
+                jsonWriter.onStartObject();
+            }
+            String[] fieldNames = def.getFieldNames();
+
+            for (int i = 0; i < fieldNames.length; i++) {
+                String name = fieldNames[i];
+                if (ifExist()) {
+                    jsonWriter.onStartField(name);
+                }
+                readObject();
+                if (ifExist()) {
+                    jsonWriter.onEndField();
+                }
+            }
+            if (ifExist()) {
+                jsonWriter.onEndObject();
+            }
+            return null;
         }
-        return null;
     }
 
 
@@ -637,39 +673,74 @@ public class HighlyHessian2Input extends HiglyHessian2InputCompatible {
 
     private void customReadList(int length) throws IOException {
         if (ifExist()) {
+            int position = addRef(new Offset(jsonWriter.markIndex()));
             jsonWriter.onStartArray();
-        }
-        for (; length > 0; length--) {
-            readObject();
-            jsonWriter.onEndField();
-        }
-        if (ifExist()) {
+            for (; length > 0; length--) {
+                readObject();
+                jsonWriter.onEndField();
+            }
             jsonWriter.onEndArray();
+            setRef(position, jsonWriter.markIndex());
+
+        } else {
+            //for (; length > 0; length--) {
+            //    readObject();
+            //}
+            logger.warn("Hessian2 to json in read List got error cause jsonWriter is null.");
         }
+
     }
 
     private void customReadMap() throws IOException {
         if (ifExist()) {
+            int position = addRef(new Offset(jsonWriter.markIndex()));
             jsonWriter.onStartObject();
-        }
-
-        while (!isEnd()) {
-            readObject();
-
-            if (ifExist()) {
+            while (!isEnd()) {
+                readObject();
                 jsonWriter.onColon();
-            }
-            readObject();
-
-            if (ifExist()) {
+                readObject();
                 jsonWriter.onEndField();
             }
-        }
-        readEnd();
-
-        if (ifExist()) {
+            readEnd();
             jsonWriter.onEndObject();
+            setRef(position, jsonWriter.markIndex());
+        } else {
+            logger.warn("Hessian2 to json in read Map got error cause jsonWriter is null.");
+        }
+
+    }
+
+    /**
+     * 处理 hessian2 共用对象的情况
+     */
+    private int addRef(Offset offset) {
+        if (_refs == null)
+            _refs = new ArrayList();
+
+        _refs.add(offset);
+
+        return _refs.size() - 1;
+    }
+
+    private void setRef(int position, int endIndex) {
+        if (_refs != null) {
+            ((Offset) _refs.get(position)).setEndIndex(endIndex);
         }
     }
 
+    /**
+     * 特殊对象处理
+     */
+    private boolean judgeSpecificObjectDefinition(ObjectDefinition def) {
+        if (def != null) {
+            switch (def.getType()) {
+                case "java.math.BigDecimal":
+                    return true;
+                default:
+                    return false;
+            }
+
+        }
+        return false;
+    }
 }

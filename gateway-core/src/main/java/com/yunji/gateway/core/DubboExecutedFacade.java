@@ -103,6 +103,7 @@ public class DubboExecutedFacade {
 
     public CompletableFuture<String> execute(String interfaceName, String methodName, String version,
                                              String requestJson, OptimizedService optimizedService) {
+        if (requestJson == null) requestJson = "{}";
         if (optimizedService != null) {
             List<Field> requestFields = optimizedService.getMethodMap().get(methodName).request.fields;
 
@@ -125,6 +126,9 @@ public class DubboExecutedFacade {
         throw new RuntimeException("Metadata service definition == null.");
     }
 
+    public ConfigService getConfigService() {
+        return configService;
+    }
 
     /**
      * 初始化 ApplicationConfig
@@ -138,7 +142,7 @@ public class DubboExecutedFacade {
             application = new ApplicationConfig();
             application.setName(applicationName);
             RegistryConfig registryConfig = new RegistryConfig();
-            registryConfig.setProtocol(GateConstants.REGISTEY_PROTOCOL);
+            registryConfig.setProtocol(GateConstants.REGISTER_PROTOCOL);
             registryConfig.setAddress(registryUrl);
             application.setRegistry(registryConfig);
         }

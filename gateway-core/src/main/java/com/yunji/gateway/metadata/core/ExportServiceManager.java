@@ -104,13 +104,17 @@ public class ExportServiceManager implements RegistryListener, ConfigListener {
                         service = serviceMetadataMap.get(serviceName);
                         if (service == null) {
                             List<URL> urls = registryMetadataClient.subscribe(serviceName, this);
-                            this.notifyAsync(serviceName, urls);
+                            if (urls.isEmpty()) {
+                                logger.warn("外化指定暴露服务: {} 未注册在注册中心,请检测服务是否启动.", serviceName);
+                            } else {
+                                this.notifyAsync(serviceName, urls);
+                            }
                         } else {
-                            logger.info("Target white list service: {} already cached.", serviceName);
+                            logger.debug("目标服务: {} 元数据信息已缓存.", serviceName);
                         }
                     }
                 } else {//
-                    logger.info("Config white service list,current service [{}]'s metadata  already cached.", serviceName);
+                    logger.debug("目标服务: {} 元数据信息已缓存.", serviceName);
                 }
             }
         }
@@ -118,6 +122,7 @@ public class ExportServiceManager implements RegistryListener, ConfigListener {
         //处理变少的 RegistryServices
         Sets.SetView<String> reduceService = Sets.difference(lastRegistryServices, referServiceList);
         if (!reduceService.isEmpty()) {
+            logger.info("外化配置变更,移除以下服务:{}", reduceService.toString());
             for (String service : reduceService) {
                 serviceMetadataMap.remove(service);
                 registryMetadataClient.unsubscribe(service);
@@ -138,17 +143,17 @@ public class ExportServiceManager implements RegistryListener, ConfigListener {
     public void notify(String serviceName, String path, List<URL> childrenUrls, ChangeType changeType) {
         switch (changeType) {
             case REGISTRY_INIT_CALLBACK:
-                logger.info("First subscribe event, service: [{}], childrenUrls: {}", serviceName, childrenUrls);
+                logger.info("第一次订阅服务触发事件 REGISTRY_INIT_CALLBACK, service: {}, childrenUrl size : {}", serviceName, childrenUrls.size());
                 break;
             case RECOVER:
-                logger.info("Registry Recover notified event,service: [{}], path: [{}], childrenUrls: {}", serviceName, path, childrenUrls);
+                logger.info("Zookeeper Recover 恢复事件 RECOVER, service: {}, path: {}, childrenUrl size: {}", serviceName, path, childrenUrls.size());
                 break;
             case REGISTRY_CALLBACK:
-                logger.info("Registry center notified event,service: [{}], path: [{}], childrenUrls: {}", serviceName, path, childrenUrls);
+                logger.info("Zookeeper 订阅节点事件变更推送事件 REGISTRY_CALLBACK, service: {}, path: {}, childrenUrl size: {}", serviceName, path, childrenUrls.size());
                 //need remove.
                 if (serviceMetadataMap.containsKey(serviceName) && childrenUrls.isEmpty()) {
                     serviceMetadataMap.remove(serviceName);
-                    logger.info("Remove service:{} metadata cache, because there is no provider alive.", serviceName);
+                    logger.info("订阅Zookeeper 服务 {} 节点下没有可用服务,从元数据缓存Map中移除.", serviceName);
                     return;
                 }
                 break;
@@ -232,13 +237,13 @@ public class ExportServiceManager implements RegistryListener, ConfigListener {
      * 注册 Jmx 信息
      */
     private void registerJmx() {
-        MBeanServer mBeanServer = ManagementFactory.getPlatformMBeanServer();
         try {
+            MBeanServer mBeanServer = ManagementFactory.getPlatformMBeanServer();
             ObjectName jmxName = new ObjectName(this.getClass().getName() + ":name=metadataMap");
             final JmxCache jmxCache = new JmxCache(serviceMetadataMap);
             mBeanServer.registerMBean(jmxCache, jmxName);
         } catch (Exception e) {
-            logger.error("registerJMX error.....", e);
+            logger.warn("RegisterJMX failed ....., cause: ", e);
         }
     }
 

@@ -1,11 +1,10 @@
 package org.apache.dubbo.rpc.protocol.dubbo;
 
-import com.google.gson.Gson;
+import com.yunji.dubbo.common.serialize.util.CodecContext;
 import org.apache.dubbo.common.logger.Logger;
 import org.apache.dubbo.common.logger.LoggerFactory;
 import org.apache.dubbo.common.serialize.Cleanable;
 import org.apache.dubbo.common.serialize.ObjectInput;
-import org.apache.dubbo.common.serialize.compatible.CodecContext;
 import org.apache.dubbo.common.utils.ArrayUtils;
 import org.apache.dubbo.common.utils.Assert;
 import org.apache.dubbo.common.utils.StringUtils;
@@ -17,7 +16,6 @@ import org.apache.dubbo.remoting.exchange.Response;
 import org.apache.dubbo.remoting.transport.CodecSupport;
 import org.apache.dubbo.rpc.AppResponse;
 import org.apache.dubbo.rpc.Invocation;
-import org.apache.dubbo.rpc.RpcContext;
 import org.apache.dubbo.rpc.support.RpcUtils;
 
 import java.io.IOException;
@@ -31,9 +29,6 @@ import static com.yunji.gateway.util.GateConstants.METADATA_METHOD_NAME;
 
 
 public class CustomDecodeableRpcResult extends AppResponse implements Codec, Decodeable {
-
-    private static final Gson gson = new Gson();
-
     private static final Logger log = LoggerFactory.getLogger(CustomDecodeableRpcResult.class);
 
     private Channel channel;
@@ -127,17 +122,18 @@ public class CustomDecodeableRpcResult extends AppResponse implements Codec, Dec
      * 流式序列化 handle json value.
      */
     private void handleJsonValue(ObjectInput in) {
-        String service = invocation.getAttachment(INTERFACE);
-        String methodName = invocation.getMethodName();
+        if (invocation != null && invocation.getInvoker() != null && invocation.getInvoker().getUrl() != null) {
+            String service = invocation.getAttachment(INTERFACE);
+            String methodName = invocation.getMethodName();
 
-        Object value;
-        if (METADATA_METHOD_NAME.equals(methodName)) {
-            value = JsonDuplexHandler.readMetadata(in);
-        } else {
-            value = JsonDuplexHandler.readObject(service, methodName, in);
+            Object value;
+            if (METADATA_METHOD_NAME.equals(methodName)) {
+                value = JsonDuplexHandler.readMetadata(in);
+            } else {
+                value = JsonDuplexHandler.readObject(service, methodName, in);
+            }
+            setValue(value);
         }
-
-        setValue(value);
     }
 
     private void handleValue(ObjectInput in) throws IOException {

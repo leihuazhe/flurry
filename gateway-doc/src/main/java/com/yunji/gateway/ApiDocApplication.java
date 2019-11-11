@@ -1,11 +1,13 @@
 package com.yunji.gateway;
 
 import com.yunji.gateway.doc.properties.ApiDocProperties;
+import com.yunji.gateway.openapi.EnableOpenApi;
 import org.springframework.boot.Banner;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.ImportResource;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
@@ -19,9 +21,10 @@ import java.util.List;
  * @author maple.lei
  * @date 2018-01-12 20:00
  */
+//@EnableOpenApi
 @SpringBootApplication
 @EnableConfigurationProperties(ApiDocProperties.class)
-@ImportResource(locations = {"classpath:spring.xml"})
+@ImportResource(locations = {"classpath:spring.xml", "classpath:dubbo-consumer.xml"})
 public class ApiDocApplication /*implements CommandLineRunner*/ {
 
     public static void main(String[] args) {

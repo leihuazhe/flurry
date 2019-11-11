@@ -2,11 +2,11 @@ package com.yunji.gateway.metadata.common;
 
 import com.yunji.gateway.GateWayService;
 import com.yunji.gateway.GatewayServiceFactory;
+import com.yunji.gateway.jsonserializer.TType;
 import com.yunji.gateway.metadata.OptimizedService;
 import com.yunji.gateway.util.GateConstants;
 import org.apache.dubbo.common.utils.Assert;
 import org.apache.dubbo.common.utils.StringUtils;
-import com.yunji.gateway.jsonserializer.TType;
 import com.yunji.gateway.metadata.tag.DataType;
 import com.yunji.gateway.metadata.tag.Service;
 import org.apache.dubbo.config.MetaServiceInfo;
@@ -54,26 +54,31 @@ public class MetadataUtil {
                 GateWayService gateWayService = GatewayServiceFactory.create(
                         MetaServiceInfo.builder()
                                 .serviceName(serviceName)
-                                .methodName(RegistryConstants.METADATA_METHOD)
+                                .methodName(GateConstants.METADATA_METHOD_NAME)
                                 .version(version)
                                 .group(group)
                                 .build());
                 //Invoke.
-                gateWayService.invoke(RegistryConstants.METADATA_METHOD, new String[]{}, new Object[]{});
+                gateWayService.invoke(GateConstants.METADATA_METHOD_NAME, new String[]{}, new Object[]{});
 
                 String metaString = (String) RpcContext.getContext()
                         .getCompletableFuture()
-                        .get(GateConstants.TIME_OUT, TimeUnit.MILLISECONDS);
+                        .get(GateConstants.METADATA_CALL_TIME_OUT, TimeUnit.MILLISECONDS);
 
-
-                try (StringReader reader = new StringReader(metaString)) {
-                    Service service = JAXB.unmarshal(reader, Service.class);
-                    return new OptimizedService(service);
+                if (StringUtils.isNotEmpty(metaString)) {
+                    try (StringReader reader = new StringReader(metaString)) {
+                        Service service = JAXB.unmarshal(reader, Service.class);
+                        return new OptimizedService(service);
+                    }
+                } else {
+                    logger.error("订阅目标服务 {} 元数据获取为空,请检查.", serviceName);
+                    return null;
                 }
+
             } catch (ExecutionException tx) {
                 String detailMsg = tx.getMessage();
-                if (detailMsg.contains("org.apache.dubbo.common.bytecode.NoSuchMethodException")) {
-                    logger.error("目标服务:{} 没有增强方法 getServiceMetadata,无法获取到服务元数据.", serviceName);
+                if (detailMsg != null && detailMsg.contains("org.apache.dubbo.common.bytecode.NoSuchMethodException")) {
+                    logger.error("目标服务:{} 没有增强方法 _getServiceMetadata,无法获取到服务元数据.", serviceName);
                     return null;
                 }
                 logger.error("[" + serviceName + "]: ResolveServiceMetadata get error: " + tx.getMessage(), tx);
@@ -119,7 +124,10 @@ public class MetadataUtil {
             }
             return list;
         } else {
-            throw new IllegalArgumentException("White list String is empty. Please specify the list string on config server.");
+//            throw new IllegalArgumentException("White list String is empty. Please specify the list string on config server.");
+            logger.warn("White list String is empty. Please specify the list string on config server.");
+            //返回空
+            return new HashSet<>();
         }
     }
 
@@ -210,9 +218,9 @@ public class MetadataUtil {
             case MAP:
                 return "java.util.Map";
             case LIST:
-                return "java.lang.List";
+                return "java.util.List";
             case SET:
-                return "java.lang.Set";
+                return "java.util.Set";
             case ENUM:
                 return "java.lang.Enum";
             case STRUCT:

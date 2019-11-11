@@ -1,14 +1,17 @@
 package com.yunji.gateway.util;
 
 
+import com.google.common.base.Splitter;
 import org.apache.dubbo.common.io.UnsafeStringWriter;
 import org.apache.dubbo.common.utils.ClassUtils;
+import org.apache.dubbo.common.utils.StringUtils;
 import org.apache.dubbo.config.ApplicationConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.PrintWriter;
 import java.util.Iterator;
+import java.util.List;
 import java.util.ServiceLoader;
 
 import static org.apache.dubbo.rpc.Constants.*;
@@ -119,4 +122,15 @@ public class MixUtils {
     //========================================
     // URL 注册模型相关
     //========================================
+
+
+    public static String getServiceNameByPath(String path) {
+        if (StringUtils.isNotEmpty(path)) {
+            List<String> values = Splitter.on("/").trimResults().omitEmptyStrings().splitToList(path);
+            if (values.size() > 2) {
+                return values.get(1);
+            }
+        }
+        throw new UnsupportedOperationException("不支持自定义dubbo root 的情况");
+    }
 }

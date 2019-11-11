@@ -3,7 +3,6 @@ package com.yunji.gateway.openapi;
 import com.yunji.gateway.core.DubboExecutedFacade;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 
 import javax.annotation.PostConstruct;
@@ -13,7 +12,6 @@ import static com.yunji.gateway.util.GateConstants.*;
 /**
  * @author Denim.leihz 2019-07-31 9:26 PM
  */
-@Configuration
 public class DubboOpenApiConfiguration {
 
     private String registryUrl;

@@ -1,0 +1,28 @@
+{
+  "args0": {
+    "orderNo": "1101201301023",
+    "productCount": 14,
+    "totalAmount": 121.96,
+    "storeId": "1270001",
+    "flag": "false",
+    "status": "DOING",
+    "orderDetailList": [
+      {
+        "orderNo": "1101201301023",
+        "detailSeq": 1,
+        "Amount": 68.48,
+        "remark": "第一件商品",
+        "bigDecimal": 12.3,
+        "status": "FINISHED"
+      },
+      {
+        "orderNo": "1101201301023",
+        "detailSeq": 2,
+        "Amount": 69.69,
+        "remark": "第二件商品",
+        "bigDecimal": 12.4,
+        "status": "DOING"
+      }
+    ]
+  }
+}

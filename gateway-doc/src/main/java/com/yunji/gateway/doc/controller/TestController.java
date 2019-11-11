@@ -3,6 +3,7 @@ package com.yunji.gateway.doc.controller;
 import com.yunji.gateway.doc.dto.TestTemplate;
 import com.yunji.gateway.doc.dto.TestTemplateVo;
 import com.yunji.gateway.doc.repository.TestTemplateRepository;
+import com.yunji.gateway.doc.util.BaseObject;
 import com.yunji.gateway.doc.util.DataConvertUtil;
 import com.yunji.gateway.process.Post;
 import org.slf4j.Logger;
@@ -45,14 +46,21 @@ public class TestController {
 
     @RequestMapping(method = RequestMethod.POST)
     @ResponseBody
-    public String test(HttpServletRequest req) {
+    public Object test(HttpServletRequest req) {
 
         String jsonParameter = req.getParameter("parameter");
         String serviceName = req.getParameter("serviceName");
         String versionName = req.getParameter("version");
         String methodName = req.getParameter("methodName");
 
-        return post.post(serviceName, versionName, methodName, jsonParameter, req);
+        try {
+            String json = this.post.post(serviceName, versionName, methodName, jsonParameter, req);
+            LOGGER.info("Receive response: " + json);
+
+            return json;
+        } catch (Exception e) {
+            return new BaseObject(1000L, "Error:" + e.getMessage());
+        }
     }
 
     /**

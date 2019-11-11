@@ -1,10 +1,10 @@
 package com.yunji.gateway.jsonserializer;
 
+import com.yunji.dubbo.common.serialize.compatible.Hessian3Input;
+import com.yunji.dubbo.common.serialize.compatible.Hessian3ObjectInput;
 import com.yunji.gateway.metadata.OptimizedService;
 import com.yunji.gateway.metadata.OptimizedStruct;
 import com.yunji.gateway.metadata.core.ExportServiceManager;
-import org.apache.dubbo.common.serialize.HighlyHessian2Input;
-import org.apache.dubbo.common.serialize.HighlyHessian2ObjectInput;
 import com.yunji.gateway.metadata.tag.Method;
 import org.apache.dubbo.common.serialize.ObjectInput;
 import org.apache.dubbo.common.serialize.ObjectOutput;
@@ -36,8 +36,9 @@ public class JsonDuplexHandler {
         OptimizedService bizService;
         try {
             //todo version 版本
-            bizService = getServiceMetadata(service, null);
-            return readObject(bizService, methodName, in);
+//            bizService = getServiceMetadata(service, null);
+//            return readObject(bizService, methodName, in);
+            return readObject((OptimizedService) null, methodName, in);
         } catch (IOException e) {
             LOGGER.error(e.getMessage(), e);
             throw new RpcException("Got occurred when custom readObject.");
@@ -61,12 +62,9 @@ public class JsonDuplexHandler {
     }
 
     private static String readObject(OptimizedService bizService, String methodName, ObjectInput in) throws IOException {
-        Method method = bizService.getMethodMap().get(methodName);
-
-        OptimizedStruct resp = bizService.getOptimizedStructs().get(method.response.namespace + "." + method.response.name);
-
-        JsonSerializer jsonDecoder = new JsonSerializer(bizService, resp);
-
+//        Method method = bizService.getMethodMap().get(methodName);
+//        OptimizedStruct resp = bizService.getOptimizedStructs().get(method.response.namespace + "." + method.response.name);
+        JsonSerializer jsonDecoder = new JsonSerializer(null, null);
         return jsonDecoder.read(in);
     }
 
@@ -80,8 +78,9 @@ public class JsonDuplexHandler {
     }
 
     public static Object readMetadata(ObjectInput in) {
-        HighlyHessian2ObjectInput cmh2 = (HighlyHessian2ObjectInput) in;
-        HighlyHessian2Input cmH2i = cmh2.getCmH2i();
+//        HighlyHessian2ObjectInput cmh2 = (HighlyHessian2ObjectInput) in;
+        Hessian3ObjectInput cmh2 = (Hessian3ObjectInput) in;
+        Hessian3Input cmH2i = cmh2.getCmH3i();
         try {
             return cmH2i.readObject((List<Class<?>>) null);
         } catch (IOException e) {

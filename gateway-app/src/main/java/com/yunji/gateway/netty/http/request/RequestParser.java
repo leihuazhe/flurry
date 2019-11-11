@@ -1,11 +1,11 @@
 package com.yunji.gateway.netty.http.request;
 
-import io.netty.handler.codec.http.FullHttpRequest;
-import io.netty.handler.codec.http.QueryStringDecoder;
+import io.netty.handler.codec.http.*;
 import io.netty.handler.codec.http.multipart.DefaultHttpDataFactory;
 import io.netty.handler.codec.http.multipart.HttpPostRequestDecoder;
 import io.netty.handler.codec.http.multipart.InterfaceHttpData;
 import io.netty.handler.codec.http.multipart.MemoryAttribute;
+import org.apache.commons.lang3.StringUtils;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -85,6 +85,12 @@ public final class RequestParser {
      * @return
      */
     public static String fastParseParam(FullHttpRequest httpRequest, String condition) {
+//        String contentType = HttpUtil.getMimeType(httpRequest).toString();
+        String contentType = HttpUtil.getMimeType(httpRequest).toString();
+
+        if ("application/json".equals(contentType)) {
+            return httpRequest.content().toString(StandardCharsets.UTF_8);
+        }
         String content = httpRequest.content().toString(StandardCharsets.UTF_8);
         QueryStringDecoder qs = new QueryStringDecoder(content, StandardCharsets.UTF_8, false);
         Map<String, List<String>> parameters = qs.parameters();
@@ -95,6 +101,28 @@ public final class RequestParser {
         }
         return null;
     }
+
+    /**
+     * 解析post请求参数
+     */
+    /*private Map<String, List<String>> decodePostParams(FullHttpRequest request) {
+        HttpPostRequestDecoder decoder = new HttpPostRequestDecoder(
+                new DefaultHttpDataFactory(false), request);
+        List<InterfaceHttpData> postData = decoder.getBodyHttpDatas(); //
+        if (postData.size() == 0) {
+            return Collections.emptyMap();
+        }
+        Map<String, List<String>> params = new LinkedHashMap<>(postData.size());
+        for (InterfaceHttpData data : postData) {
+            if (data.getHttpDataType() == InterfaceHttpData.HttpDataType.Attribute) {
+                MemoryAttribute attribute = (MemoryAttribute) data;
+                // Often there's only 1 value.
+                List<String> values = params.computeIfAbsent(attribute.getName(), k -> new ArrayList<String>(1));
+                values.add(attribute.getValue());
+            }
+        }
+        return params;
+    }*/
 
 
     /**

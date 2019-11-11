@@ -10,8 +10,6 @@ import io.netty.util.CharsetUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.concurrent.atomic.AtomicInteger;
-
 /**
  * @author maple 2018.08.28 下午4:53
  */
@@ -19,12 +17,11 @@ public class HttpHandlerUtil {
     private static Logger logger = LoggerFactory.getLogger(HttpHandlerUtil.class);
 
     //未完成请求计数
-    private static AtomicInteger requestCounter = new AtomicInteger(0);
+//    private static AtomicInteger requestCounter = new AtomicInteger(0);
 
     public static void sendHttpResponse(ChannelHandlerContext ctx, HttpResponseEntity entity, RequestContext context) {
         sendHttpResponse(ctx, entity.getContent(), context.request(), entity.getStatus());
     }
-
 
     /**
      * 返回信息给前端 http
@@ -38,6 +35,7 @@ public class HttpHandlerUtil {
      */
     public static void sendHttpResponse(ChannelHandlerContext ctx, String content, FullHttpRequest request, HttpResponseStatus status) {
         try {
+            if (content == null) content = "";
             ByteBuf wrapBuf = ctx.alloc().buffer(content.length());
             wrapBuf.writeBytes(content.getBytes(CharsetUtil.UTF_8));
 
@@ -58,7 +56,7 @@ public class HttpHandlerUtil {
             }
         } finally {
             //请求返回，计数 -1
-            requestCounter.decrementAndGet();
+//            requestCounter.decrementAndGet();
         }
     }
 
@@ -79,7 +77,7 @@ public class HttpHandlerUtil {
      * @return
      */
     public static String wrapCode(String url, GateWayErrorCode code) {
-        String resp = String.format("{\"data\":%s,\"code\":%s, \"errorMessage\":\"%s\"}", "{}", code.getCode(), code.getMsg());
+        String resp = wrapFailed(code.getCode(), code.getMsg());
         logger.info("mesh-response: url: {}, info: {}", url, resp);
         return resp;
     }
@@ -88,7 +86,7 @@ public class HttpHandlerUtil {
      * wrap message response for json format.
      */
     public static String wrapExCodeResponse(String url, GatewayException ex) {
-        String resp = String.format("{\"data\":%s,\"code\":%s, \"errorMessage\":\"%s\"}", "{}", ex.getCode(), ex.getMsg());
+        String resp = wrapFailed(ex.getCode(), ex.getMsg());
         logger.info("mesh-response: url: {}, info: {}", url, resp);
         return resp;
     }
@@ -97,7 +95,7 @@ public class HttpHandlerUtil {
      * wrap message response for json format.
      */
     public static String wrapSuccess(String url, Object msg) {
-        String resp = String.format("{\"data\":%s,\"code\":%s, \"errorMessage\":\"%s\"}", msg, 0, "");
+        String resp = "{\"data\":" + msg + ",\"code\":0}";
         logger.debug("gateway-response: url: {}, info: {}", url, resp);
         return resp;
     }
@@ -110,8 +108,13 @@ public class HttpHandlerUtil {
         return msg.toString();
     }
 
-    public static AtomicInteger getRequestCounter() {
-        return requestCounter;
+//    public static AtomicInteger getRequestCounter() {
+//        return requestCounter;
+//    }
+
+
+    private static String wrapFailed(int code, String errorMessage) {
+        return "{\"data\":{},\"code\":" + code + ", \"errorMessage\":\"" + errorMessage + "\"}";
     }
 
 }

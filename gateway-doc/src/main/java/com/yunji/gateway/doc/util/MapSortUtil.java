@@ -4,6 +4,7 @@ package com.yunji.gateway.doc.util;
 import com.yunji.gateway.metadata.tag.Service;
 
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -26,9 +27,7 @@ public class MapSortUtil {
             return null;
         }
 
-        Map<String, Collection<Service>> sortMap = new TreeMap<>(
-                new MapKeyComparator());
-
+        Map<String, Collection<Service>> sortMap = new TreeMap<>(String::compareTo);
         sortMap.putAll(map);
 
         return sortMap;

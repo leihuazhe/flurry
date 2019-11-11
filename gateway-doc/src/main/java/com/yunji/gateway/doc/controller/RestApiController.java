@@ -1,5 +1,6 @@
 package com.yunji.gateway.doc.controller;
 
+import com.yunji.gateway.doc.util.BaseObject;
 import com.yunji.gateway.process.Post;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -23,12 +24,16 @@ public class RestApiController {
     private Post post;
 
     @PostMapping(value = "{service}/{version}/{method}")
-    public String rest(@PathVariable(value = "service") String service,
+    public Object rest(@PathVariable(value = "service") String service,
                        @PathVariable(value = "version") String version,
                        @PathVariable(value = "method") String method,
                        @RequestParam(value = "parameter") String parameter,
                        HttpServletRequest req) {
 
-        return post.post(service, version, method, parameter, req);
+        try {
+            return post.post(service, version, method, parameter, req);
+        } catch (Exception e) {
+            return new BaseObject(1000L, "Rest error:" + e.getMessage());
+        }
     }
 }

@@ -9,5 +9,5 @@ public interface Post {
 
     String post(String service, String version,
                 String method, String parameter,
-                HttpServletRequest req);
+                HttpServletRequest req) throws Exception;
 }

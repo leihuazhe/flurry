@@ -10,7 +10,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * A copy of {@link com.alibaba.com.caucho.hessian.io.Hessian2Input}
+ * A copy of {@link Hessian2Input}
  *
  * @author Denim.leihz 2019-07-10 9:08 PM
  */

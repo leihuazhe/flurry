@@ -77,13 +77,6 @@ public class HighlyHessian2ObjectOutput implements ObjectOutput {
         cmH2o.flushBuffer();
     }
 
-    /**
-     * 自定义 mark index 方法
-     */
-    public int markIndex() throws IOException {
-        return cmH2o.markIndex();
-    }
-
     public void reWriteIndex(int offset, int length) throws IOException {
         cmH2o.reWriteIndex(offset, length);
     }
