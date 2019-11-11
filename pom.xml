@@ -18,8 +18,8 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
-    <groupId>com.yunji.gateway</groupId>
-    <artifactId>dubbo-gateway</artifactId>
+    <groupId>com.yunji.flurry</groupId>
+    <artifactId>flurry</artifactId>
     <packaging>pom</packaging>
     <version>3.0.0-SNAPSHOT</version>
 
@@ -35,9 +35,9 @@
     </properties>
 
     <modules>
-        <module>gateway-core</module>
-        <module>gateway-app</module>
-        <module>gateway-doc</module>
+        <module>flurry-gateway</module>
+        <module>flurry-core</module>
+        <module>flurry-doc</module>
     </modules>
 
     <dependencyManagement>
