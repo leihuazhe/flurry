@@ -8,6 +8,8 @@ import com.yunji.flurry.metadata.core.CuratorMetadataClient;
 import com.yunji.flurry.metadata.core.ExportServiceManager;
 import com.yunji.flurry.metadata.common.MetadataUtil;
 import com.yunji.flurry.util.GateConstants;
+import com.yunji.flurry.metadata.tag.Field;
+import com.yunji.flurry.util.MixUtils;
 
 import org.apache.dubbo.common.URL;
 import org.apache.dubbo.common.Version;
@@ -19,13 +21,11 @@ import org.apache.dubbo.common.utils.UrlUtils;
 import org.apache.dubbo.config.ApplicationConfig;
 import org.apache.dubbo.config.RegistryConfig;
 import org.apache.dubbo.config.RpcRequest;
-import com.yunji.flurry.metadata.tag.Field;
 import org.apache.dubbo.config.context.ConfigManager;
 import org.apache.dubbo.registry.RegistryFactory;
 import org.apache.dubbo.registry.RegistryService;
 import org.apache.dubbo.remoting.zookeeper.ZookeeperTransporter;
 import org.apache.dubbo.rpc.RpcContext;
-import com.yunji.flurry.util.MixUtils;
 
 import java.util.HashMap;
 import java.util.List;
