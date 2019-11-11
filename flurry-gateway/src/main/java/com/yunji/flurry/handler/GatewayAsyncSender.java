@@ -4,7 +4,7 @@ import com.yunji.flurry.netty.http.request.RequestContext;
 import com.yunji.flurry.util.GateWayErrorCode;
 import com.yunji.flurry.util.FlurryException;
 import io.netty.channel.ChannelHandlerContext;
-import com.yunji.gateway.core.DubboExecutedFacade;
+import com.yunji.flurry.core.DubboExecutedFacade;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
