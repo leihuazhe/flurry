@@ -26,8 +26,8 @@ import java.util.List;
 public class ApiDocApplication /*implements CommandLineRunner*/ {
 
     public static void main(String[] args) {
-        System.setProperty("config_env", "local");
-        System.setProperty("Ddiamond_server_host", "tdiamond.yunjiweidian.com");
+//        System.setProperty("config_env", "local");
+//        System.setProperty("Ddiamond_server_host", "tdiamond.yunjiweidian.com");
 
         new SpringApplicationBuilder()
                 .bannerMode(Banner.Mode.OFF)

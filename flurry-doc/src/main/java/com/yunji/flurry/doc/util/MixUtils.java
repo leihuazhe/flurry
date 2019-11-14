@@ -5,4 +5,8 @@ package com.yunji.flurry.doc.util;
  */
 public class MixUtils {
     public static final String ECHO_NAME = "$echo";
+
+    public static final String REGISTRY_ADDRESS = "dubbo.registry.address";
+
+    public static final String DUBBO_ROOT_PREFIX = "dubbo.root.prefix";
 }
