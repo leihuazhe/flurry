@@ -13,11 +13,9 @@
     <packaging>jar</packaging>
 
     <dependencies>
-
         <dependency>
             <groupId>com.yunji.flurry</groupId>
-            <artifactId>y-hessian-lite</artifactId>
-            <version>3.0.0-SNAPSHOT</version>
+            <artifactId>y-hessian-flurry</artifactId>
         </dependency>
 
 

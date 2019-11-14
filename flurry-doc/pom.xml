@@ -204,8 +204,8 @@
            <artifactId>dubbo-demo-api</artifactId>
              <exclusions>
                  <exclusion>
-                     <groupId>com.yunji.gateway</groupId>
-                     <artifactId>hessian-lite</artifactId>
+                     <groupId>com.yunji.flurry</groupId>
+                     <artifactId>y-hessian-lite</artifactId>
                  </exclusion>
              </exclusions>
        </dependency>
