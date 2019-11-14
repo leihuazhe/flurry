@@ -38,6 +38,7 @@
         <module>flurry-gateway</module>
         <module>flurry-core</module>
         <module>flurry-doc</module>
+        <module>flurry-webjar</module>
     </modules>
 
     <dependencyManagement>

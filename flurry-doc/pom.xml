@@ -191,31 +191,36 @@
         </dependency>
 
 
-
         <dependency>
             <groupId>org.lz4</groupId>
             <artifactId>lz4-java</artifactId>
             <version>1.6.0</version>
         </dependency>
 
-         <dependency>
-           <groupId>com.yunji.gateway</groupId>
-           <version>2.5.3-SNAPSHOT</version>
-           <artifactId>dubbo-demo-api</artifactId>
-             <exclusions>
-                 <exclusion>
-                     <groupId>com.yunji.flurry</groupId>
-                     <artifactId>y-hessian-lite</artifactId>
-                 </exclusion>
-             </exclusions>
-       </dependency>
+        <dependency>
+            <groupId>com.yunji.gateway</groupId>
+            <version>2.5.3-SNAPSHOT</version>
+            <artifactId>dubbo-demo-api</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.yunji.flurry</groupId>
+                    <artifactId>y-hessian-lite</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>com.yunji.flurry</groupId>
+            <artifactId>flurry-webjar</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
     </dependencies>
 
     <build>
         <finalName>ROOT</finalName>
         <plugins>
-            <plugin>
+            <!--<plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
                 <version>3.0.1</version>
@@ -230,11 +235,18 @@
                         </goals>
                     </execution>
                 </executions>
-            </plugin>
+            </plugin>-->
 
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>repackage</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
 
             <plugin>
