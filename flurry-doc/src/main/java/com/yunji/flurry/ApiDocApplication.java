@@ -10,6 +10,7 @@ import org.springframework.context.annotation.ImportResource;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,16 +20,13 @@ import java.util.List;
  * @author maple.lei
  * @date 2018-01-12 20:00
  */
-//@EnableOpenApi
 @SpringBootApplication
 @EnableConfigurationProperties(ApiDocProperties.class)
-@ImportResource(locations = {"classpath:spring.xml", "classpath:dubbo-consumer.xml"})
+@ImportResource(locations = {"classpath:spring.xml"/*, "classpath:dubbo-consumer.xml"*/})
 public class ApiDocApplication /*implements CommandLineRunner*/ {
 
     public static void main(String[] args) {
-//        System.setProperty("config_env", "local");
-//        System.setProperty("Ddiamond_server_host", "tdiamond.yunjiweidian.com");
-
+        System.setProperty("dubbo.application.qos.enable", "false");
         new SpringApplicationBuilder()
                 .bannerMode(Banner.Mode.OFF)
                 .web(true)
