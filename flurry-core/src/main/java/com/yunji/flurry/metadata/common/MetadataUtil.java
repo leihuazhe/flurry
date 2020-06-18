@@ -49,22 +49,22 @@ public class MetadataUtil {
      * @return 服务元数据信息
      */
     public static com.yunji.flurry.metadata.OptimizedService callServiceMetadata(String serviceName, String version, String group) {
-        int retry = com.yunji.flurry.util.GateConstants.DEFAULT_RETRY;
+        int retry = GateConstants.DEFAULT_RETRY;
         for (int i = 0; i < retry; i++) {
             try {
                 GateWayService gateWayService = GatewayServiceFactory.create(
                         MetaServiceInfo.builder()
                                 .serviceName(serviceName)
-                                .methodName(com.yunji.flurry.util.GateConstants.METADATA_METHOD_NAME)
+                                .methodName(GateConstants.METADATA_METHOD_NAME)
                                 .version(version)
                                 .group(group)
                                 .build());
                 //Invoke.
-                gateWayService.invoke(com.yunji.flurry.util.GateConstants.METADATA_METHOD_NAME, new String[]{}, new Object[]{});
+                gateWayService.invoke(GateConstants.METADATA_METHOD_NAME, new String[]{}, new Object[]{});
 
                 String metaString = (String) RpcContext.getContext()
                         .getCompletableFuture()
-                        .get(com.yunji.flurry.util.GateConstants.METADATA_CALL_TIME_OUT, TimeUnit.MILLISECONDS);
+                        .get(GateConstants.METADATA_CALL_TIME_OUT, TimeUnit.MILLISECONDS);
 
                 if (StringUtils.isNotEmpty(metaString)) {
                     try (StringReader reader = new StringReader(metaString)) {

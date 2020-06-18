@@ -1,2 +1,0 @@
--DapplicationName=demoWeb
--Dconfig_env=local -Ddiamond_server_host=tdiamond.yunjiweidian.com -javaagent:/Users/maple/yunji/Jagent/jagent/agent.jar%

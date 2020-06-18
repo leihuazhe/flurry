@@ -1,9 +1,15 @@
 package com.yunji.flurry.bootstrap;
 
+import com.yunji.flurry.util.PropertiesLoaderUtils;
+
+import java.util.Properties;
+
 /**
  * @author Denim.leihz 2019-07-29 2:12 PM
  */
 public class FlurryApplicationBuilder {
+
+    private static final String DEFAULT_PROPERTIES_NAME = "application.properties";
 
     private final FlurryApplication application;
 
@@ -44,6 +50,16 @@ public class FlurryApplicationBuilder {
     public FlurryApplicationBuilder diamondId(String dataId) throws Exception {
         this.application.setDiamondId(dataId);
         return this;
+    }
+
+    public FlurryApplicationBuilder loadProperties() {
+        try {
+            Properties properties = PropertiesLoaderUtils.loadAllProperties(DEFAULT_PROPERTIES_NAME);
+            PropertiesLoaderUtils.fillToSystemProperty(properties);
+            return this;
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Classpath 下缺少配置文件: " + DEFAULT_PROPERTIES_NAME);
+        }
     }
 
     public void start() throws Exception {

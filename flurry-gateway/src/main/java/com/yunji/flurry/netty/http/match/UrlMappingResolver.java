@@ -1,5 +1,6 @@
 package com.yunji.flurry.netty.http.match;
 
+import com.yunji.flurry.config.UrlMappingContext;
 import com.yunji.flurry.netty.http.request.RequestContext;
 import com.yunji.flurry.netty.http.request.RequestParser;
 import io.netty.handler.codec.http.FullHttpRequest;
@@ -26,12 +27,7 @@ public class UrlMappingResolver {
 
     private static final Pattern POST_GATEWAY_PATTERN_1 = Pattern.compile("/([^\\s|^/]*)(?:/([^\\s|^/]*))?");
 
-    private static final Pattern ECHO_PATTERN = Pattern.compile("/([^\\s|^/]*)/([^\\s|^/]*)/([^\\s|^/]*)/([^\\s|^/]*)");
-
-    private static String ANT_PATTERN = "/api/{service:[0-9a-zA-Z_\\.]+}/{version:[0-9\\.]+}/{method:[\\w]+}{params:.*?}";
-
-    private static PathMatcher pathMatcher = new AntPathMatcher();
-
+    private static final Pattern URL_MAPPING_PATTERN = Pattern.compile("/(api)/(.*?)");
 
     private static final String[] WILDCARD_CHARS = {"/", "?", "&", "="};
 
@@ -39,16 +35,24 @@ public class UrlMappingResolver {
 
     //fixme 性能优化
     public static void handlerPostUrl(FullHttpRequest request, RequestContext context) {
-        Matcher matcherFirst = POST_GATEWAY_PATTERN.matcher(request.uri());
+        String uri = request.uri();
+
+        Matcher matcherFirst = POST_GATEWAY_PATTERN.matcher(uri);
 
         if (matcherFirst.matches()) {
             handlerMappingUrl(matcherFirst, request, context);
             return;
         }
-        Matcher matcherSecond = POST_GATEWAY_PATTERN_1.matcher(request.uri());
+        Matcher matcherSecond = POST_GATEWAY_PATTERN_1.matcher(uri);
 
         if (matcherSecond.matches()) {
             handlerRequestParam(matcherSecond, request, context);
+            return;
+        }
+        //2020.6.16 Add url_mapping
+        Matcher matcherThird = URL_MAPPING_PATTERN.matcher(uri);
+        if (matcherThird.matches()) {
+            handlerUrlMapping(matcherThird, request, context);
             return;
         }
 
@@ -192,6 +196,35 @@ public class UrlMappingResolver {
             return path.substring(0, path.lastIndexOf("."));
         }
         return path;
+    }
+
+    private static void handlerUrlMapping(Matcher matcher, FullHttpRequest request, RequestContext context) {
+        getRequestCookies(request, context);
+        String prefix = "api";
+        String url = matcher.group(2);
+
+        UrlMappingContext.InvokeBean invokeBean = UrlMappingContext.getInvokeByUrl(url);
+
+        if (invokeBean != null) {
+            context.service(invokeBean.service);
+            context.method(invokeBean.method);
+            context.version(invokeBean.version);
+        } else {
+            throw new IllegalArgumentException("Url" + url + "找不到具体的服务映射,请检查.");
+        }
+
+
+        String timestamp = RequestParser.fastParseParam(request, "timestamp");
+        String secret = RequestParser.fastParseParam(request, "secret");
+        String secret2 = RequestParser.fastParseParam(request, "secret2");
+        String parameter = RequestParser.fastParseParam(request, "parameter");
+
+        context.urlPrefix(prefix);
+        context.timestamp(timestamp);
+        context.secret(secret);
+        context.secret2(secret2);
+        context.parameter(parameter);
+
     }
 
 }

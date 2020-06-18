@@ -17,6 +17,8 @@ public class GatewayApplication {
                 .diamondId(MixUtils.get(DATA_ID_KEY, DEFAULT_DATA_ID))
                 .registerShutdownHook()
                 .logLogBanner()
+                //加载配置文件
+                .loadProperties()
                 .serverPort(9000)
                 .start();
     }

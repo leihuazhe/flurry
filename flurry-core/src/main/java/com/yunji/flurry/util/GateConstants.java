@@ -70,5 +70,13 @@ public interface GateConstants {
 
 
     int DEFAULT_RETRY = 3;
+
+    /**
+     * Nacos 相关
+     */
+
+
+
+    String NACOS_SEPARATOR = "|";
 }
 
