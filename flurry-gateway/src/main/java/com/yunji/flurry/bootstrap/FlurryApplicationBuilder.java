@@ -1,5 +1,6 @@
 package com.yunji.flurry.bootstrap;
 
+import com.yunji.flurry.config.nacos.NacosConfigService;
 import com.yunji.flurry.util.PropertiesLoaderUtils;
 
 import java.util.Properties;
@@ -15,6 +16,7 @@ public class FlurryApplicationBuilder {
 
     public FlurryApplicationBuilder() {
         this.application = new FlurryApplication();
+        loadProperties();
     }
 
     public FlurryApplicationBuilder logLogBanner() {
@@ -52,13 +54,21 @@ public class FlurryApplicationBuilder {
         return this;
     }
 
-    public FlurryApplicationBuilder loadProperties() {
+    public void loadProperties() {
         try {
             Properties properties = PropertiesLoaderUtils.loadAllProperties(DEFAULT_PROPERTIES_NAME);
             PropertiesLoaderUtils.fillToSystemProperty(properties);
-            return this;
         } catch (Exception e) {
             throw new IllegalArgumentException("Classpath 下缺少配置文件: " + DEFAULT_PROPERTIES_NAME);
+        }
+    }
+
+    public FlurryApplicationBuilder startNacos() {
+        try {
+            NacosConfigService.getInstance().start();
+            return this;
+        } catch (Exception e) {
+            throw new IllegalArgumentException(e);
         }
     }
 

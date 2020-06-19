@@ -1,4 +1,4 @@
-package com.yunji.flurry.config;
+package com.yunji.flurry.config.nacos;
 
 import com.alibaba.nacos.api.NacosFactory;
 import com.alibaba.nacos.api.config.ConfigService;

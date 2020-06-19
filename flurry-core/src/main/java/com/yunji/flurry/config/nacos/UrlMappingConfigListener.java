@@ -1,4 +1,4 @@
-package com.yunji.flurry.config;
+package com.yunji.flurry.config.nacos;
 
 import com.alibaba.nacos.api.config.listener.Listener;
 import org.slf4j.Logger;

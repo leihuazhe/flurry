@@ -1,14 +1,12 @@
 package com.yunji.flurry.netty.http.match;
 
-import com.yunji.flurry.config.UrlMappingContext;
+import com.yunji.flurry.config.nacos.UrlMappingContext;
 import com.yunji.flurry.netty.http.request.RequestContext;
 import com.yunji.flurry.netty.http.request.RequestParser;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.cookie.ServerCookieDecoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.util.AntPathMatcher;
-import org.springframework.util.PathMatcher;
 
 import java.util.Arrays;
 import java.util.regex.Matcher;
@@ -27,7 +25,11 @@ public class UrlMappingResolver {
 
     private static final Pattern POST_GATEWAY_PATTERN_1 = Pattern.compile("/([^\\s|^/]*)(?:/([^\\s|^/]*))?");
 
-    private static final Pattern URL_MAPPING_PATTERN = Pattern.compile("/(api)/(.*?)");
+    /**
+     * 基于 url -> 服务信息映射的请求模式, 不以 /api/ 开头.
+     */
+    /*private static final Pattern URL_MAPPING_PATTERN = Pattern.compile("/(api)/(.*?)");*/
+    private static final Pattern URL_MAPPING_PATTERN = Pattern.compile("^(?!/api)/(.*?)");
 
     private static final String[] WILDCARD_CHARS = {"/", "?", "&", "="};
 
@@ -36,6 +38,14 @@ public class UrlMappingResolver {
     //fixme 性能优化
     public static void handlerPostUrl(FullHttpRequest request, RequestContext context) {
         String uri = request.uri();
+
+        //2020.6.16 Add url_mapping
+        Matcher matchUrl = URL_MAPPING_PATTERN.matcher(uri);
+        if (matchUrl.matches()) {
+            handlerUrlMapping(matchUrl, request, context);
+            return;
+        }
+
 
         Matcher matcherFirst = POST_GATEWAY_PATTERN.matcher(uri);
 
@@ -47,12 +57,6 @@ public class UrlMappingResolver {
 
         if (matcherSecond.matches()) {
             handlerRequestParam(matcherSecond, request, context);
-            return;
-        }
-        //2020.6.16 Add url_mapping
-        Matcher matcherThird = URL_MAPPING_PATTERN.matcher(uri);
-        if (matcherThird.matches()) {
-            handlerUrlMapping(matcherThird, request, context);
             return;
         }
 
@@ -200,9 +204,12 @@ public class UrlMappingResolver {
 
     private static void handlerUrlMapping(Matcher matcher, FullHttpRequest request, RequestContext context) {
         getRequestCookies(request, context);
-        String prefix = "api";
-        String url = matcher.group(2);
 
+        String url = request.uri();
+        if (url.contains("?")) {
+            String[] group = url.split("?");
+            url = group[0];
+        }
         UrlMappingContext.InvokeBean invokeBean = UrlMappingContext.getInvokeByUrl(url);
 
         if (invokeBean != null) {
@@ -213,18 +220,15 @@ public class UrlMappingResolver {
             throw new IllegalArgumentException("Url" + url + "找不到具体的服务映射,请检查.");
         }
 
-
         String timestamp = RequestParser.fastParseParam(request, "timestamp");
         String secret = RequestParser.fastParseParam(request, "secret");
         String secret2 = RequestParser.fastParseParam(request, "secret2");
         String parameter = RequestParser.fastParseParam(request, "parameter");
 
-        context.urlPrefix(prefix);
         context.timestamp(timestamp);
         context.secret(secret);
         context.secret2(secret2);
         context.parameter(parameter);
-
     }
 
 }

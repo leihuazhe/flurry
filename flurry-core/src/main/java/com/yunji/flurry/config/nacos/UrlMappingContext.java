@@ -1,4 +1,4 @@
-package com.yunji.flurry.config;
+package com.yunji.flurry.config.nacos;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
