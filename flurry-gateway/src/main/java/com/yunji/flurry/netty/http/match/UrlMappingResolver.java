@@ -217,7 +217,7 @@ public class UrlMappingResolver {
             context.method(invokeBean.method);
             context.version(invokeBean.version);
         } else {
-            throw new IllegalArgumentException("Url" + url + "找不到具体的服务映射,请检查.");
+            throw new IllegalArgumentException("Url:(" + url + ") 找不到具体的服务映射,请检查.");
         }
 
         String timestamp = RequestParser.fastParseParam(request, "timestamp");

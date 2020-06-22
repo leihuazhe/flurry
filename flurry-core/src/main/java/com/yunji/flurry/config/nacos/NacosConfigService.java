@@ -18,6 +18,8 @@ public class NacosConfigService {
     private static final Logger logger = LoggerFactory.getLogger(NacosConfigService.class);
     private AtomicBoolean start = new AtomicBoolean(false);
 
+    private ConfigListener urlListener = new ConfigListener();
+
     private static NacosConfigService instance = new NacosConfigService();
 
     private NacosConfigService() {
@@ -40,10 +42,15 @@ public class NacosConfigService {
                             .instance()
                             .create(properties);
 
-                    configService.addListener(nacosBean.getDataId(),
+                    //获取配置信息并注册监听.
+                    String config = configService.getConfigAndSignListener(
+                            nacosBean.getDataId(),
                             nacosBean.getGroup(),
-                            new UrlMappingConfigListener()
+                            5000,
+                            urlListener
                     );
+                    urlListener.firstReceiveConfig(config);
+
                     start.compareAndSet(false, true);
                 }
             }
