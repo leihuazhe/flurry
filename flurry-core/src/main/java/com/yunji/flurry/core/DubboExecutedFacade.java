@@ -129,7 +129,7 @@ public class DubboExecutedFacade {
      * 返回结果的采集
      */
     public void onResponse(TraceBean traceBean, String result, Throwable ex) {
-        log.info("Async result on response, traceBean: {}, result: {}, exception: {}.", traceBean, result, ex);
+        //log.info("Async result on response, traceBean: {}, result: {}, exception: {}.", traceBean, result, ex);
     }
 
     public CompletableFuture<String> execute(String interfaceName, String methodName, String version,
