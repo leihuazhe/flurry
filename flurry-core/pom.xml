@@ -75,6 +75,12 @@
             <artifactId>lombok</artifactId>
         </dependency>
 
+        <!-- yunji agent -->
+        <dependency>
+            <groupId>com.yunji.agent</groupId>
+            <artifactId>erlang-common</artifactId>
+        </dependency>
+
         <dependency>
             <groupId>com.alibaba.nacos</groupId>
             <artifactId>nacos-client</artifactId>

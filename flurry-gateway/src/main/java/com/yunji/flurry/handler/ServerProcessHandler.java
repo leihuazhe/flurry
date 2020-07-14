@@ -1,7 +1,7 @@
 package com.yunji.flurry.handler;
 
-import com.yunji.flurry.netty.http.HttpGetHeadProcessor;
-import com.yunji.flurry.netty.http.HttpPostProcessor;
+import com.yunji.flurry.netty.http.HttpOtherInvoker;
+import com.yunji.flurry.netty.http.HttpPostInvoker;
 import com.yunji.flurry.util.HttpHandlerUtil;
 import com.yunji.flurry.netty.http.HttpResponseEntity;
 import com.yunji.flurry.netty.http.request.RequestContext;
@@ -23,11 +23,11 @@ import org.slf4j.LoggerFactory;
 public class ServerProcessHandler extends SimpleChannelInboundHandler<RequestContext> {
     private static Logger logger = LoggerFactory.getLogger(ServerProcessHandler.class);
 
-    private final HttpPostProcessor postHandler;
-    private final HttpGetHeadProcessor getHandler = new HttpGetHeadProcessor();
+    private final HttpPostInvoker postInvoker;
+    private final HttpOtherInvoker otherInvoker = new HttpOtherInvoker();
 
     public ServerProcessHandler(String registryUrl, String diamondId) {
-        postHandler = new HttpPostProcessor(registryUrl, diamondId);
+        postInvoker = new HttpPostInvoker(registryUrl, diamondId);
     }
 
     @Override
@@ -53,7 +53,7 @@ public class ServerProcessHandler extends SimpleChannelInboundHandler<RequestCon
     private void dispatchRequest(RequestContext context, ChannelHandlerContext ctx) throws FlurryException {
         HttpMethod httpMethod = context.httpMethod();
         if (HttpMethod.POST.equals(httpMethod)) {
-            postHandler.handlerPostAsync(context, ctx);
+            postInvoker.asyncInvoke(context, ctx);
             return;
         }
         boolean isGet = HttpMethod.GET.equals(httpMethod);
@@ -72,7 +72,7 @@ public class ServerProcessHandler extends SimpleChannelInboundHandler<RequestCon
      * handler get 和 head 请求
      */
     private void handlerGetAndHead(RequestContext context, ChannelHandlerContext ctx) {
-        HttpResponseEntity entity = getHandler.handlerRequest(context);
+        HttpResponseEntity entity = otherInvoker.handlerRequest(context);
         HttpHandlerUtil.sendHttpResponse(ctx, entity, context);
     }
 

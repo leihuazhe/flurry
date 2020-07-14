@@ -40,7 +40,7 @@ public class UrlMappingContext {
             urlServiceMappingMap.clear();
             urlServiceMappingMap.putAll(copyMap);
         } catch (Exception e) {
-            log.error("[UrlMapping] " + e.getMessage(), e);
+            log.error("[UrlMapping] reload url map error: " + e.getMessage(), e);
         }
 
     }

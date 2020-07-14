@@ -5,6 +5,7 @@ import com.yunji.flurry.netty.http.request.RequestContext;
 import com.yunji.flurry.netty.http.request.RequestParser;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.cookie.ServerCookieDecoder;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,6 +13,7 @@ import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static com.yunji.flurry.netty.http.util.Constants.SHADOW;
 import static io.netty.handler.codec.http.HttpHeaderNames.COOKIE;
 
 /**
@@ -74,7 +76,7 @@ public class UrlMappingResolver {
      * @param context
      */
     private static void handlerMappingUrl(Matcher matcher, FullHttpRequest request, RequestContext context) {
-        getRequestCookies(request, context);
+        getCookieAndShadow(request, context);
         String prefix = "api";
         String serviceName = matcher.group(2);
         String versionName = matcher.group(3);
@@ -120,7 +122,7 @@ public class UrlMappingResolver {
      * etc. /api?cookie=234&user=maple
      */
     private static void handlerRequestParam(Matcher matcher, FullHttpRequest request, RequestContext context) {
-        getRequestCookies(request, context);
+        getCookieAndShadow(request, context);
 
         String prefix = matcher.group(1);
         String apiKey = matcher.group(2);
@@ -182,10 +184,15 @@ public class UrlMappingResolver {
      * @param request FullHttpRequest #netty
      * @param context RequestContext
      */
-    private static void getRequestCookies(FullHttpRequest request, RequestContext context) {
+    private static void getCookieAndShadow(FullHttpRequest request, RequestContext context) {
         String value = request.headers().get(COOKIE);
         if (value != null) {
             context.cookies(ServerCookieDecoder.STRICT.decode(value));
+        }
+        //增加获取 shadow 标识
+        String shadow = request.headers().get(SHADOW);
+        if (StringUtils.isNotEmpty(shadow) && "true".equals(shadow)) {
+            context.shadow(true);
         }
     }
 
@@ -203,7 +210,7 @@ public class UrlMappingResolver {
     }
 
     private static void handlerUrlMapping(Matcher matcher, FullHttpRequest request, RequestContext context) {
-        getRequestCookies(request, context);
+        getCookieAndShadow(request, context);
 
         String url = request.uri();
         if (url.contains("?")) {

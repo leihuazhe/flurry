@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
  * @author maple 2018.09.18 上午10:20
  */
 public class RequestContext {
+
     /**
      * httpRequest
      */
@@ -85,6 +86,11 @@ public class RequestContext {
      * cookies map
      */
     private Set<Cookie> cookies;
+
+    /**
+     * shadow 标识
+     */
+    private boolean shadow = false;
 
 
     public FullHttpRequest request() {
@@ -214,6 +220,14 @@ public class RequestContext {
 
     public void cookies(Set<Cookie> cookies) {
         this.cookies = cookies;
+    }
+
+    public void shadow(boolean shadow) {
+        this.shadow = shadow;
+    }
+
+    public boolean isShadow() {
+        return shadow;
     }
 
     public String argumentToString() {

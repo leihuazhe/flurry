@@ -9,10 +9,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
+ * 除 post 外的其他 HTTP.METHOD 处理.
+ *
  * @author maple 2018.08.28 下午3:21
  */
-public class HttpGetHeadProcessor {
-    private static final Logger logger = LoggerFactory.getLogger(HttpGetHeadProcessor.class);
+public class HttpOtherInvoker {
+    private static final Logger logger = LoggerFactory.getLogger(HttpOtherInvoker.class);
 
     private GetUrlController controller = new GetUrlController();
 

@@ -1,5 +1,7 @@
 package com.yunji.flurry.netty.http.util;
 
+import io.netty.util.AsciiString;
+
 /**
  * desc: GateConstants
  *
@@ -29,6 +31,9 @@ public class Constants {
 
 
     public static final String COOKIES_PREFIX = "cookie_";
+
+
+    public static final AsciiString SHADOW = AsciiString.cached("shadow");
 
 
 }

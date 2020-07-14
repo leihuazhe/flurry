@@ -1,5 +1,7 @@
 package com.yunji.flurry.core;
 
+import com.yunji.erlang.bean.TraceBean;
+import com.yunji.erlang.trace.buriedpoint.core.TraceContext;
 import com.yunji.flurry.GateWayService;
 import com.yunji.flurry.GatewayServiceFactory;
 import com.yunji.flurry.config.DiamondConfigService;
@@ -26,6 +28,8 @@ import org.apache.dubbo.registry.RegistryFactory;
 import org.apache.dubbo.registry.RegistryService;
 import org.apache.dubbo.remoting.zookeeper.ZookeeperTransporter;
 import org.apache.dubbo.rpc.RpcContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.List;
@@ -38,6 +42,7 @@ import java.util.concurrent.CompletableFuture;
  * @author Denim.leihz 2019-07-31 6:44 PM
  */
 public class DubboExecutedFacade {
+    private Logger log = LoggerFactory.getLogger(getClass());
 
     private final String registryUrl;
     /**
@@ -95,11 +100,36 @@ public class DubboExecutedFacade {
         initConfigListener();
     }
 
+    public CompletableFuture<String> executeRequest(Request request) {
+        //兼容yunji-agent 调用链采集
+        TraceBean traceBean = TraceContext.getTrace();
+
+        CompletableFuture<String> resultFuture = execute(
+                request.getInterfaceName(),
+                request.getMethodName(),
+                request.getVersion(),
+                request.getContent()
+        );
+
+        resultFuture.whenComplete((result, ex) -> {
+            onResponse(traceBean, result, ex);
+        });
+
+        return resultFuture;
+    }
+
 
     public CompletableFuture<String> execute(String interfaceName, String methodName, String version, String requestJson) {
         OptimizedService optimizedService = exportServiceManager.getMetadata(interfaceName, version);
 
         return execute(interfaceName, methodName, version, requestJson, optimizedService);
+    }
+
+    /**
+     * 返回结果的采集
+     */
+    public void onResponse(TraceBean traceBean, String result, Throwable ex) {
+        log.info("Async result on response, traceBean: {}, result: {}, exception: {}.", traceBean, result, ex);
     }
 
     public CompletableFuture<String> execute(String interfaceName, String methodName, String version,

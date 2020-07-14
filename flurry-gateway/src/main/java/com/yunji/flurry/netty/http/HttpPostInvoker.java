@@ -19,19 +19,19 @@ import java.util.concurrent.TimeoutException;
 /**
  * @author maple 2018.08.28 下午3:21
  */
-public class HttpPostProcessor {
-    private static final Logger logger = LoggerFactory.getLogger(HttpPostProcessor.class);
+public class HttpPostInvoker {
+    private static final Logger logger = LoggerFactory.getLogger(HttpPostInvoker.class);
 
     private final GatewayAsyncSender asyncSender;
 
-    public HttpPostProcessor(String registryUrl, String diamondId) {
+    public HttpPostInvoker(String registryUrl, String diamondId) {
         this.asyncSender = new GatewayAsyncSender(registryUrl, diamondId);
     }
 
     /**
-     * Async
+     * Async HttpPostInvoker.
      */
-    public void handlerPostAsync(RequestContext context, ChannelHandlerContext ctx) throws RpcException {
+    public void asyncInvoke(RequestContext context, ChannelHandlerContext ctx) throws RpcException {
         if (context.isLegal()) {
             if (logger.isDebugEnabled()) {
                 logger.debug("Http:{}, 请求参数: {} ", context.requestUrl(), context.argumentToString());
