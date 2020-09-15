@@ -82,14 +82,14 @@ public class FlurryApplication {
             // No shutdown hook registered yet.
             this.shutdownHook = new Thread(() -> {
                 synchronized (startupShutdownMonitor) {
-                    logger.info("ready to shutdown this gateway!");
+                    logger.info("Ready to shutdown this gateway!");
                     if (bossGroup != null) {
                         bossGroup.shutdownGracefully();
                     }
                     if (workerGroup != null) {
                         workerGroup.shutdownGracefully();
                     }
-                    logger.info("end to shutdown this gateway!");
+                    logger.info("End to shutdown this gateway!");
                 }
             }, "netty-server-shutdownHook-thread");
             Runtime.getRuntime().addShutdownHook(this.shutdownHook);
