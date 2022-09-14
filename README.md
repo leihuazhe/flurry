@@ -1,5 +1,8 @@
 ## Dubbo 异步服务网关
 
+可查看文章： https://www.cnblogs.com/leihuazhe/p/12185775.html
+
+
 本工程主要分为3个模块:
 
 - flurry-gateway 
